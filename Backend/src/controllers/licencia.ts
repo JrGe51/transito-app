@@ -3,11 +3,11 @@ import { Licencia } from '../models/licencia';
 
 export const registerLicencia = async (req: Request, res: Response) => {
 
-    const { Lname, Ldescription } = req.body;
+    const { name, description } = req.body;
     
     Licencia.create({
-        Lname: Lname,
-        Ldescription: Ldescription,
+        name: name,
+        description: description,
     })
 
     res.json({
