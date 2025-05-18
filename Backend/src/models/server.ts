@@ -42,7 +42,6 @@ class Server {
             await User.sync();
             await Licencia.sync();
             await Horario.sync();
-            console.log("Se a creado la tabla de forma exitosa");
             console.log("Base de datos conectada correctamente")
         } catch (error) {
             console.log("Error de conexion", error);
