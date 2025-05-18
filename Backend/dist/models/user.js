@@ -16,4 +16,6 @@ exports.User = connection_1.default.define('User', {
     telefono: { type: sequelize_1.DataTypes.STRING, allowNull: false },
     fechanacimiento: { type: sequelize_1.DataTypes.DATEONLY, allowNull: false },
     direccion: { type: sequelize_1.DataTypes.STRING, allowNull: false },
+}, {
+    freezeTableName: true, // Evita que Sequelize pluralice el nombre de la tabla
 });

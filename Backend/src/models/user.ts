@@ -13,5 +13,8 @@ export const User = sequelize.define(
         telefono: {type:DataTypes.STRING, allowNull: false},
         fechanacimiento: {type:DataTypes.DATEONLY, allowNull: false},
         direccion: {type:DataTypes.STRING, allowNull: false},
+    },
+    {
+        freezeTableName: true, // Evita que Sequelize pluralice el nombre de la tabla
     }
 )

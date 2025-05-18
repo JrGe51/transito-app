@@ -12,11 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerHorario = void 0;
 const horario_1 = require("../models/horario");
 const registerHorario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { fecha, horainicio, horafin, cuposdisponibles } = req.body;
+    const { fecha, hora, cuposdisponibles } = req.body;
     horario_1.Horario.create({
         fecha: fecha,
-        horainicio: horainicio,
-        horafin: horafin,
+        hora: hora,
         cuposdisponibles: cuposdisponibles,
     });
     res.json({
