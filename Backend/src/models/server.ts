@@ -6,6 +6,7 @@ import RHorario from '../routes/horario';
 import { User } from './user';
 import { Licencia } from './licencia';
 import { Horario } from './horario';
+import cors from 'cors';
 
 
 class Server {
@@ -35,6 +36,7 @@ class Server {
 
     midlewares() {
         this.app.use(express.json())
+        this.app.use(cors())
     }
 
     async DBconnet() {
@@ -42,6 +44,7 @@ class Server {
             await User.sync();
             await Licencia.sync();
             await Horario.sync();
+            
             console.log("Base de datos conectada correctamente")
         } catch (error) {
             console.log("Error de conexion", error);

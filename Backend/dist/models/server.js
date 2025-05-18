@@ -19,6 +19,7 @@ const horario_1 = __importDefault(require("../routes/horario"));
 const user_2 = require("./user");
 const licencia_2 = require("./licencia");
 const horario_2 = require("./horario");
+const cors_1 = __importDefault(require("cors"));
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -40,6 +41,7 @@ class Server {
     }
     midlewares() {
         this.app.use(express_1.default.json());
+        this.app.use((0, cors_1.default)());
     }
     DBconnet() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -47,7 +49,6 @@ class Server {
                 yield user_2.User.sync();
                 yield licencia_2.Licencia.sync();
                 yield horario_2.Horario.sync();
-                console.log("Se a creado la tabla de forma exitosa");
                 console.log("Base de datos conectada correctamente");
             }
             catch (error) {
