@@ -18,57 +18,57 @@ const user_1 = require("../models/user");
 const sequelize_1 = require("sequelize");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, rut, lastname, email, password, telefono, fechanacimiento, direccion } = req.body;
-    const user = yield user_1.User.findOne({ where: { [sequelize_1.Op.or]: { email: email, rut: rut } } });
+    const { Uname, Urut, Ulastname, Uemail, Upassword, Utelefono, Ufechanacimiento, Udireccion } = req.body;
+    const user = yield user_1.User.findOne({ where: { [sequelize_1.Op.or]: { email: Uemail, rut: Urut } } });
     if (user) {
         res.status(400).json({
-            msg: `El usuario ya existe con el email ${email} o rut ${rut}.`
+            msg: `El usuario ya existe con el email ${Uemail} o rut ${Urut}.`
         });
         return;
     }
     console.log("Estoy por aqui");
-    const passwordHash = yield bcrypt_1.default.hash(password, 10);
+    const passwordHash = yield bcrypt_1.default.hash(Upassword, 10);
     try {
         yield user_1.User.create({
-            name: name,
-            rut: rut,
-            lastname: lastname,
-            email: email,
-            password: passwordHash,
-            telefono: telefono,
-            fechanacimiento: fechanacimiento,
-            direccion: direccion,
+            Uname: Uname,
+            Urut: Urut,
+            Ulastname: Ulastname,
+            Uemail: Uemail,
+            Upassword: passwordHash,
+            Utelefono: Utelefono,
+            Ufechanacimiento: Ufechanacimiento,
+            Udireccion: Udireccion,
         });
         res.json({
-            msg: `User ${name} ${lastname} create succes..`,
+            msg: `User ${Uname} ${Ulastname} create succes..`,
         });
     }
     catch (error) {
         res.status(400).json({
-            msg: `Existe un error al crear el usuario ${name} ${lastname}.`
+            msg: `Existe un error al crear el usuario ${Uname} ${Ulastname}.`
         });
     }
 });
 exports.register = register;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, password } = req.body;
-    const user = yield user_1.User.findOne({ where: { email: email } });
+    const { Uemail, Upassword } = req.body;
+    const user = yield user_1.User.findOne({ where: { email: Uemail } });
     if (!user) {
         res.status(400).json({
-            msg: `El usuario no existe con el email ${email}.`
+            msg: `El usuario no existe con el email ${Uemail}.`
         });
         return;
     }
-    const passwordValid = yield bcrypt_1.default.compare(password, user.password);
+    const passwordValid = yield bcrypt_1.default.compare(Upassword, user.Upassword);
     if (!passwordValid) {
         res.status(400).json({
-            msg: `Contraseña Incorrecta ${password}.`
+            msg: `Contraseña Incorrecta ${Upassword}.`
         });
         return;
     }
     const token = jsonwebtoken_1.default.sign({
-        email: email,
-        password: password,
+        Uemail: Uemail,
+        Upassword: Upassword,
     }, process.env.SECRET_KEY || 'TSE-Dylan-Hernandez', {
         expiresIn: '1h'
     });
