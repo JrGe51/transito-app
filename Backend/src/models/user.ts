@@ -4,14 +4,14 @@ import sequelize from "../database/connection";
 export const User = sequelize.define(
     'User',
     {
-        id: {type: DataTypes.INTEGER,primaryKey: true,autoIncrement: true},
-        name: {type:DataTypes.STRING, allowNull: false},
-        rut: {type: DataTypes.STRING(12), allowNull: false, unique: true},
-        lastname: {type:DataTypes.STRING, allowNull: false},
-        email: {type:DataTypes.STRING, allowNull: false, unique:true},
-        password: {type:DataTypes.STRING, allowNull: false},
-        telefono: {type:DataTypes.STRING, allowNull: false},
-        fechanacimiento: {type:DataTypes.DATEONLY, allowNull: false},
-        direccion: {type:DataTypes.STRING, allowNull: false},
+        Uid: {type: DataTypes.INTEGER,primaryKey: true,autoIncrement: true},
+        Uname: {type:DataTypes.STRING, allowNull: false},
+        Urut: {type: DataTypes.STRING(12), allowNull: false, unique: true},
+        Ulastname: {type:DataTypes.STRING, allowNull: false},
+        Uemail: {type:DataTypes.STRING, allowNull: false, unique:true},
+        Upassword: {type:DataTypes.STRING, allowNull: false},
+        Utelefono: {type:DataTypes.STRING, allowNull: false},
+        Ufechanacimiento: {type:DataTypes.DATEONLY, allowNull: false},
+        Udireccion: {type:DataTypes.STRING, allowNull: false},
     }
 )

@@ -3,17 +3,16 @@ import { Horario } from '../models/horario';
 
 export const registerHorario = async (req: Request, res: Response) => {
 
-    const { fecha, horainicio, horafin, cuposdisponibles } = req.body;
+    const { Hfecha, Hhora, Hcuposdisponibles } = req.body;
 
     Horario.create({
-        fecha: fecha,
-        horainicio: horainicio,
-        horafin: horafin,
-        cuposdisponibles: cuposdisponibles,
+        Hfecha: Hfecha,
+        Hhora: Hhora,
+        Hcuposdisponibles: Hcuposdisponibles,
     })
 
     res.json({
-        msg: `Fecha ${fecha}  create succes..`,
+        msg: `Fecha ${Hfecha}  create succes..`,
     })
 
 }

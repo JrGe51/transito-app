@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
 import sequelize from '../database/connection';
 import RUser from '../routes/user';
 import RLicencia from '../routes/licencia';
@@ -37,6 +37,14 @@ class Server {
     midlewares() {
         this.app.use(express.json())
         this.app.use(cors())
+
+        this.app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+            console.error(err.stack); // Imprime el error en la consola
+            res.status(500).json({
+                msg: "Ocurrió un error en el servidor",
+                error: err.message,
+            });
+        });
     }
 
     async DBconnet() {

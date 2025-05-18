@@ -6,67 +6,67 @@ import jwt from "jsonwebtoken"
 
 
 export const register = async (req: Request, res: Response) => {
-    const { name, rut, lastname, email, password, telefono, fechanacimiento, direccion } = req.body
+    const { Uname, Urut, Ulastname, Uemail, Upassword, Utelefono, Ufechanacimiento, Udireccion } = req.body
 
-    const user = await User.findOne({where: { [Op.or]: { email: email, rut: rut }}})
+    const user = await User.findOne({where: { [Op.or]: { email: Uemail, rut: Urut }}})
 
     if(user){
         res.status(400).json({
-            msg: `El usuario ya existe con el email ${email} o rut ${rut}.`
+            msg: `El usuario ya existe con el email ${Uemail} o rut ${Urut}.`
         })
         return
     }
 
     console.log("Estoy por aqui");
 
-    const passwordHash = await bcrypt.hash(password, 10)
+    const passwordHash = await bcrypt.hash(Upassword, 10)
 
     try {
         await User.create({
-            name: name,
-            rut: rut,
-            lastname: lastname,
-            email: email,
-            password: passwordHash,
-            telefono: telefono,
-            fechanacimiento: fechanacimiento,
-            direccion: direccion,
+            Uname: Uname,
+            Urut: Urut,
+            Ulastname: Ulastname,
+            Uemail: Uemail,
+            Upassword: passwordHash,
+            Utelefono: Utelefono,
+            Ufechanacimiento: Ufechanacimiento,
+            Udireccion: Udireccion,
         })
         
         res.json({
-            msg: `User ${name} ${lastname} create succes..`,
+            msg: `User ${Uname} ${Ulastname} create succes..`,
         })
     } catch (error) {
         res.status(400).json({
-            msg: `Existe un error al crear el usuario ${name} ${lastname}.`
+            msg: `Existe un error al crear el usuario ${Uname} ${Ulastname}.`
         })   
     }
 }
 
 export const login = async (req: Request, res: Response) => {
     
-    const {email, password} = req.body
-    const user:any = await User.findOne({where: {email: email}})
+    const {Uemail, Upassword} = req.body
+    const user:any = await User.findOne({where: {email: Uemail}})
 
     if(!user){
         res.status(400).json({
-            msg: `El usuario no existe con el email ${email}.`
+            msg: `El usuario no existe con el email ${Uemail}.`
         })
         return
     }
 
-    const passwordValid = await bcrypt.compare(password, user.password)
+    const passwordValid = await bcrypt.compare(Upassword, user.Upassword)
 
     if(!passwordValid){
         res.status(400).json({
-            msg: `Contraseña Incorrecta ${password}.`
+            msg: `Contraseña Incorrecta ${Upassword}.`
         })
         return
     }
 
     const token = jwt.sign({
-        email: email ,
-        password: password,
+        Uemail: Uemail ,
+        Upassword: Upassword,
     },  process.env.SECRET_KEY || 'TSE-Dylan-Hernandez', {
         expiresIn: '1h'
     });

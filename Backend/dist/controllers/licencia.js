@@ -12,10 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerLicencia = void 0;
 const licencia_1 = require("../models/licencia");
 const registerLicencia = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, description } = req.body;
+    const { Lname, Ldescription } = req.body;
     licencia_1.Licencia.create({
-        name: name,
-        description: description,
+        Lname: Lname,
+        Ldescription: Ldescription,
     });
     res.json({
         msg: `Licencia ${name}  create succes..`,

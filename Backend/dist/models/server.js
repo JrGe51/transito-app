@@ -42,6 +42,13 @@ class Server {
     midlewares() {
         this.app.use(express_1.default.json());
         this.app.use((0, cors_1.default)());
+        this.app.use((err, req, res, next) => {
+            console.error(err.stack); // Imprime el error en la consola
+            res.status(500).json({
+                msg: "Ocurrió un error en el servidor",
+                error: err.message,
+            });
+        });
     }
     DBconnet() {
         return __awaiter(this, void 0, void 0, function* () {
