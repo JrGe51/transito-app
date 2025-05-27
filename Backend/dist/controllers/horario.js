@@ -49,9 +49,10 @@ const getHorasPorFecha = (req, res) => __awaiter(void 0, void 0, void 0, functio
             : Array.isArray(req.query.fecha)
                 ? req.query.fecha[0]
                 : undefined;
-        if (!fecha)
+        if (!fecha) {
             res.status(400).json({ msg: "Fecha requerida" });
-        return;
+            return;
+        }
         const horas = yield horario_1.Horario.findAll({
             where: { fecha, cuposdisponibles: { [sequelize_1.Op.gt]: 0 } },
             attributes: ['hora'],

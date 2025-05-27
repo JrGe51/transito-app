@@ -43,10 +43,10 @@ export const getHorasPorFecha = async (req: Request, res: Response): Promise<voi
                 ? req.query.fecha[0]
                 : undefined;
 
-        if (!fecha) 
+        if (!fecha) {
             res.status(400).json({ msg: "Fecha requerida" });
             return;
-
+        }
         const horas = await Horario.findAll({
             where: { fecha, cuposdisponibles: { [Op.gt]: 0 } },
             attributes: ['hora'],
