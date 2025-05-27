@@ -9,14 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerHorario = void 0;
+exports.getHorasPorFecha = exports.getFechasDisponibles = exports.registerHorario = void 0;
 const horario_1 = require("../models/horario");
+const sequelize_1 = require("sequelize");
 const registerHorario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { fecha, horainicio, horafin, cuposdisponibles } = req.body;
+    const { fecha, hora, cuposdisponibles } = req.body;
     horario_1.Horario.create({
         fecha: fecha,
-        horainicio: horainicio,
-        horafin: horafin,
+        hora: hora,
         cuposdisponibles: cuposdisponibles,
     });
     res.json({
@@ -24,3 +24,43 @@ const registerHorario = (req, res) => __awaiter(void 0, void 0, void 0, function
     });
 });
 exports.registerHorario = registerHorario;
+const getFechasDisponibles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Busca fechas con al menos un cupo disponible
+        const fechas = yield horario_1.Horario.findAll({
+            where: { cuposdisponibles: { [sequelize_1.Op.gt]: 0 } },
+            attributes: ['fecha'],
+            group: ['fecha'],
+            order: [['fecha', 'ASC']]
+        });
+        // Devuelve solo el array de fechas
+        res.json(fechas.map(f => f.fecha));
+    }
+    catch (error) {
+        res.status(500).json({ msg: "Error al obtener fechas", error });
+    }
+});
+exports.getFechasDisponibles = getFechasDisponibles;
+const getHorasPorFecha = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Asegúrate de que fecha sea string
+        const fecha = typeof req.query.fecha === 'string'
+            ? req.query.fecha
+            : Array.isArray(req.query.fecha)
+                ? req.query.fecha[0]
+                : undefined;
+        if (!fecha)
+            res.status(400).json({ msg: "Fecha requerida" });
+        return;
+        const horas = yield horario_1.Horario.findAll({
+            where: { fecha, cuposdisponibles: { [sequelize_1.Op.gt]: 0 } },
+            attributes: ['hora'],
+            order: [['hora', 'ASC']]
+        });
+        res.json(horas.map(h => h.hora));
+    }
+    catch (error) {
+        res.status(500).json({ msg: "Error al obtener horas", error });
+    }
+});
+exports.getHorasPorFecha = getHorasPorFecha;

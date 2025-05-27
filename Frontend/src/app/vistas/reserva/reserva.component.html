@@ -18,39 +18,40 @@
   <div id="formContent">
     <h1 class="fadeIn first">Primera Licencia</h1>
     <h2 class="fadeIn first">Reserva tu hora</h2>
+
+    <div class="mb-3 text-center" *ngIf="!tipoLicenciaSeleccionado">
+      <button
+        *ngFor="let tipo of tiposLicencia"
+        type="button"
+        class="btn btn-primary m-2 d-block w-100"
+        style="max-width: 300px; margin-left: auto; margin-right: auto;"
+        (click)="seleccionarTipoLicencia(tipo)">
+        {{ tipo }}
+      </button>
+    </div>
     
-    <form class="reservation-form">
-      <div class="form-group fadeIn third">
-        <label for="fecha">Fechas disponibles</label>
-        <input type="date" id="fecha" class="form-control">
-      </div>
+    <div class="mb-3 text-center" *ngIf="tipoLicenciaSeleccionado">
+      <form class="reservation-form">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Fechas disponibles</mat-label>
+          <mat-calendar
+            [dateClass]="dateClass"
+            [selected]="fechaSeleccionada ? (fechaSeleccionada | date:'yyyy-MM-dd') : null"
+            (selectedChange)="onFechaChange($event)"
+            [dateFilter]="filtrarFechasDisponibles">
+          </mat-calendar>
+        </mat-form-field>
 
-      <div class="form-group fadeIn third">
-        <label for="hora">Horas disponibles</label>
-        <select id="hora" class="form-control">
-          <option value="" disabled selected>Selecciona una hora</option>
-          <option value="09:00">09:00</option>
-          <option value="10:00">10:00</option>
-          <option value="11:00">11:00</option>
-          <option value="12:00">12:00</option>
-          <option value="14:00">14:00</option>
-          <option value="15:00">15:00</option>
-          <option value="16:00">16:00</option>
-        </select>
-      </div>
+        <mat-form-field appearance="fill" class="w-100" *ngIf="horasDisponibles.length > 0">
+          <mat-label>Horas disponibles</mat-label>
+          <mat-select [(value)]="horaSeleccionada">
+            <mat-option *ngFor="let hora of horasDisponibles" [value]="hora">{{hora}}</mat-option>
+          </mat-select>
+        </mat-form-field>
 
-      <div class="form-group fadeIn fourth">
-        <label for="documentos">Documentos requeridos</label>
-        <ul class="document-list">
-          <li>Cédula de identidad</li>
-          <li>Certificado de antecedentes</li>
-          <li>Certificado médico</li>
-          <li>Foto tipo carné</li>
-        </ul>
-      </div>
-
-      <input type="submit" class="fadeIn fourth" value="Reservar hora">
-    </form>
+        <input type="submit" class="fadeIn fourth" value="Reservar hora">
+      </form>
+    </div>
   </div>
 </div>
 

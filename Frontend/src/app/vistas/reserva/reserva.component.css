@@ -30,6 +30,18 @@ html {
     box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
     text-align: center;
   }
+
+  .btn.d-block {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+  } 
+
+  .fecha-disponible .mat-calendar-body-cell-content {
+    background-color: #1976d2 !important;
+    color: #fff !important;
+    border-radius: 50%;
+  }
   
   h1 {
     text-align: center;

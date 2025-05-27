@@ -6,10 +6,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Horario = void 0;
 const sequelize_1 = require("sequelize");
 const connection_1 = __importDefault(require("../database/connection"));
-exports.Horario = connection_1.default.define('Horario', {
+// Extiende el modelo con los atributos definidos
+class Horario extends sequelize_1.Model {
+}
+exports.Horario = Horario;
+// Inicializa el modelo
+Horario.init({
     id: { type: sequelize_1.DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    fecha: { type: sequelize_1.DataTypes.STRING, allowNull: false },
-    horainicio: { type: sequelize_1.DataTypes.TIME, allowNull: false },
-    horafin: { type: sequelize_1.DataTypes.TIME, allowNull: false },
+    fecha: { type: sequelize_1.DataTypes.DATEONLY, allowNull: false },
+    hora: { type: sequelize_1.DataTypes.TIME, allowNull: false },
     cuposdisponibles: { type: sequelize_1.DataTypes.INTEGER, allowNull: false },
+}, {
+    sequelize: connection_1.default,
+    modelName: 'Horario',
+    freezeTableName: true, // Evita que Sequelize pluralice el nombre de la tabla
 });

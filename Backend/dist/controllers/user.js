@@ -67,8 +67,8 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return;
     }
     const token = jsonwebtoken_1.default.sign({
-        email: email,
-        password: password,
+        id: user.id,
+        email: user.email,
     }, process.env.SECRET_KEY || 'TSE-Dylan-Hernandez', {
         expiresIn: '1h'
     });
