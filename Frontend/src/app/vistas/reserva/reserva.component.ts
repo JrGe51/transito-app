@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { HorarioService } from '../../servicios/horario.service';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -12,23 +14,24 @@ import { provideNativeDateAdapter } from '@angular/material/core';
   selector: 'app-reserva',
   templateUrl: './reserva.component.html',
   styleUrls: ['./reserva.component.css'],
+  providers: [provideNativeDateAdapter()],
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatFormFieldModule,
+    MatCardModule,
     MatInputModule,
     MatSelectModule,
     MatDatepickerModule,
     HttpClientModule
   ],
-  providers: [
-    provideNativeDateAdapter() // Add the provider here
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReservaComponent implements OnInit {
   fechasDisponibles: string[] = [];
   horasDisponibles: string[] = [];
-  fechaSeleccionada: string | null = null;
+  fechaSeleccionada: Date | null = null;
   horaSeleccionada: string | null = null;
   tiposLicencia: string[] = ['Clase B', 'Clase C']; 
   tipoLicenciaSeleccionado: string | null = null;
@@ -41,16 +44,29 @@ export class ReservaComponent implements OnInit {
     });
   }
 
-  onFechaChange(date: Date) {
-    const fecha = this.formatDate(date);
-    this.fechaSeleccionada = fecha;
-    if (fecha) {
-      this.horarioService.getHorasPorFecha(fecha).subscribe(horas => {
-        this.horasDisponibles = horas;
-      });
-    } else {
+  onFechaChange(date: Date | null) {
+    if (!date) {
+      this.fechaSeleccionada = null;
+      this.horaSeleccionada = null;
       this.horasDisponibles = [];
+      console.log('Fecha deseleccionada');
+      return;
     }
+    this.fechaSeleccionada = date;
+    this.horaSeleccionada = null;
+    const fechaString = this.formatDate(date);
+    console.log('Fecha seleccionada:', fechaString);
+    
+    this.horarioService.getHorasPorFecha(fechaString).subscribe({
+      next: (horas) => {
+        console.log('Horas disponibles:', horas);
+        this.horasDisponibles = horas;
+      },
+      error: (error) => {
+        console.error('Error al obtener horas:', error);
+        this.horasDisponibles = [];
+      }
+    });
   }
 
   formatDate(date: Date): string {
@@ -70,24 +86,24 @@ export class ReservaComponent implements OnInit {
   }
 
   seleccionarTipoLicencia(tipo: string) {
-  this.tipoLicenciaSeleccionado = tipo;
-  this.fechaSeleccionada = null;
-  this.horaSeleccionada = null;
-  this.horasDisponibles = [];
+    this.tipoLicenciaSeleccionado = tipo;
+    this.fechaSeleccionada = null;
+    this.horaSeleccionada = null;
+    this.horasDisponibles = [];
   }
 
   onSubmit() {
-  if (!this.tipoLicenciaSeleccionado || !this.fechaSeleccionada || !this.horaSeleccionada) {
-    alert('Selecciona tipo de licencia, fecha y hora');
-    return;
+    if (!this.tipoLicenciaSeleccionado || !this.fechaSeleccionada || !this.horaSeleccionada) {
+      alert('Selecciona tipo de licencia, fecha y hora');
+      return;
+    }
+    this.horarioService.registrarSolicitud({
+      name: this.tipoLicenciaSeleccionado,
+      fecha: this.formatDate(this.fechaSeleccionada),
+      hora: this.horaSeleccionada
+    }).subscribe({
+      next: () => alert('Reserva realizada con éxito'),
+      error: (err) => alert('Error al reservar: ' + (err.error?.msg || 'Intenta de nuevo'))
+    });
   }
-  this.horarioService.registrarSolicitud({
-    name: this.tipoLicenciaSeleccionado,
-    fecha: this.fechaSeleccionada,
-    hora: this.horaSeleccionada
-  }).subscribe({
-    next: () => alert('Reserva realizada con éxito'),
-    error: (err) => alert('Error al reservar: ' + (err.error?.msg || 'Intenta de nuevo'))
-  });
-}
 }
