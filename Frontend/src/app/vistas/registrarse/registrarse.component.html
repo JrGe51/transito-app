@@ -1,37 +1,108 @@
 <div class="register-container">
-  <div class="register-box">
+  <div class="register-box fadeInDown">
     <div class="register-header">
       <h2>Registrarse</h2>
     </div>
     <form class="register-form">
       <div class="form-row">
         <div class="form-group">
-          <input type="text" class="form-control" name="name" [(ngModel)]="name" id="floatingName" placeholder="Nombre" required>
+          <input type="text" class="form-control" name="name" [(ngModel)]="name" id="floatingName" placeholder="Nombre (mínimo 3 caracteres)" required>
+          <div class="error-message">
+            <ng-container *ngIf="name === ''">
+              ❌ Debes ingresar tu nombre
+            </ng-container>
+            <ng-container *ngIf="name !== '' && name.length < 3">
+              ❌ El nombre debe tener al menos 3 caracteres
+            </ng-container>
+          </div>
         </div>
         <div class="form-group">
-          <input type="text" class="form-control" name="lastname" [(ngModel)]="lastname" id="floatingLastname" placeholder="Apellido" required>
+          <input type="text" class="form-control" name="lastname" [(ngModel)]="lastname" id="floatingLastname" placeholder="Apellido (mínimo 3 caracteres)" required>
+          <div class="error-message">
+             <ng-container *ngIf="lastname === ''">
+              ❌ Debes ingresar tu apellido
+            </ng-container>
+            <ng-container *ngIf="lastname !== '' && lastname.length < 3">
+              ❌ El apellido debe tener al menos 3 caracteres
+            </ng-container>
+          </div>
         </div>
       </div>
+      <div class="form-row">
         <div class="form-group">
-            <input type="date" class="form-control" name="fechanacimiento" [(ngModel)]="fechanacimiento" placeholder="Fecha de Nacimiento" required>
-      </div>
-      <div class="form-group">
-        <input type="text" class="form-control" name="rut" [(ngModel)]="rut" id="floatingRut" placeholder="Rut" required>
-      </div>
-      <div class="form-group">
-        <input type="text" class="form-control" name="telefono" [(ngModel)]="telefono" placeholder="Telefono" required>
-      </div>
-      <div class="form-group">
-        <input type="text" class="form-control" name="direccion" [(ngModel)]="direccion" placeholder="Direccion" required>
-      </div>
-        <div class="form-group">
-            <input type="email" class="form-control" name="email" [(ngModel)]="email" id="floatingInput" placeholder="email" required>
+          <input type="text" class="form-control" name="rut" [(ngModel)]="rut" (input)="formatearRut()" id="floatingRut" placeholder="Rut (ejemplo: 12.345.678-9)" required>
+          <div class="error-message">
+            <ng-container *ngIf="rut === ''">
+              ❌ Debes ingresar tu RUT
+            </ng-container>
+            <ng-container *ngIf="rut !== '' && getRutError()">
+              {{ getRutError() }}
+            </ng-container>
+          </div>
         </div>
+        <div class="form-group">
+          <input type="date" class="form-control" name="fechanacimiento" [(ngModel)]="fechanacimiento" placeholder="Fecha de Nacimiento" required>
+          <div class="error-message" *ngIf="fechanacimiento === ''">
+            ❌ Debes seleccionar una fecha de nacimiento
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <input type="text" class="form-control" name="telefono" [(ngModel)]="telefono" placeholder="Teléfono (9-12 dígitos)" required>
+          <div class="error-message">
+            <ng-container *ngIf="telefono === ''">
+              ❌ Debes ingresar tu número de teléfono
+            </ng-container>
+            <ng-container *ngIf="telefono !== '' && getTelefonoError()">
+              {{ getTelefonoError() }}
+            </ng-container>
+          </div>
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="direccion" [(ngModel)]="direccion" placeholder="Dirección (mínimo 5 caracteres)" required>
+          <div class="error-message">
+            <ng-container *ngIf="direccion === ''">
+              ❌ Debes ingresar tu dirección
+            </ng-container>
+            <ng-container *ngIf="direccion !== '' && direccion.length < 5">
+              ❌ La dirección debe tener al menos 5 caracteres
+            </ng-container>
+          </div>
+        </div>
+      </div>
       <div class="form-group">
-        <input type="password" class="form-control" name="password" [(ngModel)]="password" id="floatingPassword" placeholder="Contraseña" required>
+        <input type="email" class="form-control" name="email" [(ngModel)]="email" id="floatingInput" placeholder="Email (ejemplo: usuario@dominio.com)" required>
+        <div class="error-message">
+          <ng-container *ngIf="email === ''">
+            ❌ Debes ingresar tu email
+          </ng-container>
+          <ng-container *ngIf="email !== '' && getEmailError()">
+            {{ getEmailError() }}
+          </ng-container>
+        </div>
+      </div>
+      <div class="form-group">
+        <input type="password" class="form-control" name="password" [(ngModel)]="password" id="floatingPassword" placeholder="Contraseña (mínimo 6 caracteres)" required>
+        <div class="error-message">
+          <ng-container *ngIf="password === ''">
+            ❌ Debes ingresar una contraseña
+          </ng-container>
+          <ng-container *ngIf="password !== '' && password.length < 6">
+            ❌ La contraseña debe tener al menos 6 caracteres
+          </ng-container>
+        </div>
       </div>
       <div class="form-group">
         <input type="password" class="form-control" name="repetirpassword" [(ngModel)]="repetirpassword" id="floatingrepetirPassword" placeholder="Repetir Contraseña" required>
+        <div class="error-message">
+          <ng-container *ngIf="repetirpassword === ''">
+            ❌ Debes repetir la contraseña
+          </ng-container>
+          <ng-container *ngIf="repetirpassword !== '' && password !== repetirpassword">
+            ❌ Las contraseñas no coinciden
+          </ng-container>
+        </div>
       </div>
       <button type="submit" class="register-button" (click)="addUser()">REGISTRARSE</button>
     </form>
