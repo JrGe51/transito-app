@@ -38,10 +38,11 @@ export class LoginComponent {
 
     }
     this.userService.logIn(user).subscribe({
-      next: (token) => {
-        console.log(token)
-        this.toast.success(`Bienvenido ${this.email}, Login exitoso`)
-        this.router.navigate(['/nuevo'])
+      next: (token: any) => {
+        console.log(token);
+        localStorage.setItem('token', token.token);
+        this.toast.success(`Bienvenido ${this.email}, Login exitoso`);
+        this.router.navigate(['/nuevo']);
       },
       error: (e: HttpErrorResponse) => {
         this.errorService.messageError(e)

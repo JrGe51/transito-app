@@ -35,6 +35,7 @@ export class ReservaComponent implements OnInit {
   horaSeleccionada: string | null = null;
   tiposLicencia: string[] = ['Clase B', 'Clase C']; 
   tipoLicenciaSeleccionado: string | null = null;
+  licenciaSeleccionada: boolean = false;
 
   constructor(private horarioService: HorarioService) {}
 
@@ -87,23 +88,49 @@ export class ReservaComponent implements OnInit {
 
   seleccionarTipoLicencia(tipo: string) {
     this.tipoLicenciaSeleccionado = tipo;
+    this.licenciaSeleccionada = true;
     this.fechaSeleccionada = null;
     this.horaSeleccionada = null;
     this.horasDisponibles = [];
+    console.log('Tipo de licencia seleccionado:', tipo);
   }
 
   onSubmit() {
-    if (!this.tipoLicenciaSeleccionado || !this.fechaSeleccionada || !this.horaSeleccionada) {
-      alert('Selecciona tipo de licencia, fecha y hora');
+    if (!this.tipoLicenciaSeleccionado) {
+      alert('Por favor, selecciona un tipo de licencia');
       return;
     }
-    this.horarioService.registrarSolicitud({
+    if (!this.fechaSeleccionada) {
+      alert('Por favor, selecciona una fecha');
+      return;
+    }
+    if (!this.horaSeleccionada) {
+      alert('Por favor, selecciona una hora');
+      return;
+    }
+
+    const solicitud = {
       name: this.tipoLicenciaSeleccionado,
       fecha: this.formatDate(this.fechaSeleccionada),
       hora: this.horaSeleccionada
-    }).subscribe({
-      next: () => alert('Reserva realizada con éxito'),
-      error: (err) => alert('Error al reservar: ' + (err.error?.msg || 'Intenta de nuevo'))
+    };
+
+    console.log('Enviando solicitud:', solicitud);
+
+    this.horarioService.registrarSolicitud(solicitud).subscribe({
+      next: () => {
+        alert('Reserva realizada con éxito');
+        // Limpiar el formulario después de una reserva exitosa
+        this.tipoLicenciaSeleccionado = null;
+        this.licenciaSeleccionada = false;
+        this.fechaSeleccionada = null;
+        this.horaSeleccionada = null;
+        this.horasDisponibles = [];
+      },
+      error: (err) => {
+        console.error('Error al reservar:', err);
+        alert('Error al reservar: ' + (err.error?.msg || 'Intenta de nuevo'));
+      }
     });
   }
 }

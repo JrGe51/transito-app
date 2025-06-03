@@ -15,7 +15,7 @@ Horario.init({
     id: { type: sequelize_1.DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     fecha: { type: sequelize_1.DataTypes.DATEONLY, allowNull: false },
     hora: { type: sequelize_1.DataTypes.TIME, allowNull: false },
-    cuposdisponibles: { type: sequelize_1.DataTypes.INTEGER, allowNull: false },
+    cupodisponible: { type: sequelize_1.DataTypes.BOOLEAN, allowNull: false },
 }, {
     sequelize: connection_1.default,
     modelName: 'Horario',

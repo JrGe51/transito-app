@@ -6,7 +6,7 @@ interface HorarioAttributes {
     id: number;
     fecha: string;
     hora: string;
-    cuposdisponibles: number;
+    cupodisponible: number;
 }
 
 // Define los atributos opcionales para la creación
@@ -17,7 +17,7 @@ export class Horario extends Model<HorarioAttributes, HorarioCreationAttributes>
     public id!: number;
     public fecha!: string;
     public hora!: string;
-    public cuposdisponibles!: number;
+    public cupodisponible!: number;
 }
 
 // Inicializa el modelo
@@ -26,7 +26,7 @@ Horario.init(
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
         fecha: { type: DataTypes.DATEONLY, allowNull: false },
         hora: { type: DataTypes.TIME, allowNull: false },
-        cuposdisponibles: { type: DataTypes.INTEGER, allowNull: false },
+        cupodisponible: { type: DataTypes.BOOLEAN, allowNull: false },
     },
     {
         sequelize,
