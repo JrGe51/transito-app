@@ -3,14 +3,14 @@
     <div class="fadeIn first">
       <img src="../../../assets/img/user-icon.jpg" id="icon" alt="User Icon" />
     </div>
-    <form>
+    <form (ngSubmit)="login()" #loginForm="ngForm">
         <div class="form-group">
             <input type="email" class="form-control" name="email" [(ngModel)]="email" id="floatingInput" placeholder="email" required>
         </div>
       <div class="form-group">
         <input type="password" class="form-control" name="password" [(ngModel)]="password" id="floatingPassword" placeholder="Contraseña" required>
       </div>
-      <input type="submit" class="fadeIn fourth" (click)="login()" value="Ingresar">
+      <button type="submit" class="fadeIn fourth">Ingresar</button>
     </form>
     <div id="formFooter">
       <a class="underlineHover" href="/registrarse">¿Registrarse?</a>

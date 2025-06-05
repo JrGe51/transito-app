@@ -4,10 +4,12 @@ import RUser from '../routes/user';
 import RLicencia from '../routes/licencia';
 import RHorario from '../routes/horario';
 import RSolicitud from '../routes/solicitud';
+import RAdmin from '../routes/admin';
 import { User } from './user';
 import { Licencia } from './licencia';
 import { Horario } from './horario';
 import { Solicitud } from './solicitud';
+import { Admin } from './admin';
 import cors from 'cors';
 
 
@@ -35,6 +37,7 @@ class Server {
         this.app.use(RLicencia)
         this.app.use(RHorario)
         this.app.use(RSolicitud)
+        this.app.use(RAdmin)
     }
 
     midlewares() {
@@ -42,7 +45,7 @@ class Server {
         this.app.use(cors())
 
         this.app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-            console.error(err.stack); // Imprime el error en la consola
+            console.error(err.stack); 
             res.status(500).json({
                 msg: "Ocurrió un error en el servidor",
                 error: err.message,
@@ -56,6 +59,7 @@ class Server {
             await Licencia.sync();
             await Horario.sync();
             await Solicitud.sync();
+            await Admin.sync();
             
             console.log("Base de datos conectada correctamente")
         } catch (error) {
