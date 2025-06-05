@@ -13,11 +13,11 @@ exports.getHorasPorFecha = exports.getFechasDisponibles = exports.registerHorari
 const horario_1 = require("../models/horario");
 const sequelize_1 = require("sequelize");
 const registerHorario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { fecha, hora, cuposdisponibles } = req.body;
+    const { fecha, hora, cupodisponible } = req.body;
     horario_1.Horario.create({
         fecha: fecha,
         hora: hora,
-        cuposdisponibles: cuposdisponibles,
+        cupodisponible: cupodisponible,
     });
     res.json({
         msg: `Fecha ${fecha}  create succes..`,
@@ -28,7 +28,7 @@ const getFechasDisponibles = (req, res) => __awaiter(void 0, void 0, void 0, fun
     try {
         // Busca fechas con al menos un cupo disponible
         const fechas = yield horario_1.Horario.findAll({
-            where: { cuposdisponibles: { [sequelize_1.Op.gt]: 0 } },
+            where: { cupodisponible: { [sequelize_1.Op.gt]: 0 } },
             attributes: ['fecha'],
             group: ['fecha'],
             order: [['fecha', 'ASC']]
@@ -54,7 +54,7 @@ const getHorasPorFecha = (req, res) => __awaiter(void 0, void 0, void 0, functio
             return;
         }
         const horas = yield horario_1.Horario.findAll({
-            where: { fecha, cuposdisponibles: { [sequelize_1.Op.gt]: 0 } },
+            where: { fecha, cupodisponible: { [sequelize_1.Op.gt]: 0 } },
             attributes: ['hora'],
             order: [['hora', 'ASC']]
         });

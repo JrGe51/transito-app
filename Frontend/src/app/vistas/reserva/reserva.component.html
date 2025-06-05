@@ -16,9 +16,9 @@
 <div class="wrapper fadeIn">
   <div id="formContent">
     <h1 class="fadeIn first">Primera Licencia</h1>
-    <h2 class="fadeIn first">Reserva tu hora</h2>
 
     <div class="mb-3 text-center" *ngIf="!tipoLicenciaSeleccionado">
+      <h3 class="mb-4">Selecciona el tipo de licencia</h3>
       <button
         *ngFor="let tipo of tiposLicencia"
         type="button"
@@ -30,7 +30,13 @@
     </div>
     
     <div class="mb-3 text-center" *ngIf="tipoLicenciaSeleccionado">
-      <form class="reservation-form">
+      <div class="alert alert-info mb-4">
+        <strong>Tipo de licencia seleccionada:</strong> {{ tipoLicenciaSeleccionado }}
+        <button type="button" class="btn btn-sm btn-outline-primary ms-3" (click)="tipoLicenciaSeleccionado = null">
+          Cambiar
+        </button>
+      </div>
+      <form class="reservation-form" (ngSubmit)="onSubmit()">
         <mat-card class="demo-inline-calendar-card w-75">
           <mat-label>Fechas disponibles</mat-label>
           <mat-calendar

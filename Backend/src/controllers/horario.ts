@@ -4,12 +4,12 @@ import { Op } from 'sequelize';
 
 export const registerHorario = async (req: Request, res: Response) => {
 
-    const { fecha, hora, cuposdisponibles } = req.body;
+    const { fecha, hora, cupodisponible } = req.body;
 
     Horario.create({
         fecha: fecha,
         hora: hora,
-        cuposdisponibles: cuposdisponibles,
+        cupodisponible: cupodisponible,
     })
 
     res.json({
@@ -22,7 +22,7 @@ export const getFechasDisponibles = async (req: Request, res: Response) => {
     try {
         // Busca fechas con al menos un cupo disponible
         const fechas = await Horario.findAll({
-            where: { cuposdisponibles: { [Op.gt]: 0 } },
+            where: { cupodisponible: { [Op.gt]: 0 } },
             attributes: ['fecha'],
             group: ['fecha'],
             order: [['fecha', 'ASC']]
@@ -48,7 +48,7 @@ export const getHorasPorFecha = async (req: Request, res: Response): Promise<voi
             return;
         }
         const horas = await Horario.findAll({
-            where: { fecha, cuposdisponibles: { [Op.gt]: 0 } },
+            where: { fecha, cupodisponible: { [Op.gt]: 0 } },
             attributes: ['hora'],
             order: [['hora', 'ASC']]
         });
