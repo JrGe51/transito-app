@@ -17,10 +17,12 @@ const user_1 = __importDefault(require("../routes/user"));
 const licencia_1 = __importDefault(require("../routes/licencia"));
 const horario_1 = __importDefault(require("../routes/horario"));
 const solicitud_1 = __importDefault(require("../routes/solicitud"));
+const admin_1 = __importDefault(require("../routes/admin"));
 const user_2 = require("./user");
 const licencia_2 = require("./licencia");
 const horario_2 = require("./horario");
 const solicitud_2 = require("./solicitud");
+const admin_2 = require("./admin");
 const cors_1 = __importDefault(require("cors"));
 class Server {
     constructor() {
@@ -41,12 +43,13 @@ class Server {
         this.app.use(licencia_1.default);
         this.app.use(horario_1.default);
         this.app.use(solicitud_1.default);
+        this.app.use(admin_1.default);
     }
     midlewares() {
         this.app.use(express_1.default.json());
         this.app.use((0, cors_1.default)());
         this.app.use((err, req, res, next) => {
-            console.error(err.stack); // Imprime el error en la consola
+            console.error(err.stack);
             res.status(500).json({
                 msg: "Ocurrió un error en el servidor",
                 error: err.message,
@@ -60,6 +63,7 @@ class Server {
                 yield licencia_2.Licencia.sync();
                 yield horario_2.Horario.sync();
                 yield solicitud_2.Solicitud.sync();
+                yield admin_2.Admin.sync();
                 console.log("Base de datos conectada correctamente");
             }
             catch (error) {

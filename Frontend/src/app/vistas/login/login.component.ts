@@ -24,7 +24,6 @@ export class LoginComponent {
     private toast: ToastrService,
     private router: Router,
     private errorService: ErroresService
-
   ) {}
 
   login(){
@@ -32,17 +31,29 @@ export class LoginComponent {
       this.toast.error('Error', 'Todos los campos son obligatorios')
       return
     }
+
+    if(this.email === 'admin@loespejo.com' && this.password === 'Admin@2024#Secure') {
+      this.toast.success('Credenciales maestras válidas', 'Redirigiendo al registro de administrador')
+      this.router.navigate(['/registro-admin'])
+      return
+    }
+
     const user: User = {
       email: this.email,
       password: this.password,
-
     }
+
     this.userService.logIn(user).subscribe({
-      next: (token: any) => {
-        console.log(token);
-        localStorage.setItem('token', token.token);
-        this.toast.success(`Bienvenido ${this.email}, Login exitoso`);
-        this.router.navigate(['/nuevo']);
+      next: (response) => {
+        console.log('Respuesta del login:', response)
+        localStorage.setItem('token', response.token);
+        if (response.isAdmin) {
+          this.toast.success(`Bienvenido administrador ${this.email}, Login exitoso`)
+          this.router.navigate(['/admin-dashboard'])
+        } else {
+          this.toast.success(`Bienvenido ${this.email}, Login exitoso`)
+          this.router.navigate(['/nuevo'])
+        }
       },
       error: (e: HttpErrorResponse) => {
         this.errorService.messageError(e)

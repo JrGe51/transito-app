@@ -10,12 +10,12 @@ const authenticateToken = (req, res, next) => {
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) {
         res.status(401).json({ msg: 'Token requerido' });
-        return; // <-- IMPORTANTE
+        return;
     }
     jsonwebtoken_1.default.verify(token, process.env.SECRET_KEY || 'TSE-Dylan-Hernandez', (err, user) => {
         if (err) {
             res.status(403).json({ msg: 'Token inválido' });
-            return; // <-- IMPORTANTE
+            return;
         }
         req.userId = user.id;
         next();

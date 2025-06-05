@@ -1,0 +1,90 @@
+<div class="wrapper fadeInDown">
+  <div id="formContent">
+    <div class="fadeIn first">
+      <img src="../../../assets/img/user-icon.jpg" id="icon" alt="User Icon" />
+      <h2>Registro de Administrador</h2>
+    </div>
+
+
+    <div *ngIf="!credencialesValidas">
+      <h3>Verificación de Credenciales Maestras</h3>
+      <form>
+        <div class="form-group">
+          <input type="email" class="form-control" name="masterEmail" [(ngModel)]="masterEmail" 
+                 placeholder="Email Maestro" required>
+        </div>
+        <div class="form-group">
+          <input type="password" class="form-control" name="masterPassword" [(ngModel)]="masterPassword" 
+                 placeholder="Contraseña Maestra" required>
+        </div>
+        <input type="submit" class="fadeIn fourth" (click)="verificarCredenciales()" value="Verificar Credenciales">
+      </form>
+    </div>
+
+
+    <div *ngIf="credencialesValidas">
+      <h3>Datos del Nuevo Administrador</h3>
+      <form #adminForm="ngForm" (ngSubmit)="registrarAdmin()">
+        <div class="form-group">
+          <input type="text" class="form-control" name="name" [(ngModel)]="name" #nameInput="ngModel"
+                 placeholder="Nombre" required minlength="3">
+          <div class="error-message">
+            <ng-container *ngIf="nameInput.invalid">
+              <ng-container *ngIf="nameInput.errors?.['required']">
+                ❌ El nombre es obligatorio.
+              </ng-container>
+              <ng-container *ngIf="nameInput.errors?.['minlength']">
+                ❌ El nombre debe tener al menos 3 caracteres.
+              </ng-container>
+            </ng-container>
+          </div>
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-control" name="lastname" [(ngModel)]="lastname" #lastnameInput="ngModel"
+                 placeholder="Apellido" required minlength="3">
+          <div class="error-message">
+             <ng-container *ngIf="lastnameInput.invalid">
+              <ng-container *ngIf="lastnameInput.errors?.['required']">
+                ❌ El apellido es obligatorio.
+              </ng-container>
+              <ng-container *ngIf="lastnameInput.errors?.['minlength']">
+                ❌ El apellido debe tener al menos 3 caracteres.
+              </ng-container>
+             </ng-container>
+          </div>
+        </div>
+        <div class="form-group">
+          <input type="password" class="form-control" name="password" [(ngModel)]="password" #passwordInput="ngModel"
+                 placeholder="Contraseña" required minlength="6">
+          <div class="error-message">
+            <ng-container *ngIf="passwordInput.invalid">
+              <ng-container *ngIf="passwordInput.errors?.['required']">
+                ❌ La contraseña es obligatoria.
+              </ng-container>
+              <ng-container *ngIf="passwordInput.errors?.['minlength']">
+                ❌ La contraseña debe tener al menos 6 caracteres.
+              </ng-container>
+            </ng-container>
+          </div>
+        </div>
+        <div class="form-group">
+          <input type="password" class="form-control" name="repetirPassword" [(ngModel)]="repetirPassword" #repeatPasswordInput="ngModel"
+                 placeholder="Repetir Contraseña" required>
+          <div class="error-message">
+            <ng-container *ngIf="repeatPasswordInput.invalid && repeatPasswordInput.errors?.['required']">
+                ❌ Repetir la contraseña es obligatorio.
+            </ng-container>
+            <ng-container *ngIf="password !== '' && repetirPassword !== '' && password !== repetirPassword">
+               ❌ Las contraseñas no coinciden
+            </ng-container>
+          </div>
+        </div>
+        <input type="submit" class="fadeIn fourth" value="Registrar Administrador" [disabled]="adminForm.invalid || (password !== repetirPassword && repetirPassword !== '')">
+      </form>
+    </div>
+
+    <div id="formFooter">
+      <a class="underlineHover" href="/login">¿Ya tienes cuenta? Inicia sesión</a>
+    </div>
+  </div>
+</div> 
