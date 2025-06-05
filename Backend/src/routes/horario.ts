@@ -8,4 +8,4 @@ router.post("/api/horario/register", registerHorario);
 router.get("/api/horario/fechas", getFechasDisponibles);
 router.get("/api/horario/horas", getHorasPorFecha);
 
-export default router
+export default router;
