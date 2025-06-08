@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { HorarioService } from '../../servicios/horario.service';
 import { RutService } from '../../servicios/rut.service';
 import { CommonModule } from '@angular/common';
@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDatepickerModule, MatCalendar } from '@angular/material/datepicker';
 import { HttpClientModule } from '@angular/common/http';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
@@ -16,6 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-reserva',
@@ -35,10 +36,12 @@ import { Router } from '@angular/router';
     MatDialogModule,
     MatButtonModule
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.Default,
 })
 export class ReservaComponent implements OnInit {
-  fechasDisponibles: string[] = [];
+  @ViewChild(MatCalendar) calendar!: MatCalendar<Date>;
+
+  fechasDisponibles$ = new BehaviorSubject<string[]>([]);
   horasDisponibles: string[] = [];
   fechaSeleccionada: Date | null = null;
   horaSeleccionada: string | null = null;
@@ -48,13 +51,16 @@ export class ReservaComponent implements OnInit {
   rut: string = '';
   email: string = '';
   userName: string = '';
+  minDate: Date = new Date();
+  showCalendar: boolean = true;
 
   constructor(
     private horarioService: HorarioService,
     private rutService: RutService,
     private dialog: MatDialog,
     private toast: ToastrService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -66,49 +72,45 @@ export class ReservaComponent implements OnInit {
       this.fechaSeleccionada = null;
       this.horaSeleccionada = null;
       this.horasDisponibles = [];
-      console.log('Fecha deseleccionada');
+      this.cdr.detectChanges();
       return;
     }
     this.fechaSeleccionada = date;
     this.horaSeleccionada = null;
     const fechaString = this.formatDate(date);
-    console.log('Fecha seleccionada:', fechaString);
 
-    // Asegurarse de que hay un tipo de licencia seleccionado antes de obtener horas
     if (this.tipoLicenciaSeleccionado) {
       this.horarioService.getHorasPorFecha(fechaString, this.tipoLicenciaSeleccionado).subscribe({
         next: (horas) => {
-          console.log('Horas disponibles:', horas);
           this.horasDisponibles = horas;
+          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Error al obtener horas:', error);
           this.horasDisponibles = [];
           this.toast.error('Error al cargar horas disponibles', 'Error');
+          this.cdr.detectChanges();
         }
       });
     } else {
-      console.log('Tipo de licencia no seleccionado, no se obtienen horas.');
       this.horasDisponibles = [];
+      this.cdr.detectChanges();
     }
   }
 
   formatDate(date: Date): string {
-    // Convierte Date a 'YYYY-MM-DD'
     return date.toISOString().split('T')[0];
   }
 
   dateClass = (d: Date) => {
     const dateString = this.formatDate(d);
-    // Aquí no filtramos por licencia, solo marcamos las fechas que existen en general
-    return this.fechasDisponibles.includes(dateString) ? 'fecha-disponible' : '';
+    return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
   };
 
   filtrarFechasDisponibles = (date: Date | null): boolean => {
     if (!date) return false;
     const dateString = this.formatDate(date);
-    // Aquí sí usamos las fechas disponibles cargadas para el tipo de licencia seleccionado
-    return this.fechasDisponibles.includes(dateString);
+    return this.fechasDisponibles$.value.includes(dateString);
   }
 
   seleccionarTipoLicencia(tipo: string) {
@@ -117,19 +119,57 @@ export class ReservaComponent implements OnInit {
     this.fechaSeleccionada = null;
     this.horaSeleccionada = null;
     this.horasDisponibles = [];
-    this.fechasDisponibles = []; // Limpiar fechas anteriores
-    console.log('Tipo de licencia seleccionado:', tipo);
+    this.fechasDisponibles$.next([]);
+    this.cdr.detectChanges();
 
-    // Cargar fechas disponibles para el tipo de licencia seleccionado
+    // OCULTAR CALENDARIO
+    this.showCalendar = false;
+    this.cdr.detectChanges(); // Forzar la detección de cambios para que se oculte
+
     this.horarioService.getFechasDisponibles(tipo).subscribe({
       next: (fechas) => {
-        console.log('Fechas disponibles para', tipo, ':', fechas);
-        this.fechasDisponibles = fechas;
+        this.fechasDisponibles$.next(fechas);
+        this.cdr.detectChanges();
+
+        // MOSTRAR CALENDARIO después de un pequeño retraso para asegurar que se recree
+        setTimeout(() => {
+          this.showCalendar = true;
+          this.cdr.detectChanges();
+
+          if (this.calendar) {
+            // Reasignar las funciones dateClass y filtrarFechasDisponibles para forzar reevaluación
+            this.dateClass = (d: Date) => {
+              const dateString = this.formatDate(d);
+              return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
+            };
+            this.filtrarFechasDisponibles = (date: Date | null): boolean => {
+              if (!date) return false;
+              const dateString = this.formatDate(date);
+              return this.fechasDisponibles$.value.includes(dateString);
+            };
+
+            // Intentar establecer la fecha activa para forzar la reevaluación
+            if (fechas.length > 0) {
+              this.calendar.activeDate = new Date(fechas[0]);
+            } else {
+              this.calendar.activeDate = new Date(); // Si no hay fechas, mostrar el mes actual
+            }
+            this.calendar.updateTodaysDate(); // Fuerza la reevaluación de los filtros
+            this.cdr.detectChanges();
+          }
+        }, 0);
       },
       error: (error) => {
         console.error('Error al obtener fechas por licencia:', error);
-        this.fechasDisponibles = [];
+        this.fechasDisponibles$.next([]);
         this.toast.error('Error al cargar fechas disponibles', 'Error');
+        this.cdr.detectChanges();
+
+        // Asegurarse de que el calendario se muestre incluso en caso de error
+        setTimeout(() => {
+          this.showCalendar = true;
+          this.cdr.detectChanges();
+        }, 0);
       }
     });
   }
@@ -152,16 +192,8 @@ export class ReservaComponent implements OnInit {
       title: 'Confirmar Reserva',
       html: `
         <div class="mb-3">
-          <label class="form-label">RUT (sin puntos, con guión)</label>
-          <input type="text" id="rut" class="swal2-input" placeholder="12345678-9">
-        </div>
-        <div class="mb-3">
           <label class="form-label">Correo electrónico</label>
           <input type="email" id="email" class="swal2-input" placeholder="ejemplo@correo.com">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Fecha de nacimiento</label>
-          <input type="date" id="fechaNacimiento" class="swal2-input">
         </div>
       `,
       showCancelButton: true,
@@ -171,51 +203,17 @@ export class ReservaComponent implements OnInit {
       cancelButtonColor: '#d33',
       focusConfirm: false,
       preConfirm: () => {
-        const rut = (document.getElementById('rut') as HTMLInputElement).value;
         const email = (document.getElementById('email') as HTMLInputElement).value;
-        const fechaNacimiento = (document.getElementById('fechaNacimiento') as HTMLInputElement).value;
         
-        if (!rut) {
-          Swal.showValidationMessage('Por favor ingresa tu RUT');
-          return false;
-        }
         if (!email) {
           Swal.showValidationMessage('Por favor ingresa tu correo electrónico');
           return false;
         }
-        if (!fechaNacimiento) {
-          Swal.showValidationMessage('Por favor ingresa tu fecha de nacimiento');
-          return false;
-        }
 
-        // Validar RUT
-        const verificacionRut = this.rutService.esMayorDeEdad(rut);
-        if (!verificacionRut.esValido) {
-          Swal.showValidationMessage(verificacionRut.mensaje);
-          return false;
-        }
-
-        // Validar edad
-        const fechaNac = new Date(fechaNacimiento);
-        const hoy = new Date();
-        let edad = hoy.getFullYear() - fechaNac.getFullYear();
-        const mesActual = hoy.getMonth();
-        const mesNacimiento = fechaNac.getMonth();
-
-        if (mesActual < mesNacimiento || (mesActual === mesNacimiento && hoy.getDate() < fechaNac.getDate())) {
-          edad--;
-        }
-
-        if (edad < 18) {
-          Swal.showValidationMessage(`No cumples con la edad mínima requerida. Tu edad es ${edad} años.`);
-          return false;
-        }
-        
-        return { rut, email };
+        return { email };
       }
     }).then((result) => {
       if (result.isConfirmed) {
-        this.rut = result.value.rut;
         this.email = result.value.email;
         this.onSubmit();
       }
@@ -235,19 +233,9 @@ export class ReservaComponent implements OnInit {
       this.toast.error('Por favor, selecciona una hora', 'Error');
       return;
     }
-    if (!this.rut) {
-      this.toast.error('Por favor, ingresa tu RUT', 'Error');
-      return;
-    }
+
     if (!this.email) {
       this.toast.error('Por favor, ingresa tu correo electrónico', 'Error');
-      return;
-    }
-
-    // Verificar RUT
-    const verificacion = this.rutService.esMayorDeEdad(this.rut);
-    if (!verificacion.esValido) {
-      this.toast.error(verificacion.mensaje, 'Error de verificación');
       return;
     }
 
@@ -294,7 +282,7 @@ export class ReservaComponent implements OnInit {
             this.fechaSeleccionada = null;
             this.horaSeleccionada = null;
             this.horasDisponibles = [];
-            this.rut = '';
+            this.rut = ''; // Mantener el RUT para limpiar el campo si se usaba internamente
             this.email = '';
           }, remainingTime);
         } else {
@@ -313,7 +301,7 @@ export class ReservaComponent implements OnInit {
           this.fechaSeleccionada = null;
           this.horaSeleccionada = null;
           this.horasDisponibles = [];
-          this.rut = '';
+          this.rut = ''; // Mantener el RUT para limpiar el campo si se usaba internamente
           this.email = '';
         }
       },

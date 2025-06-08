@@ -1,4 +1,40 @@
 <div class="dashboard-container">
   <h1>Panel de Administrador</h1>
   <p>Bienvenido al panel de administración.</p>
+
+  <div class="admin-buttons-wrapper">
+    <button class="btn btn-primary admin-button">Usuarios</button>
+    <button class="btn btn-primary admin-button" (click)="toggleHorariosManagement()">Horarios</button>
+    <button class="btn btn-danger admin-button">Eliminar solicitudes</button>
+  </div>
+
+  <div class="schedule-management-container" *ngIf="showHorariosManagement">
+    <div class="schedule-header">
+      <h2>Gestión de Horarios</h2>
+      <button class="btn btn-info create-schedule-button">Crear horario</button>
+    </div>
+    <div class="schedule-list-wrapper">
+      <!-- Encabezados de la tabla de horarios -->
+      <div class="schedule-item header-row">
+        <div class="schedule-field">Fecha</div>
+        <div class="schedule-field">Hora</div>
+        <div class="schedule-field">Licencia</div>
+        <div class="schedule-field">Disponible</div>
+        <div class="schedule-actions">Acciones</div>
+      </div>
+      <!-- Aquí se iterarán los horarios -->
+      <div *ngIf="horarios.length === 0" class="no-schedules-message">
+        No hay horarios disponibles.
+      </div>
+      <div *ngFor="let horario of horarios" class="schedule-item">
+        <div class="schedule-field">{{ horario.fecha }}</div>
+        <div class="schedule-field">{{ horario.hora }}</div>
+        <div class="schedule-field">{{ horario.licenciaName }}</div>
+        <div class="schedule-field">{{ horario.cupodisponible ? 'Sí' : 'No' }}</div>
+        <div class="schedule-actions">
+          <button class="btn btn-danger delete-schedule-button">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div> 

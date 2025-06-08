@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.liberarHorario = exports.getHorasPorFecha = exports.getFechasDisponibles = exports.registerHorario = void 0;
+exports.getAllHorarios = exports.liberarHorario = exports.getHorasPorFecha = exports.getFechasDisponibles = exports.registerHorario = void 0;
 const horario_1 = require("../models/horario");
 const licencia_1 = require("../models/licencia");
 const connection_1 = __importDefault(require("../database/connection"));
@@ -47,7 +47,8 @@ const registerHorario = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             where: {
                 fecha,
                 hora,
-                id_tipoLicencia: licencia.id
+                id_tipoLicencia: licencia.id,
+                cupodisponible: true
             }
         });
         if (horarioExistente) {
@@ -254,3 +255,32 @@ const liberarHorario = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.liberarHorario = liberarHorario;
+const getAllHorarios = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const horarios = yield horario_1.Horario.findAll({
+            include: [{
+                    model: licencia_1.Licencia,
+                    attributes: ['name'] // Incluir solo el nombre de la licencia
+                }],
+            attributes: ['fecha', 'hora', 'cupodisponible'], // Seleccionar solo los campos relevantes
+            order: [['fecha', 'ASC'], ['hora', 'ASC']]
+        });
+        // Mapear los resultados para incluir el nombre de la licencia directamente
+        const formattedHorarios = horarios.map(horario => ({
+            id: horario.id, // Incluir el ID para futuras operaciones (eliminar)
+            fecha: horario.fecha,
+            hora: horario.hora.substring(0, 5), // Formatear hora a HH:mm
+            cupodisponible: horario.cupodisponible,
+            licenciaName: horario.licencia ? horario.licencia.name : 'N/A'
+        }));
+        res.json(formattedHorarios);
+    }
+    catch (error) {
+        console.error('Error al obtener todos los horarios:', error);
+        res.status(500).json({
+            msg: "Error al obtener todos los horarios",
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+});
+exports.getAllHorarios = getAllHorarios;

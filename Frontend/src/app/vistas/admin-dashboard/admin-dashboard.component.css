@@ -1,6 +1,6 @@
 .dashboard-container {
   padding: 20px;
-  text-align: center;
+  text-align: left;
 }
 
 h1 {
@@ -10,4 +10,89 @@ h1 {
 
 p {
   color: #7f8c8d;
+}
+
+.admin-buttons-wrapper {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column; /* Apilar los botones verticalmente */
+  align-items: flex-start; /* Alinear los botones a la izquierda dentro del recuadro */
+  padding: 20px;
+  border: 1px solid #bdc3c7; /* Borde gris como en el dibujo */
+  border-radius: 8px; /* Bordes ligeramente redondeados */
+  max-width: 300px; /* Ancho máximo del recuadro */
+  margin-left: 20px; /* Margen a la izquierda para separarlo del borde de la página */
+  margin-right: auto; /* Permite que el margen izquierdo empuje el contenedor */
+}
+
+.admin-button {
+  width: 100%; /* Que los botones ocupen todo el ancho del recuadro */
+  margin-bottom: 15px; /* Espacio entre los botones */
+  padding: 10px 20px;
+}
+
+.admin-button:last-child {
+  margin-bottom: 0; /* Eliminar el margen inferior del último botón */
+}
+
+/* Estilos para la gestión de horarios */
+.schedule-management-container {
+  margin-top: 40px;
+  padding: 20px;
+  border: 1px solid #bdc3c7;
+  border-radius: 8px;
+  margin-left: 20px; /* Alineado con los botones */
+  margin-right: 20px;
+  max-width: 900px; /* Asegura suficiente espacio para las columnas */
+}
+
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.schedule-header h2 {
+  margin: 0; /* Eliminar margen predeterminado del h2 */
+  color: #2c3e50;
+}
+
+.create-schedule-button {
+  padding: 8px 15px;
+  font-size: 0.9em;
+}
+
+.schedule-list-wrapper {
+  width: 100%;
+}
+
+.schedule-item {
+  display: grid;
+  /* Definir las columnas explícitamente para asegurar la disposición horizontal */
+  grid-template-columns: 120px 80px 100px 90px 120px; /* Anchos fijos para cada columna */
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+  justify-items: start; /* Asegura que el contenido se alinee al inicio de cada celda */
+}
+
+.schedule-item.header-row {
+  font-weight: bold;
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 5px;
+}
+
+.schedule-field {
+  white-space: nowrap; /* Evita que el texto salte de línea */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Añade puntos suspensivos si el texto es demasiado largo */
+}
+
+.no-schedules-message {
+  text-align: center;
+  color: #7f8c8d;
+  padding: 20px;
 } 

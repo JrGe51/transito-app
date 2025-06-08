@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerHorario, getFechasDisponibles, getHorasPorFecha, liberarHorario } from "../controllers/horario";
+import { registerHorario, getFechasDisponibles, getHorasPorFecha, liberarHorario, getAllHorarios } from "../controllers/horario";
 import { authenticateToken } from '../middlewares/auth';
 
 
@@ -9,5 +9,6 @@ router.post("/api/horario/register", registerHorario);
 router.get("/api/horario/fechas", getFechasDisponibles);
 router.get("/api/horario/horas", getHorasPorFecha);
 router.put("/api/horario/liberar", authenticateToken, liberarHorario);
+router.get("/api/horario/all", authenticateToken, getAllHorarios);
 
 export default router;

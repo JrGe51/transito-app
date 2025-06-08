@@ -8,4 +8,5 @@ router.post("/api/horario/register", horario_1.registerHorario);
 router.get("/api/horario/fechas", horario_1.getFechasDisponibles);
 router.get("/api/horario/horas", horario_1.getHorasPorFecha);
 router.put("/api/horario/liberar", auth_1.authenticateToken, horario_1.liberarHorario);
+router.get("/api/horario/all", auth_1.authenticateToken, horario_1.getAllHorarios);
 exports.default = router;

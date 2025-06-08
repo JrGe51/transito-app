@@ -38,7 +38,8 @@ export const registerHorario = async (req: Request, res: Response, next: NextFun
             where: {
                 fecha,
                 hora,
-                id_tipoLicencia: licencia.id
+                id_tipoLicencia: licencia.id,
+                cupodisponible: true
             }
         });
 
@@ -263,6 +264,36 @@ export const liberarHorario = async (req: Request, res: Response): Promise<void>
         console.error('Error al liberar horario:', error);
         res.status(500).json({
             msg: "Error al liberar el horario",
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const getAllHorarios = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const horarios = await Horario.findAll({
+            include: [{
+                model: Licencia,
+                attributes: ['name'] // Incluir solo el nombre de la licencia
+            }],
+            attributes: ['fecha', 'hora', 'cupodisponible'], // Seleccionar solo los campos relevantes
+            order: [['fecha', 'ASC'], ['hora', 'ASC']]
+        });
+
+        // Mapear los resultados para incluir el nombre de la licencia directamente
+        const formattedHorarios = horarios.map(horario => ({
+            id: horario.id, // Incluir el ID para futuras operaciones (eliminar)
+            fecha: horario.fecha,
+            hora: horario.hora.substring(0, 5), // Formatear hora a HH:mm
+            cupodisponible: horario.cupodisponible,
+            licenciaName: (horario as any).licencia ? (horario as any).licencia.name : 'N/A'
+        }));
+
+        res.json(formattedHorarios);
+    } catch (error) {
+        console.error('Error al obtener todos los horarios:', error);
+        res.status(500).json({
+            msg: "Error al obtener todos los horarios",
             error: error instanceof Error ? error.message : 'Error desconocido'
         });
     }

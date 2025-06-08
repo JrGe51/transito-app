@@ -31,4 +31,13 @@ export class HorarioService {
 
     return this.http.post(`${solicitudApiUrl}/register`, solicitud, { headers });
   }
+
+  getAllHorarios(): Observable<any[]> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    // Asumiendo que el backend tendrá un endpoint para obtener todos los horarios
+    return this.http.get<any[]>(`${this.apiUrl}/all`, { headers });
+  }
 }

@@ -46,10 +46,12 @@
                   </mat-card-header>
                   <mat-card-content>
                     <mat-calendar
+                      *ngIf="showCalendar"
                       [dateClass]="dateClass"
                       [selected]="fechaSeleccionada"
                       (selectedChange)="onFechaChange($event)"
-                      [dateFilter]="filtrarFechasDisponibles">
+                      [dateFilter]="filtrarFechasDisponibles"
+                      [minDate]="minDate">
                     </mat-calendar>
                   </mat-card-content>
                 </mat-card>
