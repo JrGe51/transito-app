@@ -10,7 +10,7 @@ interface SolicitudAttributes {
     fechaSolicitud: Date; 
     id_usuario: number; 
     id_tipoLicencia: number; 
-    id_horario: number; 
+    id_horario: number;
 }
 
 // Define los atributos opcionales para la creación
@@ -32,7 +32,7 @@ Solicitud.init(
         fechaSolicitud: { type: DataTypes.DATEONLY, allowNull: false },
         id_usuario: { type: DataTypes.INTEGER, references: { model: User, key: 'id' }, allowNull: false },
         id_tipoLicencia: { type: DataTypes.INTEGER, references: { model: Licencia, key: 'id' }, allowNull: false },
-        id_horario: { type: DataTypes.INTEGER, references: { model: Horario, key: 'id' }, allowNull: false },
+        id_horario: { type: DataTypes.INTEGER, references: { model: Horario, key: 'id' }, allowNull: false }
     },
     {
         sequelize,

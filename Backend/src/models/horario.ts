@@ -1,12 +1,13 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../database/connection";
-
+import { Licencia } from "./licencia";
 // Define los atributos del modelo
 interface HorarioAttributes {
     id: number;
     fecha: string;
     hora: string;
-    cupodisponible: number;
+    cupodisponible: boolean;
+    id_tipoLicencia: number;
 }
 
 // Define los atributos opcionales para la creación
@@ -17,7 +18,8 @@ export class Horario extends Model<HorarioAttributes, HorarioCreationAttributes>
     public id!: number;
     public fecha!: string;
     public hora!: string;
-    public cupodisponible!: number;
+    public cupodisponible!: boolean;
+    public id_tipoLicencia!: number;
 }
 
 // Inicializa el modelo
@@ -27,6 +29,7 @@ Horario.init(
         fecha: { type: DataTypes.DATEONLY, allowNull: false },
         hora: { type: DataTypes.TIME, allowNull: false },
         cupodisponible: { type: DataTypes.BOOLEAN, allowNull: false },
+        id_tipoLicencia: { type: DataTypes.INTEGER, references: { model: Licencia, key: 'id' }, allowNull: false }
     },
     {
         sequelize,
@@ -34,3 +37,6 @@ Horario.init(
         freezeTableName: true, // Evita que Sequelize pluralice el nombre de la tabla
     }
 );
+
+Licencia.hasOne(Horario, { foreignKey: 'id_tipoLicencia' });
+Horario.belongsTo(Licencia, { foreignKey: 'id_tipoLicencia' });

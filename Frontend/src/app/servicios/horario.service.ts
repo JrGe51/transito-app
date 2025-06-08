@@ -1,27 +1,34 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class HorarioService {
   private apiUrl = 'http://localhost:3017/api/horario';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  getFechasDisponibles(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/fechas`);
+  getFechasDisponibles(licenciaName: string): Observable<string[]> {
+    const params = new HttpParams().set('name', licenciaName);
+    return this.http.get<string[]>(`${this.apiUrl}/fechas`, { params });
   }
 
-  getHorasPorFecha(fecha: string): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/horas?fecha=${fecha}`);
+  getHorasPorFecha(fecha: string, licenciaName: string): Observable<string[]> {
+    const params = new HttpParams().set('fecha', fecha).set('name', licenciaName);
+    return this.http.get<string[]>(`${this.apiUrl}/horas`, { params });
   }
 
-  registrarSolicitud(data: { name: string, fecha: string, hora: string }) {
-  // Usa el endpoint protegido con JWT si corresponde
-  return this.http.post('http://localhost:3017/api/solicitud/register', data, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}` // O donde guardes tu JWT
-    }
-  });
-}
+  registrarSolicitud(solicitud: any): Observable<any> {
+    const solicitudApiUrl = 'http://localhost:3017/api/solicitud';
+    
+    const token = localStorage.getItem('token');
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.post(`${solicitudApiUrl}/register`, solicitud, { headers });
+  }
 }

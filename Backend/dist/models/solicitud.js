@@ -19,7 +19,7 @@ Solicitud.init({
     fechaSolicitud: { type: sequelize_1.DataTypes.DATEONLY, allowNull: false },
     id_usuario: { type: sequelize_1.DataTypes.INTEGER, references: { model: user_1.User, key: 'id' }, allowNull: false },
     id_tipoLicencia: { type: sequelize_1.DataTypes.INTEGER, references: { model: licencia_1.Licencia, key: 'id' }, allowNull: false },
-    id_horario: { type: sequelize_1.DataTypes.INTEGER, references: { model: horario_1.Horario, key: 'id' }, allowNull: false },
+    id_horario: { type: sequelize_1.DataTypes.INTEGER, references: { model: horario_1.Horario, key: 'id' }, allowNull: false }
 }, {
     sequelize: connection_1.default,
     modelName: 'Solicitud',

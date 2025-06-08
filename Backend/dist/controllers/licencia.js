@@ -18,7 +18,7 @@ const registerLicencia = (req, res) => __awaiter(void 0, void 0, void 0, functio
         description: description,
     });
     res.json({
-        msg: `Licencia ${name}  create succes..`,
+        msg: `Licencia ${name}  creada exitosamente.`,
     });
 });
 exports.registerLicencia = registerLicencia;

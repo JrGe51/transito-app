@@ -11,7 +11,7 @@ export const registerLicencia = async (req: Request, res: Response) => {
     })
 
     res.json({
-        msg: `Licencia ${name}  create succes..`,
+        msg: `Licencia ${name}  creada exitosamente.`,
     })
 
 }
