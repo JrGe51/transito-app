@@ -37,7 +37,19 @@ export class HorarioService {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    // Asumiendo que el backend tendrá un endpoint para obtener todos los horarios
     return this.http.get<any[]>(`${this.apiUrl}/all`, { headers });
+  }
+
+  registerHorario(horarioData: {
+    fecha: string;
+    hora: string;
+    name: string;
+    cupodisponible: boolean;
+  }): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.post(`${this.apiUrl}/register`, horarioData, { headers });
   }
 }

@@ -274,20 +274,25 @@ export const getAllHorarios = async (req: Request, res: Response): Promise<void>
         const horarios = await Horario.findAll({
             include: [{
                 model: Licencia,
-                attributes: ['name'] // Incluir solo el nombre de la licencia
+                attributes: ['name'], // Incluir solo el nombre de la licencia
+                required: false // Cambiado a false para LEFT OUTER JOIN
             }],
             attributes: ['fecha', 'hora', 'cupodisponible'], // Seleccionar solo los campos relevantes
-            order: [['fecha', 'ASC'], ['hora', 'ASC']]
+            order: [['fecha', 'ASC'], ['hora', 'ASC']],
+            raw: true // Añadir raw: true para obtener objetos planos
         });
 
         // Mapear los resultados para incluir el nombre de la licencia directamente
-        const formattedHorarios = horarios.map(horario => ({
-            id: horario.id, // Incluir el ID para futuras operaciones (eliminar)
-            fecha: horario.fecha,
-            hora: horario.hora.substring(0, 5), // Formatear hora a HH:mm
-            cupodisponible: horario.cupodisponible,
-            licenciaName: (horario as any).licencia ? (horario as any).licencia.name : 'N/A'
-        }));
+        const formattedHorarios = horarios.map(horario => {
+            console.log(horario); // <-- Vuelve a agregar esta línea
+            return {
+                id: horario.id,
+                fecha: horario.fecha,
+                hora: horario.hora.substring(0, 5),
+                cupodisponible: horario.cupodisponible,
+                licenciaName: (horario as any)['Licencium.name'] ? (horario as any)['Licencium.name'] : 'N/A'
+            };
+        });
 
         res.json(formattedHorarios);
     } catch (error) {

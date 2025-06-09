@@ -23,5 +23,4 @@ Horario.init({
     modelName: 'Horario',
     freezeTableName: true, // Evita que Sequelize pluralice el nombre de la tabla
 });
-licencia_1.Licencia.hasOne(Horario, { foreignKey: 'id_tipoLicencia' });
-Horario.belongsTo(licencia_1.Licencia, { foreignKey: 'id_tipoLicencia' });
+// Eliminamos las asociaciones de este archivo, ahora están en associations.ts

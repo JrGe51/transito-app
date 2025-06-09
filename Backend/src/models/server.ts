@@ -11,6 +11,7 @@ import { Horario } from './horario';
 import { Solicitud } from './solicitud';
 import { Admin } from './admin';
 import cors from 'cors';
+import { defineAssociations } from './associations';
 
 
 class Server {
@@ -55,6 +56,8 @@ class Server {
 
     async DBconnet() {
         try {
+            defineAssociations();
+
             await User.sync();
             await Licencia.sync();
             await Horario.sync();

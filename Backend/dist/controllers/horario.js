@@ -260,19 +260,24 @@ const getAllHorarios = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const horarios = yield horario_1.Horario.findAll({
             include: [{
                     model: licencia_1.Licencia,
-                    attributes: ['name'] // Incluir solo el nombre de la licencia
+                    attributes: ['name'], // Incluir solo el nombre de la licencia
+                    required: false // Cambiado a false para LEFT OUTER JOIN
                 }],
             attributes: ['fecha', 'hora', 'cupodisponible'], // Seleccionar solo los campos relevantes
-            order: [['fecha', 'ASC'], ['hora', 'ASC']]
+            order: [['fecha', 'ASC'], ['hora', 'ASC']],
+            raw: true // Añadir raw: true para obtener objetos planos
         });
         // Mapear los resultados para incluir el nombre de la licencia directamente
-        const formattedHorarios = horarios.map(horario => ({
-            id: horario.id, // Incluir el ID para futuras operaciones (eliminar)
-            fecha: horario.fecha,
-            hora: horario.hora.substring(0, 5), // Formatear hora a HH:mm
-            cupodisponible: horario.cupodisponible,
-            licenciaName: horario.licencia ? horario.licencia.name : 'N/A'
-        }));
+        const formattedHorarios = horarios.map(horario => {
+            console.log(horario); // <-- Vuelve a agregar esta línea
+            return {
+                id: horario.id,
+                fecha: horario.fecha,
+                hora: horario.hora.substring(0, 5),
+                cupodisponible: horario.cupodisponible,
+                licenciaName: horario['Licencium.name'] ? horario['Licencium.name'] : 'N/A'
+            };
+        });
         res.json(formattedHorarios);
     }
     catch (error) {

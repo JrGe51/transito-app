@@ -1,38 +1,29 @@
 .dashboard-container {
   padding: 20px;
-  text-align: left;
-}
-
-h1 {
-  color: #2c3e50;
-  margin-bottom: 20px;
-}
-
-p {
-  color: #7f8c8d;
+  text-align: center;
 }
 
 .admin-buttons-wrapper {
   margin-top: 30px;
   display: flex;
-  flex-direction: column; /* Apilar los botones verticalmente */
-  align-items: flex-start; /* Alinear los botones a la izquierda dentro del recuadro */
+  flex-direction: column;
+  align-items: flex-start;
   padding: 20px;
-  border: 1px solid #bdc3c7; /* Borde gris como en el dibujo */
-  border-radius: 8px; /* Bordes ligeramente redondeados */
-  max-width: 300px; /* Ancho máximo del recuadro */
-  margin-left: 20px; /* Margen a la izquierda para separarlo del borde de la página */
-  margin-right: auto; /* Permite que el margen izquierdo empuje el contenedor */
+  border: 1px solid #bdc3c7;
+  border-radius: 8px;
+  max-width: 300px;
+  margin-left: 20px;
+  margin-right: auto;
 }
 
 .admin-button {
-  width: 100%; /* Que los botones ocupen todo el ancho del recuadro */
-  margin-bottom: 15px; /* Espacio entre los botones */
+  width: 100%;
+  margin-bottom: 15px;
   padding: 10px 20px;
 }
 
 .admin-button:last-child {
-  margin-bottom: 0; /* Eliminar el margen inferior del último botón */
+  margin-bottom: 0;
 }
 
 /* Estilos para la gestión de horarios */
@@ -41,9 +32,9 @@ p {
   padding: 20px;
   border: 1px solid #bdc3c7;
   border-radius: 8px;
-  margin-left: 20px; /* Alineado con los botones */
+  margin-left: 20px;
   margin-right: 20px;
-  max-width: 900px; /* Asegura suficiente espacio para las columnas */
+  max-width: 900px;
 }
 
 .schedule-header {
@@ -53,14 +44,39 @@ p {
   margin-bottom: 20px;
 }
 
-.schedule-header h2 {
-  margin: 0; /* Eliminar margen predeterminado del h2 */
-  color: #2c3e50;
-}
-
 .create-schedule-button {
   padding: 8px 15px;
   font-size: 0.9em;
+}
+
+.create-schedule-form {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.form-group {
+  flex: 1;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
 }
 
 .schedule-list-wrapper {
@@ -69,13 +85,12 @@ p {
 
 .schedule-item {
   display: grid;
-  /* Definir las columnas explícitamente para asegurar la disposición horizontal */
-  grid-template-columns: 120px 80px 100px 90px 120px; /* Anchos fijos para cada columna */
+  grid-template-columns: 120px 80px 100px 90px 120px;
   gap: 10px;
   padding: 10px 0;
   border-bottom: 1px solid #eee;
   align-items: center;
-  justify-items: start; /* Asegura que el contenido se alinee al inicio de cada celda */
+  justify-items: start;
 }
 
 .schedule-item.header-row {
@@ -86,13 +101,43 @@ p {
 }
 
 .schedule-field {
-  white-space: nowrap; /* Evita que el texto salte de línea */
+  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* Añade puntos suspensivos si el texto es demasiado largo */
+  text-overflow: ellipsis;
 }
 
 .no-schedules-message {
   text-align: center;
   color: #7f8c8d;
   padding: 20px;
+}
+
+.delete-schedule-button {
+  padding: 5px 10px;
+  font-size: 0.9em;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .form-group {
+    width: 100%;
+  }
+  
+  .schedule-item {
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+  }
+  
+  .schedule-field {
+    margin-bottom: 5px;
+  }
+  
+  .schedule-actions {
+    grid-column: 1 / -1;
+    text-align: right;
+  }
 } 

@@ -11,8 +11,36 @@
   <div class="schedule-management-container" *ngIf="showHorariosManagement">
     <div class="schedule-header">
       <h2>Gestión de Horarios</h2>
-      <button class="btn btn-info create-schedule-button">Crear horario</button>
+      <button class="btn btn-info create-schedule-button" (click)="toggleCreateForm()">
+        {{ showCreateForm ? 'Cancelar' : 'Crear horario' }}
+      </button>
     </div>
+
+    <!-- Formulario de creación de horario -->
+    <div class="create-schedule-form" *ngIf="showCreateForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" [(ngModel)]="nuevoHorario.fecha" [min]="minDate" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Hora</label>
+          <input type="time" [(ngModel)]="nuevoHorario.hora" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de Licencia</label>
+          <select [(ngModel)]="nuevoHorario.name" class="form-control">
+            <option value="">Seleccione una licencia</option>
+            <option *ngFor="let tipo of tiposLicencia" [value]="tipo">{{tipo}}</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" (click)="crearHorario()">Crear</button>
+      </div>
+    </div>
+
     <div class="schedule-list-wrapper">
       <!-- Encabezados de la tabla de horarios -->
       <div class="schedule-item header-row">
@@ -20,7 +48,7 @@
         <div class="schedule-field">Hora</div>
         <div class="schedule-field">Licencia</div>
         <div class="schedule-field">Disponible</div>
-        <div class="schedule-actions">Acciones</div>
+        <div class="schedule-actions"></div>
       </div>
       <!-- Aquí se iterarán los horarios -->
       <div *ngIf="horarios.length === 0" class="no-schedules-message">
@@ -29,7 +57,7 @@
       <div *ngFor="let horario of horarios" class="schedule-item">
         <div class="schedule-field">{{ horario.fecha }}</div>
         <div class="schedule-field">{{ horario.hora }}</div>
-        <div class="schedule-field">{{ horario.licenciaName }}</div>
+        <div class="schedule-field">{{ horario.tipoLicenciaMostrado }}</div>
         <div class="schedule-field">{{ horario.cupodisponible ? 'Sí' : 'No' }}</div>
         <div class="schedule-actions">
           <button class="btn btn-danger delete-schedule-button">Eliminar</button>

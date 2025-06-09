@@ -38,5 +38,4 @@ Horario.init(
     }
 );
 
-Licencia.hasOne(Horario, { foreignKey: 'id_tipoLicencia' });
-Horario.belongsTo(Licencia, { foreignKey: 'id_tipoLicencia' });
+// Eliminamos las asociaciones de este archivo, ahora están en associations.ts

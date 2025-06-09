@@ -24,6 +24,7 @@ const horario_2 = require("./horario");
 const solicitud_2 = require("./solicitud");
 const admin_2 = require("./admin");
 const cors_1 = __importDefault(require("cors"));
+const associations_1 = require("./associations");
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -59,6 +60,7 @@ class Server {
     DBconnet() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                (0, associations_1.defineAssociations)();
                 yield user_2.User.sync();
                 yield licencia_2.Licencia.sync();
                 yield horario_2.Horario.sync();
