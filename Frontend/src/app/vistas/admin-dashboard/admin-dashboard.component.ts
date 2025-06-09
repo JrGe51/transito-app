@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HorarioService } from '../../servicios/horario.service';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -18,6 +20,7 @@ export class AdminDashboardComponent implements OnInit {
   horarios: any[] = [];
   tiposLicencia: string[] = ['Clase B', 'Clase C'];
   minDate: string;
+  shouldShowTable: boolean = false;
   
   // Nuevo horario
   nuevoHorario = {
@@ -30,7 +33,8 @@ export class AdminDashboardComponent implements OnInit {
   constructor(
     private horarioService: HorarioService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private toast: ToastrService
   ) {
     // Establecer la fecha mínima como hoy
     this.minDate = this.getTodayDate();
@@ -58,6 +62,7 @@ export class AdminDashboardComponent implements OnInit {
     } else {
       this.horarios = [];
       this.showCreateForm = false;
+      this.shouldShowTable = false;
       this.cdr.markForCheck();
     }
   }
@@ -80,21 +85,30 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadHorarios() {
+    // Primero ocultamos la tabla
+    this.shouldShowTable = false;
+    this.cdr.markForCheck();
+
     this.horarioService.getAllHorarios().subscribe({
       next: (data: any) => {
-        this.horarios = [...data.map((item: any) => {
-          console.log(item);
-          return {
+        // Esperamos un momento antes de mostrar la tabla
+        setTimeout(() => {
+          this.horarios = data.map((item: any) => ({
+            id: item.id,
             fecha: item.fecha,
             hora: item.hora,
-            tipoLicenciaMostrado: item['Licencium.name'] || 'N/A',
+            tipoLicenciaMostrado: item.licenciaName || 'N/A',
             cupodisponible: item.cupodisponible
-          };
-        })];
-        this.cdr.markForCheck();
+          }));
+          
+          // Forzamos la recreación de la tabla
+          this.shouldShowTable = true;
+          this.cdr.markForCheck();
+        }, 100);
       },
       error: (err: any) => {
         console.error('Error al cargar horarios:', err);
+        this.shouldShowTable = true;
         this.cdr.markForCheck();
       }
     });
@@ -102,20 +116,43 @@ export class AdminDashboardComponent implements OnInit {
 
   crearHorario() {
     if (!this.nuevoHorario.fecha || !this.nuevoHorario.hora || !this.nuevoHorario.name) {
-      alert('Por favor complete todos los campos');
+      this.toast.error('Por favor complete todos los campos', 'Error');
       return;
     }
 
     this.horarioService.registerHorario(this.nuevoHorario).subscribe({
       next: (response) => {
-        alert('Horario creado exitosamente');
+        Swal.fire('¡Éxito!', 'Horario creado exitosamente', 'success');
         this.loadHorarios();
         this.toggleCreateForm();
         this.resetNuevoHorario();
       },
       error: (error) => {
         console.error('Error al crear horario:', error);
-        alert('Error al crear el horario');
+        Swal.fire('Error', 'Error al crear el horario', 'error');
+      }
+    });
+  }
+
+  eliminarHorario(id: number) {
+    Swal.fire({
+      title: '¿Está seguro de que desea eliminar este horario?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.horarioService.eliminarHorario(id).subscribe({
+          next: (response) => {
+            Swal.fire('¡Eliminado!', 'Horario eliminado exitosamente', 'success');
+            this.loadHorarios();
+          },
+          error: (error) => {
+            console.error('Error al eliminar horario:', error);
+            Swal.fire('Error', 'Error al eliminar el horario', 'error');
+          }
+        });
       }
     });
   }

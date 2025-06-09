@@ -9,4 +9,5 @@ router.get("/api/horario/fechas", horario_1.getFechasDisponibles);
 router.get("/api/horario/horas", horario_1.getHorasPorFecha);
 router.put("/api/horario/liberar", auth_1.authenticateToken, horario_1.liberarHorario);
 router.get("/api/horario/all", auth_1.authenticateToken, horario_1.getAllHorarios);
+router.delete("/api/horario/:id", auth_1.authenticateToken, horario_1.deleteHorario);
 exports.default = router;

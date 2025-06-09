@@ -277,14 +277,13 @@ export const getAllHorarios = async (req: Request, res: Response): Promise<void>
                 attributes: ['name'], // Incluir solo el nombre de la licencia
                 required: false // Cambiado a false para LEFT OUTER JOIN
             }],
-            attributes: ['fecha', 'hora', 'cupodisponible'], // Seleccionar solo los campos relevantes
+            attributes: ['id','fecha', 'hora', 'cupodisponible'], // Seleccionar solo los campos relevantes
             order: [['fecha', 'ASC'], ['hora', 'ASC']],
             raw: true // Añadir raw: true para obtener objetos planos
         });
 
         // Mapear los resultados para incluir el nombre de la licencia directamente
         const formattedHorarios = horarios.map(horario => {
-            console.log(horario); // <-- Vuelve a agregar esta línea
             return {
                 id: horario.id,
                 fecha: horario.fecha,
@@ -303,3 +302,30 @@ export const getAllHorarios = async (req: Request, res: Response): Promise<void>
         });
     }
 };
+
+export const deleteHorario = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    try {
+        const horario = await Horario.findByPk(id);
+
+        if (!horario) {
+            res.status(404).json({
+                msg: `No existe un horario con el id ${id}`
+            });
+            return; // Terminar la ejecución de la función aquí
+        }
+
+        await horario.destroy();
+        res.json({
+            msg: 'Horario eliminado con éxito!'
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            msg: 'Upps hubo un error, comuníquese con soporte',
+            error
+        });
+    }
+}

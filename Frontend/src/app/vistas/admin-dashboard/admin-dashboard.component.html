@@ -41,7 +41,7 @@
       </div>
     </div>
 
-    <div class="schedule-list-wrapper">
+    <div class="schedule-list-wrapper" *ngIf="shouldShowTable">
       <!-- Encabezados de la tabla de horarios -->
       <div class="schedule-item header-row">
         <div class="schedule-field">Fecha</div>
@@ -60,7 +60,7 @@
         <div class="schedule-field">{{ horario.tipoLicenciaMostrado }}</div>
         <div class="schedule-field">{{ horario.cupodisponible ? 'Sí' : 'No' }}</div>
         <div class="schedule-actions">
-          <button class="btn btn-danger delete-schedule-button">Eliminar</button>
+          <button class="btn btn-danger delete-schedule-button" (click)="eliminarHorario(horario.id)">Eliminar</button>
         </div>
       </div>
     </div>

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllHorarios = exports.liberarHorario = exports.getHorasPorFecha = exports.getFechasDisponibles = exports.registerHorario = void 0;
+exports.deleteHorario = exports.getAllHorarios = exports.liberarHorario = exports.getHorasPorFecha = exports.getFechasDisponibles = exports.registerHorario = void 0;
 const horario_1 = require("../models/horario");
 const licencia_1 = require("../models/licencia");
 const connection_1 = __importDefault(require("../database/connection"));
@@ -263,13 +263,12 @@ const getAllHorarios = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     attributes: ['name'], // Incluir solo el nombre de la licencia
                     required: false // Cambiado a false para LEFT OUTER JOIN
                 }],
-            attributes: ['fecha', 'hora', 'cupodisponible'], // Seleccionar solo los campos relevantes
+            attributes: ['id', 'fecha', 'hora', 'cupodisponible'], // Seleccionar solo los campos relevantes
             order: [['fecha', 'ASC'], ['hora', 'ASC']],
             raw: true // Añadir raw: true para obtener objetos planos
         });
         // Mapear los resultados para incluir el nombre de la licencia directamente
         const formattedHorarios = horarios.map(horario => {
-            console.log(horario); // <-- Vuelve a agregar esta línea
             return {
                 id: horario.id,
                 fecha: horario.fecha,
@@ -289,3 +288,27 @@ const getAllHorarios = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getAllHorarios = getAllHorarios;
+const deleteHorario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    try {
+        const horario = yield horario_1.Horario.findByPk(id);
+        if (!horario) {
+            res.status(404).json({
+                msg: `No existe un horario con el id ${id}`
+            });
+            return; // Terminar la ejecución de la función aquí
+        }
+        yield horario.destroy();
+        res.json({
+            msg: 'Horario eliminado con éxito!'
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({
+            msg: 'Upps hubo un error, comuníquese con soporte',
+            error
+        });
+    }
+});
+exports.deleteHorario = deleteHorario;
