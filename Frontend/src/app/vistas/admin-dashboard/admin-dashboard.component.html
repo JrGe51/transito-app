@@ -4,10 +4,56 @@
 
   <div class="admin-buttons-wrapper">
     <button class="btn btn-primary admin-button">Usuarios</button>
+    <button class="btn btn-primary admin-button" (click)="toggleLicenciasManagement()">Licencias</button>
     <button class="btn btn-primary admin-button" (click)="toggleHorariosManagement()">Horarios</button>
     <button class="btn btn-danger admin-button">Eliminar solicitudes</button>
   </div>
 
+  <!-- Gestión de Licencias -->
+  <div class="schedule-management-container" *ngIf="showLicenciasManagement">
+    <div class="schedule-header">
+      <h2>Gestión de Licencias</h2>
+      <button class="btn btn-info create-schedule-button" (click)="toggleCreateLicenciaForm()">
+        {{ showCreateLicenciaForm ? 'Cancelar' : 'Crear licencia' }}
+      </button>
+    </div>
+
+    <!-- Formulario de creación de licencia -->
+    <div class="create-schedule-form" *ngIf="showCreateLicenciaForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre de la Licencia</label>
+          <input type="text" [(ngModel)]="nuevaLicencia.name" class="form-control" placeholder="Ej: Clase B">
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <input type="text" [(ngModel)]="nuevaLicencia.description" class="form-control" placeholder="Descripción de la licencia">
+        </div>
+        <button class="btn btn-primary" (click)="crearLicencia()">Crear</button>
+      </div>
+    </div>
+
+    <div class="schedule-list-wrapper" *ngIf="shouldShowLicenciasTable">
+      <!-- Encabezados de la tabla de licencias -->
+      <div class="schedule-item header-row">
+        <div class="schedule-field">Nombre</div>
+        <div class="schedule-field">Descripción</div>
+        <div class="schedule-actions"></div>
+      </div>
+      <div *ngIf="licencias.length === 0" class="no-schedules-message">
+        No hay licencias registradas.
+      </div>
+      <div *ngFor="let licencia of licencias" class="schedule-item">
+        <div class="schedule-field">{{ licencia.name }}</div>
+        <div class="schedule-field">{{ licencia.description }}</div>
+        <div class="schedule-actions">
+          <button class="btn btn-danger delete-schedule-button" (click)="eliminarLicencia(licencia.id)">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gestión de Horarios -->
   <div class="schedule-management-container" *ngIf="showHorariosManagement">
     <div class="schedule-header">
       <h2>Gestión de Horarios</h2>

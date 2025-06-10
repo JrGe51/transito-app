@@ -71,7 +71,18 @@ export const login = async (req: Request, res: Response) => {
         expiresIn: '1h'
     });
 
-    res.json({token})
-
+    res.json({
+        token,
+        user: {
+            id: user.id,
+            name: user.name,
+            lastname: user.lastname,
+            email: user.email,
+            rut: user.rut,
+            telefono: user.telefono,
+            fechanacimiento: user.fechanacimiento,
+            direccion: user.direccion
+        }
+    })
 }
 

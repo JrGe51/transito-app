@@ -47,6 +47,7 @@ export class LoginComponent {
       next: (response) => {
         console.log('Respuesta del login:', response)
         localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
         if (response.isAdmin) {
           this.toast.success(`Bienvenido administrador ${this.email}, Login exitoso`)
           this.router.navigate(['/admin-dashboard'])

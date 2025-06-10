@@ -3,7 +3,7 @@ import { Horario } from '../models/horario';
 import { Licencia } from '../models/licencia';
 import  sequelize  from '../database/connection';
 
-export const registerHorario = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const registerHorario = async (req: Request, res: Response,): Promise<void> => {
     const t = await sequelize.transaction();
     try {
         const { fecha, hora, cupodisponible, name } = req.body;

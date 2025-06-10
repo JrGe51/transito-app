@@ -45,7 +45,7 @@ export class ReservaComponent implements OnInit {
   horasDisponibles: string[] = [];
   fechaSeleccionada: Date | null = null;
   horaSeleccionada: string | null = null;
-  tiposLicencia: string[] = ['Clase B', 'Clase C']; 
+  tiposLicencia: string[] = ['Clase B', 'Clase C', 'Clase D']; 
   tipoLicenciaSeleccionado: string | null = null;
   licenciaSeleccionada: boolean = false;
   rut: string = '';
@@ -113,7 +113,68 @@ export class ReservaComponent implements OnInit {
     return this.fechasDisponibles$.value.includes(dateString);
   }
 
+  // Función para calcular la edad
+  calcularEdad(fechaNacimiento: string): number {
+    const hoy = new Date();
+    const fechaNac = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - fechaNac.getFullYear();
+    const mes = hoy.getMonth() - fechaNac.getMonth();
+    
+    if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+      edad--;
+    }
+    
+    return edad;
+  }
+
+  // Función para validar edad según tipo de licencia
+  validarEdadParaLicencia(tipoLicencia: string): boolean {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.fechanacimiento) {
+      this.toast.error('No se encontró la fecha de nacimiento del usuario', 'Error');
+      return false;
+    }
+
+    const edad = this.calcularEdad(user.fechanacimiento);
+    let edadMinima = 18; // Edad mínima por defecto
+    let mensajeError = '';
+
+    // Definir edad mínima y mensaje según tipo de licencia
+    switch (tipoLicencia) {
+      case 'Clase B':
+        edadMinima = 18;
+        mensajeError = 'Debes ser mayor de 18 años para obtener una licencia Clase B';
+        break;
+      case 'Clase C':
+        edadMinima = 18;
+        mensajeError = 'Debes ser mayor de 18 años para obtener una licencia Clase C';
+        break;
+      case 'Clase D':
+        edadMinima = 18;
+        mensajeError = 'Debes ser mayor de 18 años para obtener una licencia Clase D';
+        break;
+      default:
+        return true; // Para otros tipos de licencia que no requieran validación de edad
+    }
+
+    if (edad < edadMinima) {
+      Swal.fire({
+        title: 'Edad insuficiente',
+        text: mensajeError,
+        icon: 'warning',
+        confirmButtonText: 'Entendido'
+      });
+      return false;
+    }
+    return true;
+  }
+
   seleccionarTipoLicencia(tipo: string) {
+    // Validar edad para cualquier tipo de licencia
+    if (!this.validarEdadParaLicencia(tipo)) {
+      return;
+    }
+
     this.tipoLicenciaSeleccionado = tipo;
     this.licenciaSeleccionada = true;
     this.fechaSeleccionada = null;

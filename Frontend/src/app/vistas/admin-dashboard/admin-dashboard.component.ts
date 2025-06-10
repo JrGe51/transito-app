@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HorarioService } from '../../servicios/horario.service';
+import { LicenciaService } from '../../servicios/licencia.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
@@ -16,11 +17,15 @@ import Swal from 'sweetalert2';
 })
 export class AdminDashboardComponent implements OnInit {
   showHorariosManagement: boolean = false;
+  showLicenciasManagement: boolean = false;
   showCreateForm: boolean = false;
+  showCreateLicenciaForm: boolean = false;
   horarios: any[] = [];
-  tiposLicencia: string[] = ['Clase B', 'Clase C'];
+  licencias: any[] = [];
+  tiposLicencia: string[] = ['Clase B', 'Clase C', 'Clase D'];
   minDate: string;
   shouldShowTable: boolean = false;
+  shouldShowLicenciasTable: boolean = false;
   
   // Nuevo horario
   nuevoHorario = {
@@ -30,13 +35,19 @@ export class AdminDashboardComponent implements OnInit {
     cupodisponible: true
   };
 
+  // Nueva licencia
+  nuevaLicencia = {
+    name: '',
+    description: ''
+  };
+
   constructor(
     private horarioService: HorarioService,
+    private licenciaService: LicenciaService,
     private router: Router,
     private cdr: ChangeDetectorRef,
     private toast: ToastrService
   ) {
-    // Establecer la fecha mínima como hoy
     this.minDate = this.getTodayDate();
   }
 
@@ -59,6 +70,8 @@ export class AdminDashboardComponent implements OnInit {
     this.showHorariosManagement = !this.showHorariosManagement;
     if (this.showHorariosManagement) {
       this.loadHorarios();
+      this.showLicenciasManagement = false;
+      this.showCreateLicenciaForm = false;
     } else {
       this.horarios = [];
       this.showCreateForm = false;
@@ -151,6 +164,101 @@ export class AdminDashboardComponent implements OnInit {
           error: (error) => {
             console.error('Error al eliminar horario:', error);
             Swal.fire('Error', 'Error al eliminar el horario', 'error');
+          }
+        });
+      }
+    });
+  }
+
+  // LICENCIAS
+  toggleLicenciasManagement() {
+    this.showLicenciasManagement = !this.showLicenciasManagement;
+    if (this.showLicenciasManagement) {
+      this.loadLicencias();
+      this.showHorariosManagement = false;
+      this.showCreateForm = false;
+    } else {
+      this.licencias = [];
+      this.showCreateLicenciaForm = false;
+      this.shouldShowLicenciasTable = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  toggleCreateLicenciaForm() {
+    this.showCreateLicenciaForm = !this.showCreateLicenciaForm;
+    if (!this.showCreateLicenciaForm) {
+      this.resetNuevaLicencia();
+      this.cdr.markForCheck();
+    }
+  }
+
+  resetNuevaLicencia() {
+    this.nuevaLicencia = {
+      name: '',
+      description: ''
+    };
+  }
+
+  loadLicencias() {
+    this.shouldShowLicenciasTable = false;
+    this.cdr.markForCheck();
+    this.licenciaService.getAllLicencias().subscribe({
+      next: (data: any) => {
+        setTimeout(() => {
+          this.licencias = data.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            description: item.description
+          }));
+          this.shouldShowLicenciasTable = true;
+          this.cdr.markForCheck();
+        }, 100);
+      },
+      error: (err: any) => {
+        console.error('Error al cargar licencias:', err);
+        this.shouldShowLicenciasTable = true;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  crearLicencia() {
+    if (!this.nuevaLicencia.name || !this.nuevaLicencia.description) {
+      this.toast.error('Por favor complete todos los campos', 'Error');
+      return;
+    }
+    this.licenciaService.registerLicencia(this.nuevaLicencia).subscribe({
+      next: (response) => {
+        Swal.fire('¡Éxito!', 'Licencia creada exitosamente', 'success');
+        this.loadLicencias();
+        this.toggleCreateLicenciaForm();
+        this.resetNuevaLicencia();
+      },
+      error: (error) => {
+        console.error('Error al crear licencia:', error);
+        Swal.fire('Error', error.error?.msg || 'Error al crear la licencia', 'error');
+      }
+    });
+  }
+
+  eliminarLicencia(id: number) {
+    Swal.fire({
+      title: '¿Está seguro de que desea eliminar esta licencia?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.licenciaService.eliminarLicencia(id).subscribe({
+          next: (response) => {
+            Swal.fire('¡Eliminado!', 'Licencia eliminada exitosamente', 'success');
+            this.loadLicencias();
+          },
+          error: (error) => {
+            console.error('Error al eliminar licencia:', error);
+            Swal.fire('Error', error.error?.msg || 'Error al eliminar la licencia', 'error');
           }
         });
       }

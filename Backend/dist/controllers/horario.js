@@ -16,7 +16,7 @@ exports.deleteHorario = exports.getAllHorarios = exports.liberarHorario = export
 const horario_1 = require("../models/horario");
 const licencia_1 = require("../models/licencia");
 const connection_1 = __importDefault(require("../database/connection"));
-const registerHorario = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const registerHorario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const t = yield connection_1.default.transaction();
     try {
         const { fecha, hora, cupodisponible, name } = req.body;
