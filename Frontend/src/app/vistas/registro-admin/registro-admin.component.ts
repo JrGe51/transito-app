@@ -14,18 +14,10 @@ import { CommonModule } from '@angular/common';
   styleUrl: './registro-admin.component.css'
 })
 export class RegistroAdminComponent {
-
-  masterEmail: string = '';
-  masterPassword: string = '';
-
-
   name: string = '';
   lastname: string = '';
   password: string = '';
   repetirPassword: string = '';
-
-
-  credencialesValidas: boolean = false;
 
   constructor(
     private adminService: AdminService,
@@ -33,33 +25,7 @@ export class RegistroAdminComponent {
     private router: Router
   ) {}
 
-  verificarCredenciales() {
-    if (this.masterEmail === '' || this.masterPassword === '') {
-      this.toast.error('Error', 'Las credenciales maestras son obligatorias');
-      return;
-    }
-
-    this.adminService.checkMasterCredentials(this.masterEmail, this.masterPassword).subscribe({
-      next: (response) => {
-        if (response.isMaster) {
-          this.credencialesValidas = true;
-          this.toast.success('Credenciales válidas', 'Puede proceder con el registro');
-        } else {
-          this.toast.error('Error', 'Credenciales maestras inválidas');
-        }
-      },
-      error: () => {
-        this.toast.error('Error', 'Credenciales maestras inválidas');
-      }
-    });
-  }
-
   registrarAdmin() {
-    if (!this.credencialesValidas) {
-      this.toast.error('Error', 'Debe verificar las credenciales maestras primero');
-      return;
-    }
-
     if (this.name === '' || this.lastname === '' || this.password === '' || this.repetirPassword === '') {
       this.toast.error('Error', 'Todos los campos son obligatorios');
       return;
