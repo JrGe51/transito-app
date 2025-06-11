@@ -21,6 +21,17 @@ const registerSolicitud = (req, res, next) => __awaiter(void 0, void 0, void 0, 
             res.status(401).json({ msg: 'Usuario no autenticado' });
             return;
         }
+        // Verificar si el usuario ya tiene una reserva activa
+        const reservaExistente = yield solicitud_1.Solicitud.findOne({
+            where: { id_usuario }
+        });
+        if (reservaExistente) {
+            res.status(400).json({
+                msg: 'Ya tienes una reserva activa. No puedes crear más reservas hasta que se complete la actual.',
+                type: 'warning'
+            });
+            return;
+        }
         // Validar que el nombre de la licencia exista en la tabla Licencia
         const licencia = yield licencia_1.Licencia.findOne({ where: { name } });
         if (!licencia) {

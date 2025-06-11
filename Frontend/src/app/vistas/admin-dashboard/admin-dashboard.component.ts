@@ -48,7 +48,7 @@ export class AdminDashboardComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private toast: ToastrService
   ) {
-    this.minDate = this.getTodayDate();
+    this.minDate = this.getTomorrowDate();
   }
 
   ngOnInit(): void {
@@ -59,11 +59,12 @@ export class AdminDashboardComponent implements OnInit {
     this.loadLicencias();
   }
 
-  private getTodayDate(): string {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
+  private getTomorrowDate(): string {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1); // Obtener la fecha de mañana
+    const year = tomorrow.getFullYear();
+    const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const day = String(tomorrow.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 

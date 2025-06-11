@@ -45,7 +45,7 @@ export class ReservaComponent implements OnInit {
   horasDisponibles: string[] = [];
   fechaSeleccionada: Date | null = null;
   horaSeleccionada: string | null = null;
-  tiposLicencia: string[] = ['Clase B', 'Clase C', 'Clase D']; 
+  tiposLicencia: string[] = ['Clase A','Clase B', 'Clase C', 'Clase D']; 
   tipoLicenciaSeleccionado: string | null = null;
   licenciaSeleccionada: boolean = false;
   rut: string = '';
@@ -147,6 +147,10 @@ export class ReservaComponent implements OnInit {
 
     // Definir edad mínima y mensaje según tipo de licencia
     switch (tipoLicencia) {
+      case 'Clase A':
+        edadMinima = 20;
+        mensajeError = 'Debes ser mayor de 20 años para obtener una licencia Clase B';
+        break;
       case 'Clase B':
         edadMinima = 18;
         mensajeError = 'Debes ser mayor de 18 años para obtener una licencia Clase B';
@@ -411,12 +415,32 @@ export class ReservaComponent implements OnInit {
           setTimeout(() => {
             Swal.close();
             console.error('Error al reservar:', err);
-            this.toast.error(err.error?.msg || 'Error al realizar la reserva', 'Error');
+            // Verificar si es un error de tipo warning (reserva existente)
+            if (err.error?.type === 'warning') {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Reserva existente',
+                text: err.error.msg,
+                confirmButtonColor: '#3085d6'
+              });
+            } else {
+              this.toast.error(err.error?.msg || 'Error al realizar la reserva', 'Error');
+            }
           }, remainingTime);
         } else {
           Swal.close();
           console.error('Error al reservar:', err);
-          this.toast.error(err.error?.msg || 'Error al realizar la reserva', 'Error');
+          // Verificar si es un error de tipo warning (reserva existente)
+          if (err.error?.type === 'warning') {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Reserva existente',
+              text: err.error.msg,
+              confirmButtonColor: '#3085d6'
+            });
+          } else {
+            this.toast.error(err.error?.msg || 'Error al realizar la reserva', 'Error');
+          }
         }
       }
     });

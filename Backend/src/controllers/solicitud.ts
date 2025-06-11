@@ -15,6 +15,19 @@ export const registerSolicitud = async (req: Request, res: Response, next: NextF
             return;
         }
 
+        // Verificar si el usuario ya tiene una reserva activa
+        const reservaExistente = await Solicitud.findOne({
+            where: { id_usuario }
+        });
+
+        if (reservaExistente) {
+            res.status(400).json({
+                msg: 'Ya tienes una reserva activa. No puedes crear más reservas hasta que se complete la actual.',
+                type: 'warning'
+            });
+            return;
+        }
+
         // Validar que el nombre de la licencia exista en la tabla Licencia
         const licencia = await Licencia.findOne({ where: { name } });
         if (!licencia) {
