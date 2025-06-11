@@ -27,7 +27,7 @@ export class AdminDashboardComponent implements OnInit {
   shouldShowTable: boolean = false;
   shouldShowLicenciasTable: boolean = false;
   
-  // Nuevo horario
+
   nuevoHorario = {
     fecha: '',
     hora: '',
@@ -35,7 +35,7 @@ export class AdminDashboardComponent implements OnInit {
     cupodisponible: true
   };
 
-  // Nueva licencia
+
   nuevaLicencia = {
     name: '',
     description: ''
@@ -98,13 +98,13 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadHorarios() {
-    // Primero ocultamos la tabla
+
     this.shouldShowTable = false;
     this.cdr.markForCheck();
 
     this.horarioService.getAllHorarios().subscribe({
       next: (data: any) => {
-        // Esperamos un momento antes de mostrar la tabla
+
         setTimeout(() => {
           this.horarios = data.map((item: any) => ({
             id: item.id,
@@ -114,7 +114,7 @@ export class AdminDashboardComponent implements OnInit {
             cupodisponible: item.cupodisponible
           }));
           
-          // Forzamos la recreación de la tabla
+
           this.shouldShowTable = true;
           this.cdr.markForCheck();
         }, 100);
@@ -258,10 +258,17 @@ export class AdminDashboardComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error al eliminar licencia:', error);
-            Swal.fire('Error', error.error?.msg || 'Error al eliminar la licencia', 'error');
+            Swal.fire('Error', 'Error al eliminar la licencia', 'error');
           }
         });
       }
     });
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.toast.info('Sesión cerrada', 'Hasta pronto!');
+    this.router.navigate(['/login']);
   }
 } 

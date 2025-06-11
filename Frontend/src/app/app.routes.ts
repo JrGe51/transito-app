@@ -9,17 +9,20 @@ import { Reserva3Component } from './vistas/reserva3/reserva3.component';
 import { ConsultasComponent } from './vistas/consultas/consultas.component';
 import { RegistroAdminComponent } from './vistas/registro-admin/registro-admin.component';
 import { AdminDashboardComponent } from './vistas/admin-dashboard/admin-dashboard.component';
+import { UserDashboardComponent } from './vistas/user-dashboard/user-dashboard.component';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: 'nuevo', component: NuevoComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'registrarse', component: RegistrarseComponent },
-  { path: 'registro-admin', component: RegistroAdminComponent },
-  { path: 'admin-dashboard', component: AdminDashboardComponent },
-  { path: 'editar', component: EditarComponent },
-  { path: 'reserva', component: ReservaComponent },
-  { path: 'reserva2', component: Reserva2Component },
-  { path: 'reserva3', component: Reserva3Component },
-  { path: 'consultas', component: ConsultasComponent },
+  { path: 'nuevo', component: NuevoComponent, canActivate: [authGuard] },
+  { path: 'login', component: LoginComponent, canActivate: [authGuard] },
+  { path: 'registrarse', component: RegistrarseComponent, canActivate: [authGuard] },
+  { path: 'registro-admin', component: RegistroAdminComponent, canActivate: [authGuard] },
+  { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [authGuard] },
+  { path: 'user-dashboard', component: UserDashboardComponent, canActivate: [authGuard] },
+  { path: 'editar', component: EditarComponent, canActivate: [authGuard] },
+  { path: 'reserva', component: ReservaComponent, canActivate: [authGuard] },
+  { path: 'reserva2', component: Reserva2Component, canActivate: [authGuard] },
+  { path: 'reserva3', component: Reserva3Component, canActivate: [authGuard] },
+  { path: 'consultas', component: ConsultasComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '/nuevo', pathMatch: 'full' }
 ]; 
