@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import bcrypt from 'bcrypt'
 import { Admin } from "../models/admin"
 import jwt from "jsonwebtoken"
-import { generarEmailUnico } from "../utils/adminUtils"
+import { generarEmailUnico } from "../utils/adminUtils" 
 
 const MASTER_EMAIL = "admin@loespejo.com"
 const MASTER_PASSWORD = "Admin@2024#Secure"
