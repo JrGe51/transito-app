@@ -34,8 +34,10 @@ const registerHorario = (req, res) => __awaiter(void 0, void 0, void 0, function
             });
             return;
         }
-        // Verificar si la licencia existe
-        const licencia = yield licencia_1.Licencia.findOne({ where: { name } });
+        // Verificar si la licencia existe (búsqueda insensible a mayúsculas/minúsculas)
+        const licencia = yield licencia_1.Licencia.findOne({
+            where: connection_1.default.where(connection_1.default.fn('LOWER', connection_1.default.col('name')), name.toLowerCase())
+        });
         if (!licencia) {
             res.status(404).json({
                 msg: `La licencia con el nombre '${name}' no existe.`
@@ -88,8 +90,10 @@ const getFechasDisponibles = (req, res) => __awaiter(void 0, void 0, void 0, fun
             });
             return;
         }
-        // Verificar si la licencia existe
-        const licencia = yield licencia_1.Licencia.findOne({ where: { name } });
+        // Verificar si la licencia existe (búsqueda insensible a mayúsculas/minúsculas)
+        const licencia = yield licencia_1.Licencia.findOne({
+            where: connection_1.default.where(connection_1.default.fn('LOWER', connection_1.default.col('name')), name.toLowerCase())
+        });
         if (!licencia) {
             res.status(404).json({
                 msg: `La licencia con el nombre '${name}' no existe.`
@@ -162,8 +166,10 @@ const getHorasPorFecha = (req, res) => __awaiter(void 0, void 0, void 0, functio
             });
             return;
         }
-        // Encontrar la licencia por nombre
-        const licencia = yield licencia_1.Licencia.findOne({ where: { name } });
+        // Encontrar la licencia por nombre (búsqueda insensible a mayúsculas/minúsculas)
+        const licencia = yield licencia_1.Licencia.findOne({
+            where: connection_1.default.where(connection_1.default.fn('LOWER', connection_1.default.col('name')), name.toLowerCase())
+        });
         if (!licencia) {
             res.status(404).json({
                 msg: `La licencia con el nombre '${name}' no existe.`

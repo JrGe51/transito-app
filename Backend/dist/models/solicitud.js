@@ -17,9 +17,11 @@ exports.Solicitud = Solicitud;
 Solicitud.init({
     id: { type: sequelize_1.DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     fechaSolicitud: { type: sequelize_1.DataTypes.DATEONLY, allowNull: false },
+    tipoTramite: { type: sequelize_1.DataTypes.STRING, allowNull: false },
     id_usuario: { type: sequelize_1.DataTypes.INTEGER, references: { model: user_1.User, key: 'id' }, allowNull: false },
     id_tipoLicencia: { type: sequelize_1.DataTypes.INTEGER, references: { model: licencia_1.Licencia, key: 'id' }, allowNull: false },
-    id_horario: { type: sequelize_1.DataTypes.INTEGER, references: { model: horario_1.Horario, key: 'id' }, allowNull: false }
+    id_horario: { type: sequelize_1.DataTypes.INTEGER, references: { model: horario_1.Horario, key: 'id' }, allowNull: false },
+    documentos: { type: sequelize_1.DataTypes.JSON, allowNull: true, defaultValue: [] }, // Campo para almacenar documentos como JSON
 }, {
     sequelize: connection_1.default,
     modelName: 'Solicitud',

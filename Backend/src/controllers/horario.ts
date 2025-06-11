@@ -24,8 +24,14 @@ export const registerHorario = async (req: Request, res: Response,): Promise<voi
             return;
         }
 
-        // Verificar si la licencia existe
-        const licencia = await Licencia.findOne({ where: { name } });
+        // Verificar si la licencia existe (búsqueda insensible a mayúsculas/minúsculas)
+        const licencia = await Licencia.findOne({
+            where: sequelize.where(
+                sequelize.fn('LOWER', sequelize.col('name')),
+                name.toLowerCase()
+            )
+        });
+        
         if (!licencia) {
             res.status(404).json({
                 msg: `La licencia con el nombre '${name}' no existe.`
@@ -84,8 +90,14 @@ export const getFechasDisponibles = async (req: Request, res: Response) => {
             return;
         }
 
-        // Verificar si la licencia existe
-        const licencia = await Licencia.findOne({ where: { name } });
+        // Verificar si la licencia existe (búsqueda insensible a mayúsculas/minúsculas)
+        const licencia = await Licencia.findOne({
+            where: sequelize.where(
+                sequelize.fn('LOWER', sequelize.col('name')),
+                name.toLowerCase()
+            )
+        });
+        
         if (!licencia) {
             res.status(404).json({
                 msg: `La licencia con el nombre '${name}' no existe.`
@@ -166,8 +178,14 @@ export const getHorasPorFecha = async (req: Request, res: Response): Promise<voi
              return;
         }
 
-        // Encontrar la licencia por nombre
-        const licencia = await Licencia.findOne({ where: { name } });
+        // Encontrar la licencia por nombre (búsqueda insensible a mayúsculas/minúsculas)
+        const licencia = await Licencia.findOne({
+            where: sequelize.where(
+                sequelize.fn('LOWER', sequelize.col('name')),
+                name.toLowerCase()
+            )
+        });
+        
         if (!licencia) {
             res.status(404).json({
                 msg: `La licencia con el nombre '${name}' no existe.`

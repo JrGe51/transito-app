@@ -42,8 +42,17 @@ class Server {
     }
 
     midlewares() {
-        this.app.use(express.json())
-        this.app.use(cors())
+        // Configuración para permitir payloads más grandes (archivos Base64)
+        this.app.use(express.json({ limit: '50mb' }));
+        this.app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+        // Configuración CORS explícita
+        this.app.use(cors({
+            origin: 'http://localhost:4200', // Solo permite solicitudes desde tu frontend de Angular
+            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Métodos HTTP permitidos
+            credentials: true, // Permite el envío de cookies de origen cruzado
+            optionsSuccessStatus: 204 // Para pre-vuelos OPTIONS
+        }));
 
         this.app.use((err: any, req: Request, res: Response, next: NextFunction) => {
             console.error(err.stack); 

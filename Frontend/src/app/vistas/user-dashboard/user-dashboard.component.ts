@@ -29,6 +29,18 @@ export class UserDashboardComponent implements OnInit {
     this.router.navigate([route]);
   }
 
+  irAReservaPrimeraLicencia(): void {
+    this.router.navigate(['/reserva'], { queryParams: { tipoTramite: 'Primera Licencia' } });
+  }
+
+  irAReservaRenovacion(): void {
+    this.router.navigate(['/reserva2'], { queryParams: { tipoTramite: 'Renovación' } });
+  }
+
+  irAReservaCambioClase(): void {
+    this.router.navigate(['/reserva3'], { queryParams: { tipoTramite: 'Cambio de Clase' } });
+  }
+
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
