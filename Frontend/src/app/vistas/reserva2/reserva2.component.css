@@ -10,7 +10,7 @@ html {
   .wrapper {
     display: flex;
     align-items: center;
-    flex-direction: column; 
+    flex-direction: column;
     justify-content: center;
     width: 100%;
     min-height: 100%;
@@ -23,7 +23,7 @@ html {
     background: #fff;
     padding: 30px;
     width: 90%;
-    max-width: 450px;
+    max-width: 850px;
     position: relative;
     -webkit-box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
     -moz-box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
@@ -50,14 +50,27 @@ html {
   }
   
   .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 15px;
+    text-align: left;
   }
   
-  label {
+  .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
-    color: #030303;
-    font-weight: 500;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .swal2-input {
+    margin: 10px auto !important;
+    width: 90% !important;
+  }
+  
+  .text-muted {
+    color: #6c757d;
+    font-size: 0.8em;
+    display: block;
+    margin-top: 5px;
   }
   
   .form-control {
@@ -142,26 +155,90 @@ html {
     border-bottom: none;
   }
   
-  input[type=submit] {
-    background-color: #56baed;
-    border: none;
-    color: white;
-    padding: 15px 80px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    text-transform: uppercase;
-    font-size: 13px;
-    -webkit-box-shadow: 0 10px 30px 0 rgba(95,186,233,0.4);
-    -moz-box-shadow: 0 10px 30px 0 rgba(95,186,233,0.4);
-    box-shadow: 0 10px 30px 0 rgba(95,186,233,0.4);
-    border-radius: 5px;
-    margin: 5px 20px 40px 20px;
-    transition: all 0.3s ease-in-out;
+  .demo-inline-calendar-card {
+    width: 300px;
   }
   
-  input[type=submit]:hover {
-    background-color: #39ace7;
+  .btn.d-block {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .fecha-disponible .mat-calendar-body-cell-content {
+    background-color: #1976d2 !important;
+    color: #fff !important;
+    border-radius: 50%;
+  }
+  
+  .mat-card {
+    margin-bottom: 20px;
+  }
+  
+  .mat-card-header {
+    margin-bottom: 15px;
+  }
+  
+  .mat-card-title {
+    font-size: 1.2rem;
+    color: #333;
+  }
+  
+  .mat-form-field {
+    width: 100%;
+  }
+  
+  input[type="file"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 90%;
+    margin: 0 auto;
+  }
+  
+  input[type="file"]::-webkit-file-upload-button {
+    background: #3085d6;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  input[type="file"]::-webkit-file-upload-button:hover {
+    background: #2c78c5;
+  }
+  
+  .alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+  }
+  
+  .alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+  }
+  
+  .btn-outline-primary {
+    color: #56baed;
+    border-color: #56baed;
+    background-color: transparent;
+  }
+  
+  .btn-outline-primary:hover {
+    color: #fff;
+    background-color: #56baed;
+    border-color: #56baed;
+  }
+  
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
   }
   
   /* ANIMACIONES */
@@ -181,7 +258,7 @@ html {
       transform: translate3d(0, 0, 0);
     }
   }
-  
+
   .fadeIn {
     animation-name: fadeIn;
     animation-duration: 1s;
@@ -189,8 +266,12 @@ html {
   }
   
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .fadeIn.first {
@@ -208,4 +289,3 @@ html {
   .fadeIn.fourth {
     animation-delay: 1s;
   }
-  
