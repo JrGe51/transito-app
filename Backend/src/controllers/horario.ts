@@ -24,11 +24,31 @@ export const registerHorario = async (req: Request, res: Response,): Promise<voi
             return;
         }
 
-        // Verificar si la licencia existe
-        const licencia = await Licencia.findOne({ where: { name } });
+        // Verificar que la fecha sea mañana o posterior
+        const fechaObj = new Date(fecha);
+        const ahora = new Date();
+        const manana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1);
+        manana.setHours(0, 0, 0, 0);
+
+        if (fechaObj < manana) {
+            res.status(400).json({
+                msg: "Solo se pueden crear horarios a partir de mañana"
+            });
+            return;
+        }
+
+        // Verificar si la licencia existe (búsqueda insensible a mayúsculas/minúsculas)
+        const licencia = await Licencia.findOne({
+            where: sequelize.where(
+                sequelize.fn('LOWER', sequelize.col('name')),
+                name.toLowerCase()
+            )
+        });
+        
         if (!licencia) {
             res.status(404).json({
-                msg: `La licencia con el nombre '${name}' no existe.`
+                msg: `La licencia '${name}' no existe. Por favor, créela primero antes de asignar horarios.`,
+                type: 'warning'
             });
             return;
         }
@@ -84,11 +104,18 @@ export const getFechasDisponibles = async (req: Request, res: Response) => {
             return;
         }
 
-        // Verificar si la licencia existe
-        const licencia = await Licencia.findOne({ where: { name } });
+        // Verificar si la licencia existe (búsqueda insensible a mayúsculas/minúsculas)
+        const licencia = await Licencia.findOne({
+            where: sequelize.where(
+                sequelize.fn('LOWER', sequelize.col('name')),
+                name.toLowerCase()
+            )
+        });
+        
         if (!licencia) {
             res.status(404).json({
-                msg: `La licencia con el nombre '${name}' no existe.`
+                msg: `La licencia '${name}' no existe. Por favor, créela primero antes de consultar horarios.`,
+                type: 'warning'
             });
             return;
         }
@@ -105,13 +132,13 @@ export const getFechasDisponibles = async (req: Request, res: Response) => {
         });
 
         // Filtrar fechas futuras, con esto las fechas pasadas no se muestran
-        const hoy = new Date();
-        // Ajustar hoy al inicio del día para comparar correctamente con fechas (YYYY-MM-DD)
-        hoy.setHours(0, 0, 0, 0);
+        const ahora = new Date();
+        const manana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1);
+        manana.setHours(0, 0, 0, 0);
 
         const fechasFiltradas = fechas
             .map(f => f.fecha)
-            .filter(fecha => new Date(fecha).setHours(0,0,0,0) >= hoy.getTime()); // Comparar timestamps al inicio del día
+            .filter(fecha => new Date(fecha).setHours(0,0,0,0) >= manana.getTime());
 
         res.json(fechasFiltradas);
     } catch (error) {
@@ -154,23 +181,31 @@ export const getHorasPorFecha = async (req: Request, res: Response): Promise<voi
             return;
         }
 
-        // Verificar que la fecha no sea en el pasado (solo para horas de fechas pasadas completas)
+        // Verificar que la fecha sea mañana o posterior
         const fechaObj = new Date(fechaStr);
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0); // Ajustar hoy al inicio del día
+        const ahora = new Date();
+        const manana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1);
+        manana.setHours(0, 0, 0, 0);
 
-        if (fechaObj.setHours(0,0,0,0) < hoy.getTime()) { // Comparar timestamps al inicio del día
-             res.status(400).json({
-                 msg: "No se pueden consultar horarios de fechas pasadas completas"
-             });
-             return;
+        if (fechaObj < manana) {
+            res.status(400).json({
+                msg: "Solo se pueden consultar horarios a partir de mañana"
+            });
+            return;
         }
 
-        // Encontrar la licencia por nombre
-        const licencia = await Licencia.findOne({ where: { name } });
+        // Encontrar la licencia por nombre (búsqueda insensible a mayúsculas/minúsculas)
+        const licencia = await Licencia.findOne({
+            where: sequelize.where(
+                sequelize.fn('LOWER', sequelize.col('name')),
+                name.toLowerCase()
+            )
+        });
+        
         if (!licencia) {
             res.status(404).json({
-                msg: `La licencia con el nombre '${name}' no existe.`
+                msg: `La licencia '${name}' no existe. Por favor, créela primero antes de consultar horarios.`,
+                type: 'warning'
             });
             return;
         }
@@ -179,13 +214,13 @@ export const getHorasPorFecha = async (req: Request, res: Response): Promise<voi
             where: { 
                 fecha: fechaStr, 
                 cupodisponible: true,
-                id_tipoLicencia: licencia.id // Filtrar por ID de licencia
+                id_tipoLicencia: licencia.id
             },
             attributes: ['hora'],
             order: [['hora', 'ASC']]
         });
 
-        // Formatear las horas a HH:mm antes de enviarlas
+        // Formatear las horas a HH:mm
         res.json(horas.map(h => h.hora.substring(0, 5)));
     } catch (error) {
         console.error('Error al obtener horas:', error);

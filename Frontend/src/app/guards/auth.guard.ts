@@ -101,7 +101,7 @@ export const authGuard: CanActivateFn = (
     }
 
 
-    if (!isAdmin && !allowedUserRoutes.includes(targetUrl)) {
+    if (!isAdmin && !allowedUserRoutes.some(route => targetUrl.startsWith(route))) {
       console.log('Guard: Usuario normal autenticado en ruta no permitida. Redirigiendo a /user-dashboard.');
       router.navigate(['/user-dashboard']);
       return of(false);

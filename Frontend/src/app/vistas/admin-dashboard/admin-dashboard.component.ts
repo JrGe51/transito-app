@@ -22,7 +22,7 @@ export class AdminDashboardComponent implements OnInit {
   showCreateLicenciaForm: boolean = false;
   horarios: any[] = [];
   licencias: any[] = [];
-  tiposLicencia: string[] = ['Clase B', 'Clase C', 'Clase D'];
+  tiposLicencia: string[] = [];
   minDate: string;
   shouldShowTable: boolean = false;
   shouldShowLicenciasTable: boolean = false;
@@ -48,7 +48,7 @@ export class AdminDashboardComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private toast: ToastrService
   ) {
-    this.minDate = this.getTodayDate();
+    this.minDate = this.getTomorrowDate();
   }
 
   ngOnInit(): void {
@@ -56,13 +56,15 @@ export class AdminDashboardComponent implements OnInit {
     if (!token) {
       this.router.navigate(['/login']);
     }
+    this.loadLicencias();
   }
 
-  private getTodayDate(): string {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
+  private getTomorrowDate(): string {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1); // Obtener la fecha de mañana
+    const year = tomorrow.getFullYear();
+    const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const day = String(tomorrow.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 
@@ -132,7 +134,9 @@ export class AdminDashboardComponent implements OnInit {
       this.toast.error('Por favor complete todos los campos', 'Error');
       return;
     }
-
+    // Limpiar espacios en el nombre de la licencia
+    this.nuevoHorario.name = this.nuevoHorario.name.trim();
+    console.log('Enviando horario:', this.nuevoHorario);
     this.horarioService.registerHorario(this.nuevoHorario).subscribe({
       next: (response) => {
         Swal.fire('¡Éxito!', 'Horario creado exitosamente', 'success');
@@ -211,6 +215,7 @@ export class AdminDashboardComponent implements OnInit {
             name: item.name,
             description: item.description
           }));
+          this.tiposLicencia = data.map((item: any) => item.name);
           this.shouldShowLicenciasTable = true;
           this.cdr.markForCheck();
         }, 100);

@@ -8,9 +8,11 @@ import { Horario } from "./horario";
 interface SolicitudAttributes {
     id: number; 
     fechaSolicitud: Date; 
+    tipoTramite: string;
     id_usuario: number; 
     id_tipoLicencia: number; 
     id_horario: number;
+    documentos: any;
 }
 
 // Define los atributos opcionales para la creación
@@ -20,9 +22,11 @@ interface SolicitudCreationAttributes extends Optional<SolicitudAttributes, 'id'
 export class Solicitud extends Model<SolicitudAttributes, SolicitudCreationAttributes> implements SolicitudAttributes {
     public id!: number;
     public fechaSolicitud!: Date;
+    public tipoTramite!: string;
     public id_usuario!: number;
     public id_tipoLicencia!: number;
     public id_horario!: number;
+    public documentos!: any;
 }
 
 // Inicializa el modelo
@@ -30,9 +34,11 @@ Solicitud.init(
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
         fechaSolicitud: { type: DataTypes.DATEONLY, allowNull: false },
+        tipoTramite: { type: DataTypes.STRING, allowNull: false },
         id_usuario: { type: DataTypes.INTEGER, references: { model: User, key: 'id' }, allowNull: false },
         id_tipoLicencia: { type: DataTypes.INTEGER, references: { model: Licencia, key: 'id' }, allowNull: false },
-        id_horario: { type: DataTypes.INTEGER, references: { model: Horario, key: 'id' }, allowNull: false }
+        id_horario: { type: DataTypes.INTEGER, references: { model: Horario, key: 'id' }, allowNull: false },
+        documentos: { type: DataTypes.JSON, allowNull: true, defaultValue: [] }, // Campo para almacenar documentos como JSON
     },
     {
         sequelize,

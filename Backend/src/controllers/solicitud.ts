@@ -6,12 +6,25 @@ import { Licencia } from "../models/licencia";
 
 export const registerSolicitud = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { name, fecha, hora } = req.body;
+        const { name, fecha, hora, tipoTramite, documentos } = req.body;
 
         const id_usuario = (req as any).userId; // <-- Toma el usuario autenticado
 
         if (!id_usuario) {
             res.status(401).json({ msg: 'Usuario no autenticado' });
+            return;
+        }
+
+        // Verificar si el usuario ya tiene una reserva activa
+        const reservaExistente = await Solicitud.findOne({
+            where: { id_usuario }
+        });
+
+        if (reservaExistente) {
+            res.status(400).json({
+                msg: 'Ya tienes una reserva activa. No puedes crear más reservas hasta que se complete la actual.',
+                type: 'warning'
+            });
             return;
         }
 
@@ -52,8 +65,10 @@ export const registerSolicitud = async (req: Request, res: Response, next: NextF
         const nuevaSolicitud = await Solicitud.create({
             fechaSolicitud: new Date(),
             id_usuario,
+            tipoTramite,
             id_tipoLicencia: licencia.id,
-            id_horario: horario.id
+            id_horario: horario.id,
+            documentos: documentos || [], // Asegurarse de que sea un array, incluso si está vacío
         });
 
         // Actualizar el cupo disponible a false
@@ -65,7 +80,9 @@ export const registerSolicitud = async (req: Request, res: Response, next: NextF
                 fechaSolicitud: nuevaSolicitud.fechaSolicitud,
                 name: licencia.name,
                 fecha: horario.fecha,
-                hora: horario.hora
+                hora: horario.hora,
+                tipoTramite: nuevaSolicitud.tipoTramite,
+                documentos: nuevaSolicitud.documentos,
             },
         });
     } catch (error) {
