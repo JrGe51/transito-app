@@ -106,6 +106,10 @@
     }
   },
   "cli": {
+<<<<<<< Updated upstream
     "analytics": "1c38ce10-d448-44cd-aafc-ce54eb91d438"
+=======
+    "analytics": "2ab5a73c-ae9d-4a83-8d4d-53db01c77960"
+>>>>>>> Stashed changes
   }
 }
