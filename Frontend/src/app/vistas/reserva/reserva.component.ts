@@ -61,7 +61,7 @@ export class ReservaComponent implements OnInit {
     private rutService: RutService,
     private dialog: MatDialog,
     private toast: ToastrService,
-    private router: Router,
+    public router: Router,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute
   ) {}
@@ -102,6 +102,7 @@ export class ReservaComponent implements OnInit {
       this.horasDisponibles = [];
       this.cdr.detectChanges();
     }
+
   }
 
   formatDate(date: Date): string {
@@ -199,36 +200,47 @@ export class ReservaComponent implements OnInit {
 
     this.horarioService.getFechasDisponibles(tipo).subscribe({
       next: (fechas) => {
-        this.fechasDisponibles$.next(fechas);
-        this.cdr.detectChanges();
-
-        // MOSTRAR CALENDARIO después de un pequeño retraso para asegurar que se recree
-        setTimeout(() => {
-          this.showCalendar = true;
+        if (fechas && fechas.length > 0) {
+          this.fechasDisponibles$.next(fechas);
           this.cdr.detectChanges();
 
-          if (this.calendar) {
-            // Reasignar las funciones dateClass y filtrarFechasDisponibles para forzar reevaluación
-            this.dateClass = (d: Date) => {
-              const dateString = this.formatDate(d);
-              return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
-            };
-            this.filtrarFechasDisponibles = (date: Date | null): boolean => {
-              if (!date) return false;
-              const dateString = this.formatDate(date);
-              return this.fechasDisponibles$.value.includes(dateString);
-            };
-
-            // Intentar establecer la fecha activa para forzar la reevaluación
-            if (fechas.length > 0) {
-              this.calendar.activeDate = new Date(fechas[0]);
-            } else {
-              this.calendar.activeDate = new Date(); // Si no hay fechas, mostrar el mes actual
-            }
-            this.calendar.updateTodaysDate(); // Fuerza la reevaluación de los filtros
+          // MOSTRAR CALENDARIO después de un pequeño retraso para asegurar que se recree
+          setTimeout(() => {
+            this.showCalendar = true;
             this.cdr.detectChanges();
-          }
-        }, 0);
+
+            if (this.calendar) {
+              // Reasignar las funciones dateClass y filtrarFechasDisponibles para forzar reevaluación
+              this.dateClass = (d: Date) => {
+                const dateString = this.formatDate(d);
+                return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
+              };
+              this.filtrarFechasDisponibles = (date: Date | null): boolean => {
+                if (!date) return false;
+                const dateString = this.formatDate(date);
+                return this.fechasDisponibles$.value.includes(dateString);
+              };
+
+              // Intentar establecer la fecha activa para forzar la reevaluación
+              if (fechas.length > 0) {
+                this.calendar.activeDate = new Date(fechas[0]);
+              } else {
+                this.calendar.activeDate = new Date(); // Si no hay fechas, mostrar el mes actual
+              }
+              this.calendar.updateTodaysDate(); // Fuerza la reevaluación de los filtros
+              this.cdr.detectChanges();
+            }
+          }, 0);
+        } else {
+          Swal.fire({
+            icon: 'info',
+            title: 'Sin cupos disponibles',
+            text: `No hay fechas disponibles para reservar la licencia ${tipo}. Por favor, intenta más tarde.`,
+            confirmButtonColor: '#3085d6'
+          });
+          this.tipoLicenciaSeleccionado = null;
+          this.licenciaSeleccionada = false;
+        }
       },
       error: (error) => {
         console.error('Error al obtener fechas por licencia:', error);
