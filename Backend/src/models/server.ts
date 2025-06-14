@@ -1,5 +1,4 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
-import sequelize from '../database/connection';
 import RUser from '../routes/user';
 import RLicencia from '../routes/licencia';
 import RHorario from '../routes/horario';

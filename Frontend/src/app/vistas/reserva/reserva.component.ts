@@ -275,10 +275,6 @@ export class ReservaComponent implements OnInit {
       title: 'Confirmar Reserva',
       html: `
         <div class="form-group">
-          <label for="email">Correo electrónico:</label>
-          <input type="email" id="email" class="swal2-input" placeholder="ejemplo@correo.com">
-        </div>
-        <div class="form-group">
           <label for="documentos">Documentos requeridos:</label>
           <input type="file" 
                  id="documentos" 
@@ -295,21 +291,15 @@ export class ReservaComponent implements OnInit {
       cancelButtonColor: '#d33',
       focusConfirm: false,
       preConfirm: () => {
-        const email = (document.getElementById('email') as HTMLInputElement).value;
         const documentos = (document.getElementById('documentos') as HTMLInputElement).files;
-        
-        if (!email) {
-          Swal.showValidationMessage('Por favor ingresa tu correo electrónico');
-          return false;
-        }
 
         if (!documentos || documentos.length === 0) {
           Swal.showValidationMessage('Por favor adjunte al menos un documento');
           return false;
         }
 
-        if (documentos.length > 3) {
-          Swal.showValidationMessage('Máximo 3 archivos permitidos');
+        if (documentos.length > 5) {
+          Swal.showValidationMessage('Máximo 5 archivos permitidos');
           return false;
         }
 
@@ -331,14 +321,12 @@ export class ReservaComponent implements OnInit {
         return Promise.all(promesas)
           .then(documentosBase64 => {
             return {
-              email,
               documentos: documentosBase64
             };
           });
       }
     }).then((result) => {
       if (result.isConfirmed) {
-        this.email = result.value.email;
         this.documentos = result.value.documentos;
         this.onSubmit();
       }
@@ -356,11 +344,6 @@ export class ReservaComponent implements OnInit {
     }
     if (!this.horaSeleccionada) {
       this.toast.error('Por favor, selecciona una hora', 'Error');
-      return;
-    }
-
-    if (!this.email) {
-      this.toast.error('Por favor, ingresa tu correo electrónico', 'Error');
       return;
     }
 
@@ -398,7 +381,8 @@ export class ReservaComponent implements OnInit {
             Swal.fire({
               icon: 'success',
               title: '¡Reserva realizada con éxito!',
-              text: `Estimado/a usuario, su reserva para el día ${this.formatDate(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.`,
+              text: `Estimado/a usuario, su reserva para el día ${this.formatDate(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.
+                      Se le ha enviado un correo electrónico con los detalles de la reserva.`,
               confirmButtonColor: '#3085d6'
             }).then(() => {
               this.router.navigate(['/nuevo']);
@@ -410,7 +394,8 @@ export class ReservaComponent implements OnInit {
           Swal.fire({
             icon: 'success',
             title: '¡Reserva realizada con éxito!',
-            text: `Estimado/a usuario, su reserva para el día ${this.formatDate(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.`,
+            text: `Estimado/a usuario, su reserva para el día ${this.formatDate(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.
+                    Se le ha enviado un correo electrónico con los detalles de la reserva.`,
             confirmButtonColor: '#3085d6'
           }).then(() => {
             this.router.navigate(['/nuevo']);
@@ -465,7 +450,6 @@ export class ReservaComponent implements OnInit {
     this.horaSeleccionada = null;
     this.horasDisponibles = [];
     this.rut = '';
-    this.email = '';
     this.documentos = [];
   }
 }
