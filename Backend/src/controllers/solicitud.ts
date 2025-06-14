@@ -36,25 +36,37 @@ export const registerSolicitud = async (req: Request, res: Response, next: NextF
         }
 
         // Verificar si el usuario ya tiene una reserva activa
+        // Verificar si el usuario ya tiene una reserva activa (para la regla de una reserva por usuario)
         const reservaExistente = await Solicitud.findOne({
-            where: { id_usuario }
+            where: { id_usuario } // Buscar cualquier reserva existente
         });
 
         if (reservaExistente) {
             res.status(400).json({
-                msg: 'Ya tienes una reserva activa. No puedes crear más reservas hasta que se complete la actual.',
+                msg: 'Ya tienes una reserva activa. No puedes crear más reservas hasta que tu reserva actual sea procesada.',
                 type: 'warning'
             });
             return;
         }
 
-        // Validar que el nombre de la licencia exista en la tabla Licencia
-        const licencia = await Licencia.findOne({ where: { name } });
-        if (!licencia) {
-            res.status(404).json({
-                msg: `La licencia con el nombre '${name}' no existe.`,
-            });
-            return;
+        let licencia;
+        // Si el tipo de trámite es Renovación y no se especificó una clase de licencia (name es 'Renovación'),
+        // asignamos una licencia por defecto (ej. 'Clase B') para que la solicitud pueda crearse.
+        if (tipoTramite === 'Renovación' && name === 'Renovación') {
+            licencia = await Licencia.findOne({ where: { name: 'Clase B' } }); // Usar una licencia existente como predeterminada
+            if (!licencia) {
+                res.status(500).json({ msg: 'Error interno: Licencia por defecto para Renovación no encontrada.' });
+                return;
+            }
+        } else {
+            // Validar que el nombre de la licencia exista en la tabla Licencia para otros trámites o si se especificó una clase
+            licencia = await Licencia.findOne({ where: { name } });
+            if (!licencia) {
+                res.status(404).json({
+                    msg: `La licencia con el nombre '${name}' no existe.`,
+                });
+                return;
+            }
         }
 
         // Validar que la fecha, hora y tipo de licencia existan en la tabla Horario y que el cupo esté disponible
