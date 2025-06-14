@@ -2,7 +2,21 @@ import { Model, DataTypes, Optional } from "sequelize";
 import sequelize from "../database/connection";
 import { User } from "./user";
 import { Licencia } from "./licencia";
-import { Horario } from "./horario";
+import { Horario, HorarioAttributes } from "./horario";
+import { LicenciaAttributes } from "./licencia";
+
+// Definir la interfaz para UserAttributes, ya que no está exportada en user.ts
+interface UserAttributes {
+    id: number;
+    name: string;
+    lastname: string;
+    email: string;
+    rut: string;
+    password: string;
+    telefono: string;
+    fechanacimiento: Date;
+    direccion: string;
+}
 
 // Define los atributos del modelo
 interface SolicitudAttributes {
@@ -13,6 +27,9 @@ interface SolicitudAttributes {
     id_tipoLicencia: number; 
     id_horario: number;
     documentos: any;
+    horario?: Horario;
+    tipoLicencia?: LicenciaAttributes;
+    usuario?: UserAttributes;
 }
 
 // Define los atributos opcionales para la creación
@@ -27,6 +44,9 @@ export class Solicitud extends Model<SolicitudAttributes, SolicitudCreationAttri
     public id_tipoLicencia!: number;
     public id_horario!: number;
     public documentos!: any;
+    public horario?: Horario;
+    public tipoLicencia?: LicenciaAttributes;
+    public usuario?: UserAttributes;
 }
 
 // Inicializa el modelo

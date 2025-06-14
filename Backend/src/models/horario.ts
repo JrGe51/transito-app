@@ -2,7 +2,7 @@ import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../database/connection";
 import { Licencia } from "./licencia";
 // Define los atributos del modelo
-interface HorarioAttributes {
+export interface HorarioAttributes {
     id: number;
     fecha: string;
     hora: string;

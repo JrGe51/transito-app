@@ -2,7 +2,7 @@ import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../database/connection";
 
 // Define los atributos del modelo
-interface LicenciaAttributes {
+export interface LicenciaAttributes {
     id: number;
     name: string;
     description: string;
