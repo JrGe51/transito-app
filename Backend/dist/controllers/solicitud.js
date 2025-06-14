@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerSolicitud = void 0;
+exports.deleteSolicitud = exports.getAllSolicitudes = exports.getSolicitudesByUser = exports.registerSolicitud = void 0;
 const solicitud_1 = require("../models/solicitud");
 const horario_1 = require("../models/horario");
 const licencia_1 = require("../models/licencia");
@@ -139,3 +139,109 @@ const registerSolicitud = (req, res, next) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.registerSolicitud = registerSolicitud;
+const getSolicitudesByUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id_usuario = req.userId; // Asumiendo que el ID del usuario está en req.userId del middleware de autenticación
+        console.log(`[getSolicitudesByUser] Intentando obtener solicitudes para el usuario ID: ${id_usuario}`);
+        if (!id_usuario) {
+            console.warn('[getSolicitudesByUser] Usuario no autenticado: id_usuario es nulo o indefinido.');
+            res.status(401).json({ msg: 'Usuario no autenticado.' });
+            return; // Añadir return aquí para que la función termine con void
+        }
+        console.log('[getSolicitudesByUser] Construyendo consulta Sequelize...');
+        const solicitudes = yield solicitud_1.Solicitud.findAll({
+            where: { id_usuario: id_usuario },
+            include: [
+                { model: horario_1.Horario, as: 'horario' },
+                { model: licencia_1.Licencia, as: 'tipoLicencia' },
+                { model: user_1.User, as: 'usuario', attributes: ['name', 'lastname', 'email'] } // Incluir solo algunos atributos del usuario
+            ]
+        });
+        console.log(`[getSolicitudesByUser] Solicitudes encontradas: ${solicitudes.length}`);
+        if (solicitudes.length === 0) {
+            res.status(404).json({
+                msg: 'No se encontraron solicitudes para este usuario.'
+            });
+            console.log('[getSolicitudesByUser] No se encontraron solicitudes para este usuario.');
+            return; // Añadir return aquí para que la función termine con void
+        }
+        res.status(200).json({
+            solicitudes
+        });
+        console.log('[getSolicitudesByUser] Solicitudes enviadas exitosamente.');
+    }
+    catch (error) {
+        console.error('[getSolicitudesByUser] Error al obtener solicitudes por usuario:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al obtener las solicitudes.',
+            error
+        });
+    }
+});
+exports.getSolicitudesByUser = getSolicitudesByUser;
+const getAllSolicitudes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const solicitudes = yield solicitud_1.Solicitud.findAll({
+            include: [
+                {
+                    model: user_1.User,
+                    as: 'usuario',
+                    attributes: ['name', 'lastname', 'email', 'rut', 'telefono']
+                },
+                {
+                    model: licencia_1.Licencia,
+                    as: 'tipoLicencia',
+                    attributes: ['name', 'description']
+                },
+                {
+                    model: horario_1.Horario,
+                    as: 'horario',
+                    attributes: ['fecha', 'hora', 'cupodisponible']
+                }
+            ],
+            order: [['fechaSolicitud', 'DESC']]
+        });
+        res.status(200).json({
+            solicitudes
+        });
+    }
+    catch (error) {
+        console.error('Error al obtener todas las solicitudes:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al obtener las solicitudes.',
+            error
+        });
+    }
+});
+exports.getAllSolicitudes = getAllSolicitudes;
+const deleteSolicitud = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const solicitud = yield solicitud_1.Solicitud.findByPk(id, {
+            include: [{ model: horario_1.Horario, as: 'horario' }]
+        });
+        if (!solicitud) {
+            res.status(404).json({
+                msg: 'Solicitud no encontrada'
+            });
+            return;
+        }
+        // Liberar el cupo del horario
+        if (solicitud.horario) {
+            yield solicitud.horario.update({ cupodisponible: true });
+        }
+        // Eliminar la solicitud
+        yield solicitud.destroy();
+        res.json({
+            msg: 'Solicitud eliminada correctamente'
+        });
+    }
+    catch (error) {
+        console.error('Error al eliminar la solicitud:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al eliminar la solicitud',
+            error
+        });
+    }
+});
+exports.deleteSolicitud = deleteSolicitud;

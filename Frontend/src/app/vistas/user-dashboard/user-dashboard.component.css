@@ -140,9 +140,25 @@ body {
   border: 1px solid #dee2e6;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  width: 280px; 
+  width: 280px;
   z-index: 1000; 
   overflow: hidden;
+  padding: 10px;
+}
+
+.solicitudes-dropdown-content {
+  position: absolute;
+  top: 100%; 
+  left: 0;
+  background-color: #f8f9fa; 
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 800px;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: auto;
+  z-index: 1001;
   padding: 10px;
 }
 

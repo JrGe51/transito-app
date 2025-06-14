@@ -5,4 +5,7 @@ const user_1 = require("../controllers/user");
 const router = (0, express_1.Router)();
 router.post("/api/user/register", user_1.register);
 router.post("/api/user/login", user_1.login);
+router.put("/api/user/updateUser/:id", user_1.updateUser);
+router.get("/api/user/all", user_1.getAllUsers);
+router.delete("/api/user/delete/:id", user_1.deleteUser);
 exports.default = router;

@@ -75,4 +75,16 @@ export class UserService {
     localStorage.removeItem('user');
     this.isLoggedIn$.next(false);
   }
+
+  updateUser(id: number, user: User): Observable<any> {
+    return this.http.put(`${this.AppUrl}${this.APIUrl}/updateUser/${id}`, user);
+  }
+
+  getAllUsers(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.AppUrl}${this.APIUrl}/all`);
+  }
+
+  deleteUser(id: number): Observable<any> {
+    return this.http.delete(`${this.AppUrl}${this.APIUrl}/delete/${id}`);
+  }
 }

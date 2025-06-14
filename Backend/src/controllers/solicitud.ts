@@ -152,3 +152,116 @@ export const registerSolicitud = async (req: Request, res: Response, next: NextF
         next(error);
     }
 };
+
+export const getSolicitudesByUser = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const id_usuario = (req as any).userId; // Asumiendo que el ID del usuario está en req.userId del middleware de autenticación
+        console.log(`[getSolicitudesByUser] Intentando obtener solicitudes para el usuario ID: ${id_usuario}`);
+
+        if (!id_usuario) {
+            console.warn('[getSolicitudesByUser] Usuario no autenticado: id_usuario es nulo o indefinido.');
+            res.status(401).json({ msg: 'Usuario no autenticado.' });
+            return; // Añadir return aquí para que la función termine con void
+        }
+
+        console.log('[getSolicitudesByUser] Construyendo consulta Sequelize...');
+        const solicitudes = await Solicitud.findAll({
+            where: { id_usuario: id_usuario },
+            include: [
+                { model: Horario, as: 'horario' },
+                { model: Licencia, as: 'tipoLicencia' },
+                { model: User, as: 'usuario', attributes: ['name', 'lastname', 'email'] } // Incluir solo algunos atributos del usuario
+            ]
+        });
+
+        console.log(`[getSolicitudesByUser] Solicitudes encontradas: ${solicitudes.length}`);
+        if (solicitudes.length === 0) {
+            res.status(404).json({
+                msg: 'No se encontraron solicitudes para este usuario.'
+            });
+            console.log('[getSolicitudesByUser] No se encontraron solicitudes para este usuario.');
+            return; // Añadir return aquí para que la función termine con void
+        }
+
+        res.status(200).json({
+            solicitudes
+        });
+        console.log('[getSolicitudesByUser] Solicitudes enviadas exitosamente.');
+
+    } catch (error) {
+        console.error('[getSolicitudesByUser] Error al obtener solicitudes por usuario:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al obtener las solicitudes.',
+            error
+        });
+    }
+};
+
+export const getAllSolicitudes = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const solicitudes = await Solicitud.findAll({
+            include: [
+                { 
+                    model: User, 
+                    as: 'usuario',
+                    attributes: ['name', 'lastname', 'email', 'rut', 'telefono']
+                },
+                { 
+                    model: Licencia, 
+                    as: 'tipoLicencia',
+                    attributes: ['name', 'description']
+                },
+                { 
+                    model: Horario, 
+                    as: 'horario',
+                    attributes: ['fecha', 'hora', 'cupodisponible']
+                }
+            ],
+            order: [['fechaSolicitud', 'DESC']]
+        });
+
+        res.status(200).json({
+            solicitudes
+        });
+    } catch (error) {
+        console.error('Error al obtener todas las solicitudes:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al obtener las solicitudes.',
+            error
+        });
+    }
+};
+
+export const deleteSolicitud = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const solicitud = await Solicitud.findByPk(id, {
+            include: [{ model: Horario, as: 'horario' }]
+        });
+
+        if (!solicitud) {
+            res.status(404).json({
+                msg: 'Solicitud no encontrada'
+            });
+            return;
+        }
+
+        // Liberar el cupo del horario
+        if (solicitud.horario) {
+            await solicitud.horario.update({ cupodisponible: true });
+        }
+
+        // Eliminar la solicitud
+        await solicitud.destroy();
+
+        res.json({
+            msg: 'Solicitud eliminada correctamente'
+        });
+    } catch (error) {
+        console.error('Error al eliminar la solicitud:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al eliminar la solicitud',
+            error
+        });
+    }
+};

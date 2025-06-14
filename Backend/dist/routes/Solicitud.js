@@ -6,4 +6,7 @@ const asyncHandler_1 = require("../utils/asyncHandler");
 const auth_1 = require("../middlewares/auth");
 const router = (0, express_1.Router)();
 router.post("/api/solicitud/register", auth_1.authenticateToken, (0, asyncHandler_1.asyncHandler)(solicitud_1.registerSolicitud));
+router.get("/api/solicitud/byUser", auth_1.authenticateToken, (0, asyncHandler_1.asyncHandler)(solicitud_1.getSolicitudesByUser));
+router.get("/api/solicitud/all", auth_1.authenticateToken, (0, asyncHandler_1.asyncHandler)(solicitud_1.getAllSolicitudes));
+router.delete("/api/solicitud/delete/:id", auth_1.authenticateToken, (0, asyncHandler_1.asyncHandler)(solicitud_1.deleteSolicitud));
 exports.default = router;
