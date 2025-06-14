@@ -13,12 +13,20 @@ exports.registerSolicitud = void 0;
 const solicitud_1 = require("../models/solicitud");
 const horario_1 = require("../models/horario");
 const licencia_1 = require("../models/licencia");
+const user_1 = require("../models/user");
+const emailService_1 = require("../utils/emailService");
 const registerSolicitud = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name, fecha, hora, tipoTramite, documentos } = req.body;
         const id_usuario = req.userId; // <-- Toma el usuario autenticado
         if (!id_usuario) {
             res.status(401).json({ msg: 'Usuario no autenticado' });
+            return;
+        }
+        // Obtener el usuario para acceder a su email
+        const usuario = yield user_1.User.findByPk(id_usuario);
+        if (!usuario) {
+            res.status(404).json({ msg: 'Usuario no encontrado' });
             return;
         }
         // Verificar si el usuario ya tiene una reserva activa
@@ -72,6 +80,35 @@ const registerSolicitud = (req, res, next) => __awaiter(void 0, void 0, void 0, 
         });
         // Actualizar el cupo disponible a false
         yield horario.update({ cupodisponible: false });
+        console.log('Intentando enviar correo a:', usuario.email);
+        // Enviar correo de confirmación
+        const emailContent = `
+            <h1>¡Reserva Confirmada!</h1>
+            <p>Estimado/a ${usuario.name} ${usuario.lastname},</p>
+            <p>Su reserva ha sido confirmada exitosamente con los siguientes detalles:</p>
+            <ul>
+                <li><strong>Tipo de Licencia:</strong> ${name}</li>
+                <li><strong>Fecha:</strong> ${fecha}</li>
+                <li><strong>Hora:</strong> ${hora}</li>
+                <li><strong>Tipo de Trámite:</strong> ${tipoTramite}</li>
+            </ul>
+
+            <p>Por favor, asegúrese de traer todos los documentos necesarios el día de su cita.</p>
+            <p>Si necesita realizar algún cambio o cancelar su reserva, por favor contáctenos.</p>
+            <p>Saludos cordiales,<br>Equipo de Tránsito</p>
+        `;
+        try {
+            console.log('Iniciando envío de correo...');
+            const emailResult = yield (0, emailService_1.sendEmail)({
+                to: usuario.email,
+                subject: 'Confirmación de Reserva - Cita Licencia Conducir',
+                html: emailContent
+            });
+            console.log('Resultado del envío:', emailResult);
+        }
+        catch (emailError) {
+            console.error('Error al enviar el correo:', emailError);
+        }
         res.status(201).json({
             msg: `Solicitud creada exitosamente.`,
             solicitud: {

@@ -2,7 +2,20 @@ import { Request, Response, NextFunction } from "express";
 import { Solicitud } from "../models/solicitud";
 import { Horario } from "../models/horario";
 import { Licencia } from "../models/licencia";
+import { User } from "../models/user";
+import { sendEmail } from "../utils/emailService";
 
+interface UserAttributes {
+    id: number;
+    name: string;
+    lastname: string;
+    email: string;
+    rut: string;
+    password: string;
+    telefono: string;
+    fechanacimiento: Date;
+    direccion: string;
+}
 
 export const registerSolicitud = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -12,6 +25,13 @@ export const registerSolicitud = async (req: Request, res: Response, next: NextF
 
         if (!id_usuario) {
             res.status(401).json({ msg: 'Usuario no autenticado' });
+            return;
+        }
+
+        // Obtener el usuario para acceder a su email
+        const usuario = await User.findByPk(id_usuario) as unknown as UserAttributes;
+        if (!usuario) {
+            res.status(404).json({ msg: 'Usuario no encontrado' });
             return;
         }
 
@@ -73,6 +93,37 @@ export const registerSolicitud = async (req: Request, res: Response, next: NextF
 
         // Actualizar el cupo disponible a false
         await horario.update({ cupodisponible: false });
+
+        console.log('Intentando enviar correo a:', usuario.email);
+        
+        // Enviar correo de confirmación
+        const emailContent = `
+            <h1>¡Reserva Confirmada!</h1>
+            <p>Estimado/a ${usuario.name} ${usuario.lastname},</p>
+            <p>Su reserva ha sido confirmada exitosamente con los siguientes detalles:</p>
+            <ul>
+                <li><strong>Tipo de Licencia:</strong> ${name}</li>
+                <li><strong>Fecha:</strong> ${fecha}</li>
+                <li><strong>Hora:</strong> ${hora}</li>
+                <li><strong>Tipo de Trámite:</strong> ${tipoTramite}</li>
+            </ul>
+
+            <p>Por favor, asegúrese de traer todos los documentos necesarios el día de su cita.</p>
+            <p>Si necesita realizar algún cambio o cancelar su reserva, por favor contáctenos.</p>
+            <p>Saludos cordiales,<br>Equipo de Tránsito</p>
+        `;
+
+        try {
+            console.log('Iniciando envío de correo...');
+            const emailResult = await sendEmail({
+                to: usuario.email,
+                subject: 'Confirmación de Reserva - Cita Licencia Conducir',
+                html: emailContent
+            });
+            console.log('Resultado del envío:', emailResult);
+        } catch (emailError) {
+            console.error('Error al enviar el correo:', emailError);
+        }
 
         res.status(201).json({
             msg: `Solicitud creada exitosamente.`,
