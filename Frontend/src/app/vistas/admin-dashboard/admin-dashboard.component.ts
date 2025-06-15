@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 import { User } from '../../interfaces/user';
 import { SolicitudService } from '../../servicios/solicitud.service';
 import { Solicitud } from '../../interfaces/solicitud';
+import { Admin } from '../../interfaces/admin';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -41,6 +42,7 @@ export class AdminDashboardComponent implements OnInit {
   solicitudes: Solicitud[] = [];
   filteredSolicitudes: Solicitud[] = [];
   solicitudSearchRut: string = '';
+  adminData: Admin | undefined;
   
 
   nuevoHorario = {
@@ -85,7 +87,27 @@ export class AdminDashboardComponent implements OnInit {
     if (!token) {
       this.router.navigate(['/login']);
     }
+    this.loadAdminData();
     this.loadLicencias();
+  }
+
+  loadAdminData(): void {
+    const adminString = localStorage.getItem('user');
+    if (adminString) {
+      try {
+        const parsedData = JSON.parse(adminString);
+        if (parsedData.isAdmin) {
+          this.adminData = parsedData;
+          this.cdr.markForCheck();
+        } else {
+          this.adminData = undefined;
+          this.cdr.markForCheck();
+        }
+      } catch (e) {
+        console.error('Error al parsear los datos del administrador de localStorage:', e);
+        this.toast.error('Error al cargar los datos del administrador.', 'Error');
+      }
+    }
   }
 
   private getTomorrowDate(): string {
@@ -520,7 +542,7 @@ export class AdminDashboardComponent implements OnInit {
               'La solicitud ha sido eliminada.',
               'success'
             );
-            this.loadSolicitudes(); // Recargar la lista de solicitudes
+            this.loadSolicitudes(); 
           },
           error: (error) => {
             console.error('Error al eliminar la solicitud:', error);
@@ -557,7 +579,7 @@ export class AdminDashboardComponent implements OnInit {
       showCloseButton: true,
       showConfirmButton: false,
       didOpen: () => {
-        // Añadir la función de descarga al objeto window
+
         (window as any).downloadDocument = (url: string, nombre: string) => {
           const link = document.createElement('a');
           link.href = url;

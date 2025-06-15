@@ -101,7 +101,6 @@ const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
             });
             return;
         }
-        // Validar si el RUT ya existe en otro usuario (excluyendo al usuario actual)
         const existingRutUser = yield user_1.User.findOne({
             where: {
                 rut: rut,
@@ -114,7 +113,6 @@ const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
             });
             return;
         }
-        // Validar si el Email ya existe en otro usuario (excluyendo al usuario actual)
         const existingEmailUser = yield user_1.User.findOne({
             where: {
                 email: email,
@@ -156,7 +154,7 @@ const getAllUsers = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
     try {
         console.log('[getAllUsers] Intentando obtener todos los usuarios...');
         const users = yield user_1.User.findAll({
-            attributes: { exclude: ['password'] } // Excluir el campo de contraseña
+            attributes: { exclude: ['password'] }
         });
         console.log(`[getAllUsers] Usuarios encontrados: ${users.length}`);
         res.status(200).json({
