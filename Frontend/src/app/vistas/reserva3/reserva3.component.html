@@ -1,54 +1,153 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">
-        <i class="bi bi-car-front"></i> Departamento de Tránsito
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto"></ul>
+<body> 
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <i class="bi bi-car-front"></i> Departamento de Tránsito
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto"></ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="wrapper fadeIn">
+      <div id="formContent">
+        <h1 class="fadeIn first">Cambio de clase</h1>
+
+        <div class="mb-3 d-flex flex-column align-items-center" *ngIf="!tipoLicenciaSeleccionado">
+          <button
+            *ngFor="let tipo of tiposLicencia"
+            type="button"
+            class="btn btn-primary m-2 d-block w-100"
+            style="max-width: 300px;"
+            (click)="seleccionarTipoLicencia(tipo)">
+            {{ tipo }}
+          </button>
+        </div>
+        
+        <div class="mb-3 text-center" *ngIf="tipoLicenciaSeleccionado">
+          <div class="alert alert-info mb-4">
+            <strong>Tipo de licencia seleccionada:</strong> {{ tipoLicenciaSeleccionado }}
+            <button type="button" class="btn btn-sm btn-outline-primary ms-3" (click)="tipoLicenciaSeleccionado = null">
+              Cambiar
+            </button>
+          </div>
+          <form class="reservation-form" (ngSubmit)="onSubmit()">
+            <div class="row justify-content-center">
+              <div class="col-md-10">
+                <div class="row">
+                  <div class="col-md-6">
+                    <mat-card class="demo-inline-calendar-card mb-4">
+                      <mat-card-header>
+                        <mat-card-title>Fechas disponibles</mat-card-title>
+                      </mat-card-header>
+                      <mat-card-content>
+                        <mat-calendar
+                          *ngIf="showCalendar"
+                          [dateClass]="dateClass"
+                          [selected]="fechaSeleccionada"
+                          (selectedChange)="onFechaChange($event)"
+                          [dateFilter]="filtrarFechasDisponibles"
+                          [minDate]="minDate">
+                        </mat-calendar>
+                      </mat-card-content>
+                    </mat-card>
+                  </div>
+
+                  <div class="col-md-6">
+                    <mat-card class="mb-4">
+                      <mat-card-header>
+                        <mat-card-title>Horas disponibles</mat-card-title>
+                      </mat-card-header>
+                      <mat-card-content>
+                        <mat-form-field appearance="fill" class="w-100">
+                          <mat-label>Selecciona una hora</mat-label>
+                          <mat-select
+                            [(ngModel)]="horaSeleccionada"
+                            [disabled]="!fechaSeleccionada || horasDisponibles.length === 0"
+                            [ngModelOptions]="{standalone: true}">
+                            <mat-option *ngFor="let hora of horasDisponibles" [value]="hora">
+                              {{hora}}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </mat-card-content>
+                    </mat-card>
+                  </div>
+                </div>
+
+                <div class="text-center">
+                  <button type="button" class="btn btn-primary btn-lg" (click)="mostrarFormularioReserva()">
+                    Reservar hora
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-</nav>
+  </main>
 
-<div class="wrapper fadeIn">
-    <div id="formContent">
-      <h1 class="fadeIn first">Cambio de clase</h1>
-      <h2 class="fadeIn first">Reserva tu hora</h2>
-    
-      <form class="reservation-form">
-        <div class="form-group fadeIn third">
-          <label for="fecha">Fechas disponibles</label>
-          <input type="date" id="fecha" class="form-control">
+  <footer class="footer mt-5">
+    <div class="footer-bg">
+      <div class="container">
+        <div class="row justify-content-around">
+          <!-- Departamento -->
+          <div class="col-md-4 mb-3">
+            <h5 class="text-primary">Departamento de Tránsito</h5>
+            <ul class="list-unstyled">
+              <li><i class="bi bi-geo-alt-fill"></i> Municipalidad Lo espejo</li>
+              <li><i class="bi bi-telephone-fill"></i> Teléfono: 973146125 </li>
+              <li><i class="bi bi-envelope-fill"></i> loespejomunicipal.cl</li>
+            </ul>
+          </div>
+          <!-- Información -->
+          <div class="col-md-4 mb-3">
+            <h5 class="text-primary">Información Importante</h5>
+            <ul class="list-unstyled">
+              <li><a href="https://www.chileatiende.gob.cl/fichas/20592-licencias-de-conducir" target="_blank"><i
+                    class="bi bi-chevron-right"></i> Licencias de Conducir</a></li>
+              <li><a href="https://practicatest.cl/preguntas/que-documentos-debe-presentar-para-sacar-licencia-de-conducir-clase-b-en-chile/ZJyToQ==" target="_blank"><i
+                    class="bi bi-chevron-right"></i> Documentos Necesarios</a></li>
+              <li><a href="https://www.loespejo.cl/" target="_blank"><i
+                    class="bi bi-chevron-right"></i> Municipalidad</a></li>
+              <li><a href="https://www.educacionvial.cl/categoria/preguntas-frecuentes/valores-de-licencias-de-conducir" target="_blank"><i
+                    class="bi bi-chevron-right"></i> Valores y Aranceles</a></li>
+            </ul>
+          </div>
+          <!-- Horario de Atención -->
+          <div class="col-md-4 mb-3">
+            <h5 class="text-primary">Horario de Atención</h5>
+            <div>
+              <span><i class="bi bi-clock-fill"></i> Atención General:</span>
+              <p class="mb-1">Lunes a Viernes:</p>
+              <ul class="list-unstyled ps-3 mb-2">
+                <li>• Mañana: 8:30 - 14:00</li>
+                <li>• Tarde: 15:00 - 17:30</li>
+              </ul>
+              <span><i class="bi bi-car-front-fill"></i> Exámenes prácticos:</span>
+              <p class="mb-1">Lunes a Jueves:</p>
+              <ul class="list-unstyled ps-3">
+                <li>• 9:00 - 13:00</li>
+              </ul>
+            </div>
+          </div>
         </div>
-  
-        <div class="form-group fadeIn third">
-          <label for="hora">Horas disponibles</label>
-          <select id="hora" class="form-control">
-            <option value="" disabled selected>Selecciona una hora</option>
-            <option value="09:00">09:00</option>
-            <option value="10:00">10:00</option>
-            <option value="11:00">11:00</option>
-            <option value="12:00">12:00</option>
-            <option value="14:00">14:00</option>
-            <option value="15:00">15:00</option>
-            <option value="16:00">16:00</option>
-          </select>
+        <hr class="my-4">
+        <div class="row footer-bottom">
+          <div class="col-12 text-center">
+            <p class="mb-0">&copy; 2025 Departamento de Tránsito Municipalidad Lo espejo. Todos los derechos reservados.</p>
+          </div>
         </div>
-  
-        <div class="form-group fadeIn fourth">
-          <label for="documentos">Documentos requeridos</label>
-          <ul class="document-list">
-            <li>Cédula de identidad</li>
-            <li>Certificado de antecedentes</li>
-            <li>Certificado médico</li>
-            <li>Foto tipo carné</li>
-          </ul>
-        </div>
-  
-        <input type="submit" class="fadeIn fourth" value="Reservar hora">
-      </form>
+      </div>
     </div>
-</div>
+  </footer>
+</body>

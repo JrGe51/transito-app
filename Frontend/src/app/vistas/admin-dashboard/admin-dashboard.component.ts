@@ -41,7 +41,6 @@ export class AdminDashboardComponent implements OnInit {
   solicitudes: Solicitud[] = [];
   filteredSolicitudes: Solicitud[] = [];
   solicitudSearchRut: string = '';
-  
 
   nuevoHorario = {
     fecha: '',
@@ -176,7 +175,14 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al crear horario:', error);
-        Swal.fire('Error', 'Error al crear el horario', 'error');
+
+        let errorMessage = 'Error al crear el horario';
+        if (error.error && error.error.msg) {
+          errorMessage = error.error.msg;
+        }
+
+        // Mostrar SweetAlert con el mensaje específico del backend
+        Swal.fire('Error', errorMessage, 'error');
       }
     });
   }
@@ -544,7 +550,7 @@ export class AdminDashboardComponent implements OnInit {
     const documentosList = solicitud.documentos.map((doc: any) => `
       <div class="mb-2">
         <strong>${doc.nombre}</strong><br>
-        <button onclick="window.downloadDocument('${doc.url}', '${doc.nombre}')" class="btn btn-primary btn-sm mt-1">
+        <button onclick="window.downloadDocument('${doc.contenido}', '${doc.nombre}')" class="btn btn-primary btn-sm mt-1">
           Descargar Documento
         </button>
       </div>

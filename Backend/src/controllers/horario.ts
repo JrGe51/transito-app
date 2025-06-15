@@ -24,18 +24,45 @@ export const registerHorario = async (req: Request, res: Response,): Promise<voi
             return;
         }
 
+        // --- NUEVA VALIDACIÓN: Rango de horas ---
+        const [horasStr, minutosStr] = hora.split(':');
+        const horas = parseInt(horasStr, 10);
+
+        if (horas < 9 || horas > 18) {
+            res.status(400).json({
+                msg: "Solo se pueden crear horarios entre las 09:00 y las 18:00 horas."
+            });
+            return;
+        }
+        // --- FIN NUEVA VALIDACIÓN ---
+
         // Verificar que la fecha sea mañana o posterior
-        const fechaObj = new Date(fecha);
+        // Parsear la fecha de entrada para que sea la medianoche local
+        const partesFecha = fecha.split('-').map(Number);
+        const fechaObj = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]); // Mes es 0-indexado
+        fechaObj.setHours(0, 0, 0, 0); // Asegurarse de que es la medianoche local de ese día
+
         const ahora = new Date();
         const manana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1);
-        manana.setHours(0, 0, 0, 0);
+        manana.setHours(0, 0, 0, 0); // Ya es la medianoche local de mañana
 
-        if (fechaObj < manana) {
+        // Ahora, compara los valores numéricos de las fechas (milisegundos desde la época)
+        if (fechaObj.getTime() < manana.getTime()) {
             res.status(400).json({
                 msg: "Solo se pueden crear horarios a partir de mañana"
             });
             return;
         }
+
+        // --- NUEVA VALIDACIÓN: Días de la semana ---
+        const diaSemana = fechaObj.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+        if (diaSemana === 0 || diaSemana === 6) { // Si es Domingo o Sábado
+            res.status(400).json({
+                msg: "Solo se pueden crear horarios de lunes a viernes."
+            });
+            return;
+        }
+        // --- FIN NUEVA VALIDACIÓN ---
 
         // Verificar si la licencia existe (búsqueda insensible a mayúsculas/minúsculas)
         const licencia = await Licencia.findOne({
@@ -182,12 +209,17 @@ export const getHorasPorFecha = async (req: Request, res: Response): Promise<voi
         }
 
         // Verificar que la fecha sea mañana o posterior
-        const fechaObj = new Date(fechaStr);
+        // Parsear la fecha de entrada para que sea la medianoche local
+        const partesFecha = fechaStr.split('-').map(Number);
+        const fechaObj = new Date(partesFecha[0], partesFecha[1] - 1, partesFecha[2]); // Mes es 0-indexado
+        fechaObj.setHours(0, 0, 0, 0); // Asegurarse de que es la medianoche local de ese día
+
         const ahora = new Date();
         const manana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1);
-        manana.setHours(0, 0, 0, 0);
+        manana.setHours(0, 0, 0, 0); // Ya es la medianoche local de mañana
 
-        if (fechaObj < manana) {
+        // Ahora, compara los valores numéricos de las fechas (milisegundos desde la época)
+        if (fechaObj.getTime() < manana.getTime()) {
             res.status(400).json({
                 msg: "Solo se pueden consultar horarios a partir de mañana"
             });

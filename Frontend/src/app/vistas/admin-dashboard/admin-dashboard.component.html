@@ -209,11 +209,13 @@
         <div class="form-group">
           <label>Fecha</label>
           <input type="date" [(ngModel)]="nuevoHorario.fecha" [min]="minDate" class="form-control">
+          <small class="form-text text-muted">Horario de lunes a viernes</small>
         </div>
 
         <div class="form-group">
           <label>Hora</label>
           <input type="time" [(ngModel)]="nuevoHorario.hora" class="form-control">
+          <small class="form-text text-muted">Horario de 09:00 a 18:00 horas</small>
         </div>
 
         <div class="form-group">
@@ -222,6 +224,7 @@
             <option value="">Seleccione una licencia</option>
             <option *ngFor="let tipo of tiposLicencia" [value]="tipo">{{tipo}}</option>
           </select>
+          <small class="form-text text-muted">&nbsp;</small>
         </div>
 
         <button class="btn btn-primary" (click)="crearHorario()">Crear</button>

@@ -45,7 +45,7 @@ export class ReservaComponent implements OnInit {
   horasDisponibles: string[] = [];
   fechaSeleccionada: Date | null = null;
   horaSeleccionada: string | null = null;
-  tiposLicencia: string[] = ['Clase A','Clase B', 'Clase C', 'Clase D']; 
+  tiposLicencia: string[] = ['Clase B', 'Clase C', 'Clase D']; 
   tipoLicenciaSeleccionado: string | null = null;
   licenciaSeleccionada: boolean = false;
   rut: string = '';
@@ -58,8 +58,6 @@ export class ReservaComponent implements OnInit {
 
   constructor(
     private horarioService: HorarioService,
-    private rutService: RutService,
-    private dialog: MatDialog,
     private toast: ToastrService,
     public router: Router,
     private cdr: ChangeDetectorRef,
