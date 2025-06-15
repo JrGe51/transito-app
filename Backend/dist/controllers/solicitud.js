@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSolicitud = exports.getAllSolicitudes = exports.getSolicitudesByUser = exports.registerSolicitud = void 0;
+exports.deleteSolicitud = exports.getSolicitudById = exports.getAllSolicitudes = exports.getSolicitudesByUser = exports.registerSolicitud = void 0;
 const solicitud_1 = require("../models/solicitud");
 const horario_1 = require("../models/horario");
 const licencia_1 = require("../models/licencia");
@@ -181,7 +181,9 @@ const getSolicitudesByUser = (req, res) => __awaiter(void 0, void 0, void 0, fun
 exports.getSolicitudesByUser = getSolicitudesByUser;
 const getAllSolicitudes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log('[getAllSolicitudes] Intentando obtener todas las solicitudes...');
         const solicitudes = yield solicitud_1.Solicitud.findAll({
+            attributes: { exclude: ['documentos'] }, // Excluir el campo documentos
             include: [
                 {
                     model: user_1.User,
@@ -201,9 +203,11 @@ const getAllSolicitudes = (req, res) => __awaiter(void 0, void 0, void 0, functi
             ],
             order: [['fechaSolicitud', 'DESC']]
         });
+        console.log(`[getAllSolicitudes] Solicitudes encontradas: ${solicitudes.length}`);
         res.status(200).json({
             solicitudes
         });
+        console.log('[getAllSolicitudes] Solicitudes enviadas exitosamente.');
     }
     catch (error) {
         console.error('Error al obtener todas las solicitudes:', error);
@@ -214,6 +218,47 @@ const getAllSolicitudes = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.getAllSolicitudes = getAllSolicitudes;
+const getSolicitudById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params; // Obtener el ID de los parámetros de la URL
+        if (!id) {
+            res.status(400).json({ msg: 'ID de solicitud es requerido.' });
+            return;
+        }
+        const solicitud = yield solicitud_1.Solicitud.findByPk(id, {
+            include: [
+                {
+                    model: user_1.User,
+                    as: 'usuario',
+                    attributes: ['name', 'lastname', 'email', 'rut', 'telefono']
+                },
+                {
+                    model: licencia_1.Licencia,
+                    as: 'tipoLicencia',
+                    attributes: ['name', 'description']
+                },
+                {
+                    model: horario_1.Horario,
+                    as: 'horario',
+                    attributes: ['fecha', 'hora', 'cupodisponible']
+                }
+            ]
+        });
+        if (!solicitud) {
+            res.status(404).json({ msg: 'Solicitud no encontrada.' });
+            return;
+        }
+        res.status(200).json({ solicitud });
+    }
+    catch (error) {
+        console.error('Error al obtener solicitud por ID:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al obtener la solicitud.',
+            error
+        });
+    }
+});
+exports.getSolicitudById = getSolicitudById;
 const deleteSolicitud = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;

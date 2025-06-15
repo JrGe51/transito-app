@@ -199,7 +199,10 @@ export const getSolicitudesByUser = async (req: Request, res: Response): Promise
 
 export const getAllSolicitudes = async (req: Request, res: Response): Promise<void> => {
     try {
+        console.log('[getAllSolicitudes] Intentando obtener todas las solicitudes...');
+
         const solicitudes = await Solicitud.findAll({
+            attributes: { exclude: ['documentos'] }, // Excluir el campo documentos
             include: [
                 { 
                     model: User, 
@@ -220,13 +223,62 @@ export const getAllSolicitudes = async (req: Request, res: Response): Promise<vo
             order: [['fechaSolicitud', 'DESC']]
         });
 
+        console.log(`[getAllSolicitudes] Solicitudes encontradas: ${solicitudes.length}`);
+
         res.status(200).json({
             solicitudes
         });
+        console.log('[getAllSolicitudes] Solicitudes enviadas exitosamente.');
+
     } catch (error) {
         console.error('Error al obtener todas las solicitudes:', error);
         res.status(500).json({
             msg: 'Error interno del servidor al obtener las solicitudes.',
+            error
+        });
+    }
+};
+
+export const getSolicitudById = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params; // Obtener el ID de los parámetros de la URL
+
+        if (!id) {
+            res.status(400).json({ msg: 'ID de solicitud es requerido.' });
+            return;
+        }
+
+        const solicitud = await Solicitud.findByPk(id, {
+            include: [
+                { 
+                    model: User, 
+                    as: 'usuario',
+                    attributes: ['name', 'lastname', 'email', 'rut', 'telefono']
+                },
+                { 
+                    model: Licencia, 
+                    as: 'tipoLicencia',
+                    attributes: ['name', 'description']
+                },
+                { 
+                    model: Horario, 
+                    as: 'horario',
+                    attributes: ['fecha', 'hora', 'cupodisponible']
+                }
+            ]
+        });
+
+        if (!solicitud) {
+            res.status(404).json({ msg: 'Solicitud no encontrada.' });
+            return;
+        }
+
+        res.status(200).json({ solicitud });
+
+    } catch (error) {
+        console.error('Error al obtener solicitud por ID:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al obtener la solicitud.',
             error
         });
     }

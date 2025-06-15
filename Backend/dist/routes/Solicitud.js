@@ -9,4 +9,5 @@ router.post("/api/solicitud/register", auth_1.authenticateToken, (0, asyncHandle
 router.get("/api/solicitud/byUser", auth_1.authenticateToken, (0, asyncHandler_1.asyncHandler)(solicitud_1.getSolicitudesByUser));
 router.get("/api/solicitud/all", auth_1.authenticateToken, (0, asyncHandler_1.asyncHandler)(solicitud_1.getAllSolicitudes));
 router.delete("/api/solicitud/delete/:id", auth_1.authenticateToken, (0, asyncHandler_1.asyncHandler)(solicitud_1.deleteSolicitud));
+router.get("/api/solicitud/:id", auth_1.authenticateToken, (0, asyncHandler_1.asyncHandler)(solicitud_1.getSolicitudById));
 exports.default = router;
