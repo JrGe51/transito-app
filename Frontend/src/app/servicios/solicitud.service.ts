@@ -36,4 +36,11 @@ export class SolicitudService {
 
     return this.http.delete(`${this.AppUrl}${this.APIUrl}/delete/${id}`, { headers: headers });
   }
+
+  getSolicitudById(id: number): Observable<{ solicitud: Solicitud }> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.get<{ solicitud: Solicitud }>(`${this.AppUrl}${this.APIUrl}/${id}`, { headers: headers });
+  }
 } 

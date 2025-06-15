@@ -499,6 +499,7 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar solicitudes:', error);
+        console.log(error)
         Swal.fire('Error', 'Error al cargar las solicitudes', 'error');
         this.cdr.detectChanges();
       }
@@ -565,36 +566,58 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   viewDocuments(solicitud: Solicitud): void {
-    if (!solicitud.documentos || solicitud.documentos.length === 0) {
-      Swal.fire('Información', 'No hay documentos adjuntos a esta solicitud.', 'info');
-      return;
-    }
-
-    const documentosList = solicitud.documentos.map((doc: any) => `
-      <div class="mb-2">
-        <strong>${doc.nombre}</strong><br>
-        <button onclick="window.downloadDocument('${doc.contenido}', '${doc.nombre}')" class="btn btn-primary btn-sm mt-1">
-          Descargar Documento
-        </button>
-      </div>
-    `).join('');
-
+    // Mostrar SweetAlert de carga mientras se obtienen los documentos
     Swal.fire({
-      title: 'Documentos Adjuntos',
-      html: documentosList,
-      width: '600px',
-      showCloseButton: true,
-      showConfirmButton: false,
+      title: 'Cargando documentos...',
+      allowOutsideClick: false,
       didOpen: () => {
+        Swal.showLoading();
+      }
+    });
 
-        (window as any).downloadDocument = (url: string, nombre: string) => {
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = nombre;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        };
+    this.solicitudService.getSolicitudById(solicitud.id!).subscribe({
+      next: (response) => {
+        Swal.close(); // Cerrar el SweetAlert de carga
+
+        const solicitudConDocumentos = response.solicitud;
+
+        if (!solicitudConDocumentos.documentos || solicitudConDocumentos.documentos.length === 0) {
+          Swal.fire('Información', 'No hay documentos adjuntos a esta solicitud.', 'info');
+          return;
+        }
+
+        const documentosList = solicitudConDocumentos.documentos.map((doc: any) => `
+          <div class="mb-2">
+            <strong>${doc.nombre}</strong><br>
+            <button onclick="window.downloadDocument('${doc.contenido}', '${doc.nombre}')" class="btn btn-primary btn-sm mt-1">
+              Descargar Documento
+            </button>
+          </div>
+        `).join('');
+
+        Swal.fire({
+          title: 'Documentos Adjuntos',
+          html: documentosList,
+          width: '600px',
+          showCloseButton: true,
+          showConfirmButton: false,
+          didOpen: () => {
+            // Añadir la función de descarga al objeto window
+            (window as any).downloadDocument = (url: string, nombre: string) => {
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = nombre;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            };
+          }
+        });
+      },
+      error: (error) => {
+        Swal.close(); // Cerrar el SweetAlert de carga en caso de error
+        console.error('Error al obtener los documentos de la solicitud:', error);
+        Swal.fire('Error', 'Error al cargar los documentos de la solicitud.', 'error');
       }
     });
   }
