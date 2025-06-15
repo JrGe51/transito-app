@@ -6,6 +6,7 @@ import { UserService } from '../../servicios/user.service';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-registrarse',
@@ -192,16 +193,28 @@ export class RegistrarseComponent implements OnInit {
       direccion: this.direccion
     }
 
-    this.userService.signIn(user).subscribe(data => {
-      this.toast.success(`Cuenta de ${this.name} ${this.lastname} se creo con exito`)
-      this.router.navigate(['/login']);
-    }, (event: HttpErrorResponse) =>{
-      if(event.error.msg){
-        console.log(event.error.msg);
-        this.toast.error(event.error.msg, 'Error')
-      }else{
-        this.toast.error('Error', 'Error al crear la cuenta')
+    this.userService.signIn(user).subscribe({
+      next: (data) => {
+        Swal.fire({
+          title: '¡Registro exitoso!',
+          text: `Cuenta de ${this.name} ${this.lastname} creada con éxito`,
+          icon: 'success',
+          confirmButtonText: 'Ir al login',
+          confirmButtonColor: '#56baed'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.router.navigate(['/login']);
+          }
+        });
+      },
+      error: (event: HttpErrorResponse) => {
+        if(event.error.msg){
+          console.log(event.error.msg);
+          this.toast.error(event.error.msg, 'Error')
+        }else{
+          this.toast.error('Error', 'Error al crear la cuenta')
+        }
       }
-    })
+    });
   } 
 }

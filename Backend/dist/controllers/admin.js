@@ -56,7 +56,7 @@ const registerAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 exports.registerAdmin = registerAdmin;
 const loginAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
-    // Verificar si son las credenciales maestras
+    // Master Admin Login
     if (email === MASTER_EMAIL && password === MASTER_PASSWORD) {
         const token = jsonwebtoken_1.default.sign({
             email: MASTER_EMAIL,
@@ -65,9 +65,18 @@ const loginAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }, process.env.SECRET_KEY || 'TSE-Dylan-Hernandez', {
             expiresIn: '1h'
         });
-        return res.json({ token, isAdmin: true });
+        return res.json({
+            token,
+            isAdmin: true,
+            user: {
+                name: "Master",
+                lastname: "Admin",
+                email: MASTER_EMAIL,
+                isAdmin: true
+            }
+        });
     }
-    // Si no son las credenciales maestras, verificar que sea un email de admin
+    // Regular Admin Login (from DB)
     if (!email.endsWith('@loespejoadmin.com')) {
         res.status(400).json({
             msg: "Credenciales inválidas"
@@ -95,6 +104,16 @@ const loginAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }, process.env.SECRET_KEY || 'TSE-Dylan-Hernandez', {
         expiresIn: '1h'
     });
-    res.json({ token, isAdmin: true });
+    res.json({
+        token,
+        isAdmin: true,
+        user: {
+            id: admin.getDataValue('id'),
+            name: admin.getDataValue('name'),
+            lastname: admin.getDataValue('lastname'),
+            email: admin.getDataValue('email'),
+            isAdmin: true
+        }
+    });
 });
 exports.loginAdmin = loginAdmin;

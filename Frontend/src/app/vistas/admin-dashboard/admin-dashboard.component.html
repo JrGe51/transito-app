@@ -10,6 +10,14 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
+          <li class="nav-item me-3 d-flex align-items-center" *ngIf="adminData">
+            <span class="navbar-text text-white me-2">
+              <i class="bi bi-person-circle"></i> {{ adminData.name }} {{ adminData.lastname }}
+            </span>
+            <span class="navbar-text text-white me-3">
+              <i class="bi bi-envelope"></i> {{ adminData.email }}
+            </span>
+          </li>
           <li class="nav-item">
             <a class="nav-link" (click)="logout()" style="cursor: pointer;">
               <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
@@ -31,7 +39,7 @@
     <button class="btn btn-primary admin-button" (click)="toggleSolicitudesManagement()">Solicitudes</button>
   </div>
 
-  <!-- Gestión de Usuarios -->
+
   <div class="user-management-container" *ngIf="showUsersManagement">
     <h2>Gestión de Usuarios</h2>
     <div class="search-bar mb-3">
@@ -80,7 +88,7 @@
       </div>
     </div>
 
-    <!-- Formulario de edición de usuario -->
+
     <div class="edit-user-form-container card shadow-sm mt-4" *ngIf="editingUser">
       <div class="card-header bg-secondary text-white">
         <h5>Editar Usuario</h5>
@@ -256,7 +264,7 @@
     </div>
   </div>
 
-  <!-- Gestión de Solicitudes -->
+
   <div class="solicitudes-management-container" *ngIf="showSolicitudesManagement">
     <h2>Gestión de Solicitudes</h2>
     <div class="search-bar mb-3">
@@ -302,4 +310,4 @@
       </table>
     </div>
   </div>
-</div> 
+</div>

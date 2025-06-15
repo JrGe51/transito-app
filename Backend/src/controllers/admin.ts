@@ -47,7 +47,7 @@ export const registerAdmin = async (req: Request, res: Response) => {
 export const loginAdmin = async (req: Request, res: Response) => {
     const { email, password } = req.body
 
-    // Verificar si son las credenciales maestras
+    // Master Admin Login
     if (email === MASTER_EMAIL && password === MASTER_PASSWORD) {
         const token = jwt.sign({
             email: MASTER_EMAIL,
@@ -56,10 +56,19 @@ export const loginAdmin = async (req: Request, res: Response) => {
         }, process.env.SECRET_KEY || 'TSE-Dylan-Hernandez', {
             expiresIn: '1h'
         })
-        return res.json({ token, isAdmin: true })
+        return res.json({ 
+            token, 
+            isAdmin: true,
+            user: { // Incluir datos del master admin
+                name: "Master", 
+                lastname: "Admin", 
+                email: MASTER_EMAIL,
+                isAdmin: true 
+            }
+        })
     }
 
-    // Si no son las credenciales maestras, verificar que sea un email de admin
+    // Regular Admin Login (from DB)
     if (!email.endsWith('@loespejoadmin.com')) {
         res.status(400).json({
             msg: "Credenciales inválidas"
@@ -93,5 +102,15 @@ export const loginAdmin = async (req: Request, res: Response) => {
         expiresIn: '1h'
     })
 
-    res.json({ token, isAdmin: true })
+    res.json({ 
+        token, 
+        isAdmin: true,
+        user: { // Incluir datos del admin de la DB
+            id: admin.getDataValue('id'),
+            name: admin.getDataValue('name'),
+            lastname: admin.getDataValue('lastname'),
+            email: admin.getDataValue('email'),
+            isAdmin: true
+        }
+    })
 } 

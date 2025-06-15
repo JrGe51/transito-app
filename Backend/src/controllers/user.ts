@@ -103,7 +103,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
-        // Validar si el RUT ya existe en otro usuario (excluyendo al usuario actual)
+
         const existingRutUser = await User.findOne({
             where: {
                 rut: rut,
@@ -118,7 +118,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
-        // Validar si el Email ya existe en otro usuario (excluyendo al usuario actual)
+
         const existingEmailUser = await User.findOne({
             where: {
                 email: email,
@@ -162,7 +162,7 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
     try {
         console.log('[getAllUsers] Intentando obtener todos los usuarios...');
         const users = await User.findAll({
-            attributes: { exclude: ['password'] } // Excluir el campo de contraseña
+            attributes: { exclude: ['password'] } 
         });
 
         console.log(`[getAllUsers] Usuarios encontrados: ${users.length}`);
