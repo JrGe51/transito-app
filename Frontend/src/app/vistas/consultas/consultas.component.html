@@ -1,18 +1,25 @@
 <body>
   <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">
-            <i class="bi bi-car-front"></i> Departamento de Tránsito
-          </a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                  aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto"></ul>
-          </div>
-        </div>
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <i class="bi bi-car-front"></i> Departamento de Tránsito
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto"></ul>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" (click)="goBack()" style="cursor: pointer;">
+              <i class="bi bi-arrow-left-circle"></i> Volver
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
     </nav>
   </header>
 
@@ -52,7 +59,7 @@
             <ul class="list-unstyled">
               <li><i class="bi bi-geo-alt-fill"></i> Municipalidad Lo espejo</li>
               <li><i class="bi bi-telephone-fill"></i> Teléfono: 973146125 </li>
-              <li><i class="bi bi-envelope-fill"></i> loespejomunicipal.cl</li>
+              <li><i class="bi bi-envelope-fill"></i> transito.loespejo1&#64;gmail.com</li>
             </ul>
           </div>
           <!-- Información -->
@@ -76,13 +83,8 @@
               <span><i class="bi bi-clock-fill"></i> Atención General:</span>
               <p class="mb-1">Lunes a Viernes:</p>
               <ul class="list-unstyled ps-3 mb-2">
-                <li>• Mañana: 8:30 - 14:00</li>
-                <li>• Tarde: 15:00 - 17:30</li>
-              </ul>
-              <span><i class="bi bi-car-front-fill"></i> Exámenes prácticos:</span>
-              <p class="mb-1">Lunes a Jueves:</p>
-              <ul class="list-unstyled ps-3">
-                <li>• 9:00 - 13:00</li>
+                <li>• Mañana: 9:00 - 14:00</li>
+                <li>• Tarde: 15:00 - 18:00</li>
               </ul>
             </div>
           </div>
@@ -96,4 +98,3 @@
       </div>
     </div>
   </footer>
-</body>

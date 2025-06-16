@@ -9,17 +9,31 @@ import jwt from "jsonwebtoken"
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { name, rut, lastname, email, password, telefono, fechanacimiento, direccion } = req.body
 
-    // Verificar si el email existe en la tabla de usuarios
-    const user = await User.findOne({where: { [Op.or]: { email: email, rut: rut }}})
-    
-    // Verificar si el email existe en la tabla de administradores
-    const admin = await Admin.findOne({where: { email: email }})
 
-    if(user || admin){
+    const existingUserByEmail = await User.findOne({ where: { email: email } });
+    if (existingUserByEmail) {
         res.status(400).json({
             msg: `El email ${email} ya se encuentra registrado.`
-        })
-        return
+        });
+        return;
+    }
+
+
+    const existingUserByRut = await User.findOne({ where: { rut: rut } });
+    if (existingUserByRut) {
+        res.status(400).json({
+            msg: `El RUT ${rut} ya se encuentra registrado.`
+        });
+        return;
+    }
+
+
+    const existingAdminByEmail = await Admin.findOne({ where: { email: email } });
+    if (existingAdminByEmail) {
+        res.status(400).json({
+            msg: `El email ${email} ya se encuentra registrado.`
+        });
+        return;
     }
 
     console.log("Estoy por aqui");

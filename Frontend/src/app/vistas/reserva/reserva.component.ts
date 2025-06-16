@@ -17,6 +17,7 @@ import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-reserva',
@@ -55,20 +56,44 @@ export class ReservaComponent implements OnInit {
   showCalendar: boolean = true;
   documentos: any[] = [];
   tipoTramite: string = '';
+  userData: any | null = null;
 
   constructor(
     private horarioService: HorarioService,
     private toast: ToastrService,
     public router: Router,
     private cdr: ChangeDetectorRef,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private location: Location
   ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       this.tipoTramite = params['tipoTramite'] || '';
     });
-    // No cargamos fechas aquí, esperamos a que se seleccione un tipo de licencia
+    this.loadUserData();
+    this.cargarTiposLicencia();
+  }
+
+  loadUserData(): void {
+    const userString = localStorage.getItem('user');
+    if (userString) {
+      this.userData = JSON.parse(userString);
+      this.cdr.detectChanges();
+    }
+  }
+
+  cargarTiposLicencia(): void {
+    this.horarioService.getLicencias().subscribe({
+      next: (licencias: any[]) => {
+        this.tiposLicencia = licencias.map(licencia => licencia.name);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error al cargar tipos de licencia:', error);
+        this.toast.error('Error al cargar los tipos de licencia.', 'Error');
+      }
+    });
   }
 
   onFechaChange(date: Date | null) {
@@ -562,5 +587,9 @@ export class ReservaComponent implements OnInit {
         }
       });
     }
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

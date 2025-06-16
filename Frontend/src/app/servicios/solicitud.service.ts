@@ -16,18 +16,18 @@ export class SolicitudService {
     this.APIUrl = 'api/solicitud';
   }
 
-  getSolicitudesByUser(userId: number): Observable<{ solicitudes: Solicitud[] }> {
+  getSolicitudesByUser(userId: number): Observable<{ solicitudes: Solicitud[], msg?: string }> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    return this.http.get<{ solicitudes: Solicitud[] }>(`${this.AppUrl}${this.APIUrl}/byUser`, { headers: headers });
+    return this.http.get<{ solicitudes: Solicitud[], msg?: string }>(`${this.AppUrl}${this.APIUrl}/byUser`, { headers: headers });
   }
 
-  getAllSolicitudes(): Observable<{ solicitudes: Solicitud[] }> {
+  getAllSolicitudes(): Observable<{ solicitudes: Solicitud[], msg?: string }> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    return this.http.get<{ solicitudes: Solicitud[] }>(`${this.AppUrl}${this.APIUrl}/all`, { headers: headers });
+    return this.http.get<{ solicitudes: Solicitud[], msg?: string }>(`${this.AppUrl}${this.APIUrl}/all`, { headers: headers });
   }
 
   deleteSolicitud(id: number): Observable<any> {

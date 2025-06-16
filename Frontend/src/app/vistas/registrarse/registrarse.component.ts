@@ -58,6 +58,14 @@ export class RegistrarseComponent implements OnInit {
     return /^\d+$/.test(texto);
   }
 
+  validarMayuscula(password: string): boolean {
+    return /[A-Z]/.test(password);
+  }
+
+  validarNumero(password: string): boolean {
+    return /\d/.test(password);
+  }
+
   formatearRut() {
     let cleanedRut = this.rut.replace(/[^0-9kK]/g, '');
     let formattedRut = '';
@@ -179,6 +187,16 @@ export class RegistrarseComponent implements OnInit {
 
     if (!this.validarLongitudMinima(this.password, 6)) {
       this.toast.error('Error', 'La contraseña debe tener al menos 6 caracteres')
+      return
+    }
+
+    if (!this.validarMayuscula(this.password)) {
+      this.toast.error('Error', 'La contraseña debe contener al menos una letra mayúscula')
+      return
+    }
+
+    if (!this.validarNumero(this.password)) {
+      this.toast.error('Error', 'La contraseña debe contener al menos un número')
       return
     }
 

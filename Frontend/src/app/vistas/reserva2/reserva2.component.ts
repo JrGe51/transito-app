@@ -17,6 +17,7 @@ import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-reserva2',
@@ -63,7 +64,8 @@ export class Reserva2Component implements OnInit {
     private toast: ToastrService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private location: Location
   ) {}
 
   ngOnInit() {
@@ -421,5 +423,9 @@ export class Reserva2Component implements OnInit {
         }
       }
     });
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

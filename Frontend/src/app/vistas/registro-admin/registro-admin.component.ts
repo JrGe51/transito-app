@@ -20,13 +20,39 @@ export class RegistroAdminComponent {
   password: string = '';
   repetirPassword: string = '';
 
+  // New properties to track validation errors for display in HTML
+  passwordHasUppercase: boolean = true;
+  passwordHasNumber: boolean = true;
+
   constructor(
     private adminService: AdminService,
     private toast: ToastrService,
     private router: Router
   ) {}
 
+  validarMayuscula(password: string): boolean {
+    return /[A-Z]/.test(password);
+  }
+
+  validarNumero(password: string): boolean {
+    return /\d/.test(password);
+  }
+
+  validarPassword() {
+    if (this.password) {
+      this.passwordHasUppercase = this.validarMayuscula(this.password);
+      this.passwordHasNumber = this.validarNumero(this.password);
+    } else {
+      this.passwordHasUppercase = true;
+      this.passwordHasNumber = true;
+    }
+  }
+
   registrarAdmin() {
+    // Reset validation flags at the beginning of the submission attempt
+    this.passwordHasUppercase = true;
+    this.passwordHasNumber = true;
+
     if (this.name === '' || this.lastname === '' || this.password === '' || this.repetirPassword === '') {
       this.toast.error('Error', 'Todos los campos son obligatorios');
       return;
@@ -39,6 +65,18 @@ export class RegistroAdminComponent {
 
     if (this.password.length < 6) {
       this.toast.error('Error', 'La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    if (!this.validarMayuscula(this.password)) {
+      this.passwordHasUppercase = false; // Set flag for HTML display
+      this.toast.error('Error', 'La contraseña debe contener al menos una letra mayúscula');
+      return;
+    }
+
+    if (!this.validarNumero(this.password)) {
+      this.passwordHasNumber = false; // Set flag for HTML display
+      this.toast.error('Error', 'La contraseña debe contener al menos un número');
       return;
     }
 
