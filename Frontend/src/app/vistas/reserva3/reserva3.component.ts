@@ -45,7 +45,7 @@ export class Reserva3Component implements OnInit {
   horasDisponibles: string[] = [];
   fechaSeleccionada: Date | null = null;
   horaSeleccionada: string | null = null;
-  tiposLicencia: string[] = ['Clase A','Clase B', 'Clase C', 'Clase D']; 
+  tiposLicencia: string[] = ['Clase B', 'Clase C', 'Clase D','Clase E' ,'Clase A1', 'Clase A2', 'Clase A3', 'Clase A4', 'Clase A5']; 
   tipoLicenciaSeleccionado: string | null = null;
   licenciaSeleccionada: boolean = false;
   rut: string = '';
@@ -105,6 +105,14 @@ export class Reserva3Component implements OnInit {
 
   formatDate(date: Date): string {
     return date.toISOString().split('T')[0];
+  }
+
+  formatDateForDisplay(date: Date): string {
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const dia = date.getDate();
+    const mes = meses[date.getMonth()];
+    const año = date.getFullYear();
+    return `${dia} de ${mes} de ${año}`;
   }
 
   dateClass = (d: Date) => {
@@ -184,73 +192,97 @@ export class Reserva3Component implements OnInit {
       return;
     }
 
-    this.tipoLicenciaSeleccionado = tipo;
-    this.licenciaSeleccionada = true;
-    this.fechaSeleccionada = null;
-    this.horaSeleccionada = null;
-    this.horasDisponibles = [];
-    this.fechasDisponibles$.next([]);
-    this.cdr.detectChanges();
+    // Verificar si la licencia existe en la base de datos
+    this.horarioService.getLicencias().subscribe({
+      next: (licencias: any[]) => {
+        const licenciaExiste = licencias.some(
+          lic => lic.name.toLowerCase() === tipo.toLowerCase()
+        );
 
-    // OCULTAR CALENDARIO
-    this.showCalendar = false;
-    this.cdr.detectChanges(); // Forzar la detección de cambios para que se oculte
-
-    this.horarioService.getFechasDisponibles(tipo).subscribe({
-      next: (fechas) => {
-        if (fechas && fechas.length > 0) {
-          this.fechasDisponibles$.next(fechas);
-          this.cdr.detectChanges();
-
-          // MOSTRAR CALENDARIO después de un pequeño retraso para asegurar que se recree
-          setTimeout(() => {
-            this.showCalendar = true;
-            this.cdr.detectChanges();
-
-            if (this.calendar) {
-              // Reasignar las funciones dateClass y filtrarFechasDisponibles para forzar reevaluación
-              this.dateClass = (d: Date) => {
-                const dateString = this.formatDate(d);
-                return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
-              };
-              this.filtrarFechasDisponibles = (date: Date | null): boolean => {
-                if (!date) return false;
-                const dateString = this.formatDate(date);
-                return this.fechasDisponibles$.value.includes(dateString);
-              };
-
-              // Intentar establecer la fecha activa para forzar la reevaluación
-              if (fechas.length > 0) {
-                this.calendar.activeDate = new Date(fechas[0]);
-              } else {
-                this.calendar.activeDate = new Date(); // Si no hay fechas, mostrar el mes actual
-              }
-              this.calendar.updateTodaysDate(); // Fuerza la reevaluación de los filtros
-              this.cdr.detectChanges();
-            }
-          }, 0);
-        } else {
+        if (!licenciaExiste) {
           Swal.fire({
-            icon: 'info',
-            title: 'Sin cupos disponibles',
-            text: `No hay fechas disponibles para reservar la licencia ${tipo}. Por favor, intenta más tarde.`,
+            icon: 'error',
+            title: 'Licencia no disponible',
+            text: 'De momento no se está impartiendo este tipo de licencia',
             confirmButtonColor: '#3085d6'
           });
-          this.tipoLicenciaSeleccionado = null;
-          this.licenciaSeleccionada = false;
+          return;
         }
-      },
-      error: (error) => {
-        console.error('Error al obtener fechas por licencia:', error);
+
+        // Si la licencia existe, continuar con el proceso
+        this.tipoLicenciaSeleccionado = tipo;
+        this.licenciaSeleccionada = true;
+        this.fechaSeleccionada = null;
+        this.horaSeleccionada = null;
+        this.horasDisponibles = [];
         this.fechasDisponibles$.next([]);
-        this.toast.error('Error al cargar fechas disponibles', 'Error');
         this.cdr.detectChanges();
 
-        // Asegurarse de que el calendario se muestre incluso en caso de error
-        setTimeout(() => {
-          this.showCalendar = true;
-          this.cdr.detectChanges();
-        }, 0);
+        // OCULTAR CALENDARIO
+        this.showCalendar = false;
+        this.cdr.detectChanges(); 
+
+        this.horarioService.getFechasDisponibles(tipo).subscribe({
+          next: (fechas) => {
+            if (fechas && fechas.length > 0) {
+              this.fechasDisponibles$.next(fechas);
+              this.cdr.detectChanges();
+
+              // MOSTRAR CALENDARIO después de un pequeño retraso para asegurar que se recree
+              setTimeout(() => {
+                this.showCalendar = true;
+                this.cdr.detectChanges();
+
+                if (this.calendar) {
+                  // Reasignar las funciones dateClass y filtrarFechasDisponibles para forzar reevaluación
+                  this.dateClass = (d: Date) => {
+                    const dateString = this.formatDate(d);
+                    return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
+                  };
+                  this.filtrarFechasDisponibles = (date: Date | null): boolean => {
+                    if (!date) return false;
+                    const dateString = this.formatDate(date);
+                    return this.fechasDisponibles$.value.includes(dateString);
+                  };
+
+                  // Intentar establecer la fecha activa para forzar la reevaluación
+                  if (fechas.length > 0) {
+                    this.calendar.activeDate = new Date(fechas[0]);
+                  } else {
+                    this.calendar.activeDate = new Date(); // Si no hay fechas, mostrar el mes actual
+                  }
+                  this.calendar.updateTodaysDate(); // Fuerza la reevaluación de los filtros
+                  this.cdr.detectChanges();
+                }
+              }, 0);
+            } else {
+              Swal.fire({
+                icon: 'info',
+                title: 'Sin cupos disponibles',
+                text: `No hay fechas disponibles para reservar la licencia ${tipo}. Por favor, intenta más tarde.`,
+                confirmButtonColor: '#3085d6'
+              });
+              this.tipoLicenciaSeleccionado = null;
+              this.licenciaSeleccionada = false;
+            }
+          },
+          error: (error) => {
+            console.error('Error al obtener fechas por licencia:', error);
+            this.fechasDisponibles$.next([]);
+            this.toast.error('Error al cargar fechas disponibles', 'Error');
+            this.cdr.detectChanges();
+
+            // Asegurarse de que el calendario se muestre incluso en caso de error
+            setTimeout(() => {
+              this.showCalendar = true;
+              this.cdr.detectChanges();
+            }, 0);
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error al verificar licencia:', error);
+        this.toast.error('Error al verificar la licencia', 'Error');
       }
     });
   }
@@ -394,7 +426,7 @@ export class Reserva3Component implements OnInit {
             Swal.fire({
               icon: 'success',
               title: '¡Reserva realizada con éxito!',
-              text: `Estimado/a usuario, su reserva para el día ${this.formatDate(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.
+              text: `Estimado/a usuario, su reserva para el día ${this.formatDateForDisplay(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.
                       Se le ha enviado un correo electrónico con los detalles de la reserva.`,
               confirmButtonColor: '#3085d6'
             }).then(() => {
@@ -407,7 +439,7 @@ export class Reserva3Component implements OnInit {
           Swal.fire({
             icon: 'success',
             title: '¡Reserva realizada con éxito!',
-            text: `Estimado/a usuario, su reserva para el día ${this.formatDate(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.
+            text: `Estimado/a usuario, su reserva para el día ${this.formatDateForDisplay(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.
                     Se le ha enviado un correo electrónico con los detalles de la reserva.`,
             confirmButtonColor: '#3085d6'
           }).then(() => {

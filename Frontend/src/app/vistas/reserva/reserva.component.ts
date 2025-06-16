@@ -45,7 +45,7 @@ export class ReservaComponent implements OnInit {
   horasDisponibles: string[] = [];
   fechaSeleccionada: Date | null = null;
   horaSeleccionada: string | null = null;
-  tiposLicencia: string[] = ['Clase B', 'Clase C', 'Clase D']; 
+  tiposLicencia: string[] = ['Clase B', 'Clase C', 'Clase D', 'Clase E']; 
   tipoLicenciaSeleccionado: string | null = null;
   licenciaSeleccionada: boolean = false;
   rut: string = '';
