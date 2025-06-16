@@ -107,6 +107,14 @@ export class ReservaComponent implements OnInit {
     return date.toISOString().split('T')[0];
   }
 
+  formatDateForDisplay(date: Date): string {
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const dia = date.getDate();
+    const mes = meses[date.getMonth()];
+    const año = date.getFullYear();
+    return `${dia} de ${mes} de ${año}`;
+  }
+
   dateClass = (d: Date) => {
     const dateString = this.formatDate(d);
     return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
@@ -274,6 +282,21 @@ export class ReservaComponent implements OnInit {
       html: `
         <div class="form-group">
           <label for="documentos">Documentos requeridos:</label>
+            <mat-card class="mb-4">
+              <mat-card-content style="text-align: left;">
+                <ul class="document-list">
+                  <p>&nbsp;</p>
+                  <li>Cédula de identidad</li>
+                  <li>Certificado de estudios</li>
+                  <li>Certificado de antecedentes</li>
+                  <li>Fotocopias: De la cédula de identidad</li>
+                  <p>&nbsp;</p>
+                  <p>Si vienes de otra comuna:
+                  Certificado de Residencia
+                  </p>                                                                                       
+                </ul>
+              </mat-card-content>
+            </mat-card>
           <input type="file" 
                  id="documentos" 
                  class="swal2-input" 
@@ -379,7 +402,7 @@ export class ReservaComponent implements OnInit {
             Swal.fire({
               icon: 'success',
               title: '¡Reserva realizada con éxito!',
-              text: `Estimado/a usuario, su reserva para el día ${this.formatDate(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.
+              text: `Estimado/a usuario, su reserva para el día ${this.formatDateForDisplay(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.
                       Se le ha enviado un correo electrónico con los detalles de la reserva.`,
               confirmButtonColor: '#3085d6'
             }).then(() => {
@@ -392,7 +415,7 @@ export class ReservaComponent implements OnInit {
           Swal.fire({
             icon: 'success',
             title: '¡Reserva realizada con éxito!',
-            text: `Estimado/a usuario, su reserva para el día ${this.formatDate(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.
+            text: `Estimado/a usuario, su reserva para el día ${this.formatDateForDisplay(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.
                     Se le ha enviado un correo electrónico con los detalles de la reserva.`,
             confirmButtonColor: '#3085d6'
           }).then(() => {

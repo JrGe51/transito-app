@@ -274,6 +274,21 @@ export class Reserva3Component implements OnInit {
       html: `
         <div class="form-group">
           <label for="documentos">Documentos requeridos:</label>
+            <mat-card class="mb-4">
+              <mat-card-content style="text-align: left;">
+                <ul class="document-list">
+                  <p>&nbsp;</p>
+                  <li>Cédula de identidad</li>
+                  <li>Licencia de Conducir actual</li>
+                  <li>Certificado de antecedentes</li>
+                  <li>Fotocopias: De la cédula de identidad y la licencia de conducir actual</li>
+                  <p>&nbsp;</p>
+                  <p>Si vienes de otra comuna:
+                  Certificado de Residencia
+                  </p>                                                                                       
+                </ul>
+              </mat-card-content>
+            </mat-card>
           <input type="file" 
                  id="documentos" 
                  class="swal2-input" 

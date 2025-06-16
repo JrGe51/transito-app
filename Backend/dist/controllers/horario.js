@@ -146,13 +146,17 @@ const getFechasDisponibles = (req, res) => __awaiter(void 0, void 0, void 0, fun
             group: ['fecha'],
             order: [['fecha', 'ASC']]
         });
-        // Filtrar fechas futuras, con esto las fechas pasadas no se muestran
+        // Obtener la fecha actual sin la hora
         const ahora = new Date();
-        const manana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1);
-        manana.setHours(0, 0, 0, 0);
+        const fechaActual = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+        // Filtrar fechas futuras, incluyendo hoy
         const fechasFiltradas = fechas
             .map(f => f.fecha)
-            .filter(fecha => new Date(fecha).setHours(0, 0, 0, 0) >= manana.getTime());
+            .filter(fecha => {
+            const fechaComparar = new Date(fecha);
+            fechaComparar.setHours(0, 0, 0, 0);
+            return fechaComparar >= fechaActual;
+        });
         res.json(fechasFiltradas);
     }
     catch (error) {
