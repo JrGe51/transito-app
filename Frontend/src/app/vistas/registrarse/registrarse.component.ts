@@ -66,6 +66,21 @@ export class RegistrarseComponent implements OnInit {
     return /\d/.test(password);
   }
 
+  validarEdad(fechaNacimiento: string): boolean {
+    if (!fechaNacimiento) return false;
+
+    const hoy = new Date();
+    const fechaNac = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - fechaNac.getFullYear();
+    const mes = hoy.getMonth() - fechaNac.getMonth();
+
+    if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+      edad--;
+    }
+
+    return edad >= 16;
+  }
+
   formatearRut() {
     let cleanedRut = this.rut.replace(/[^0-9kK]/g, '');
     let formattedRut = '';
@@ -157,6 +172,11 @@ export class RegistrarseComponent implements OnInit {
 
     if (!this.validarRut(this.rut)) {
       this.toast.error('Error', 'El formato del RUT no es válido (ejemplo: 12.345.678-9)')
+      return
+    }
+
+    if (!this.validarEdad(this.fechanacimiento)) {
+      this.toast.error('Error', 'Debes tener al menos 16 años para registrarte.')
       return
     }
 
