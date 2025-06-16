@@ -201,9 +201,25 @@ export class Reserva2Component implements OnInit {
     let mensajeError = '';
 
     switch (tipoLicencia) {
-      case 'Clase A':
+      case 'Clase A1':
         edadMinima = 20;
-        mensajeError = 'Debes ser mayor de 20 años para obtener una licencia Clase A';
+        mensajeError = 'Debes ser mayor de 20 años para obtener una licencia Clase A1';
+        break;
+      case 'Clase A2':
+        edadMinima = 20;
+        mensajeError = 'Debes ser mayor de 20 años para obtener una licencia Clase A2';
+        break;
+      case 'Clase A3':
+        edadMinima = 20;
+        mensajeError = 'Debes ser mayor de 20 años para obtener una licencia Clase A3';
+        break;
+      case 'Clase A4':
+        edadMinima = 20;
+        mensajeError = 'Debes ser mayor de 20 años para obtener una licencia Clase A4';
+        break;
+      case 'Clase A5':
+        edadMinima = 20;
+        mensajeError = 'Debes ser mayor de 20 años para obtener una licencia Clase A5';
         break;
       case 'Clase B':
         edadMinima = 18;
@@ -216,6 +232,10 @@ export class Reserva2Component implements OnInit {
       case 'Clase D':
         edadMinima = 18;
         mensajeError = 'Debes ser mayor de 18 años para obtener una licencia Clase D';
+        break;
+      case 'Clase E':
+        edadMinima = 18;
+        mensajeError = 'Debes ser mayor de 18 años para obtener una licencia Clase E';
         break;
       default:
         return true; 
