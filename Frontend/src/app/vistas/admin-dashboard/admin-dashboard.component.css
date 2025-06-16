@@ -261,4 +261,34 @@
 
 .create-license-form .btn-secondary:hover {
   background-color: #545b62;
+}
+
+/* Estilos para tablas y listas con scroll */
+.table-responsive,
+.schedule-list-wrapper {
+  max-height: 500px; /* Altura máxima antes de que aparezca el scrollbar */
+  overflow-y: auto;
+}
+
+/* Estilos personalizados para el scrollbar */
+.table-responsive::-webkit-scrollbar,
+.schedule-list-wrapper::-webkit-scrollbar {
+  width: 8px; /* Ancho del scrollbar */
+}
+
+.table-responsive::-webkit-scrollbar-track,
+.schedule-list-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Color de fondo de la pista del scrollbar */
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb,
+.schedule-list-wrapper::-webkit-scrollbar-thumb {
+  background: #888; /* Color del "pulgar" del scrollbar */
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover,
+.schedule-list-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Color del "pulgar" al pasar el mouse */
 } 

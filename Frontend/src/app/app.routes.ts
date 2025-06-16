@@ -14,7 +14,7 @@ import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: 'nuevo', component: NuevoComponent, canActivate: [authGuard] },
-  { path: 'login', component: LoginComponent, canActivate: [authGuard] },
+  { path: 'login', component: LoginComponent },
   { path: 'registrarse', component: RegistrarseComponent, canActivate: [authGuard] },
   { path: 'registro-admin', component: RegistroAdminComponent, canActivate: [authGuard] },
   { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [authGuard] },
@@ -24,5 +24,5 @@ export const routes: Routes = [
   { path: 'reserva2', component: Reserva2Component, canActivate: [authGuard] },
   { path: 'reserva3', component: Reserva3Component, canActivate: [authGuard] },
   { path: 'consultas', component: ConsultasComponent, canActivate: [authGuard] },
-  { path: '**', redirectTo: '/nuevo', pathMatch: 'full' }
+  { path: '**', redirectTo: '/login', pathMatch: 'full' }
 ]; 

@@ -277,21 +277,29 @@ export class Reserva2Component implements OnInit {
           return;
         }
 
-        // Si la licencia existe, continuar con el proceso
-        this.tipoLicenciaSeleccionado = tipo;
-        this.licenciaSeleccionada = true;
-        this.fechaSeleccionada = null;
-        this.horaSeleccionada = null;
-        this.horasDisponibles = [];
-        this.fechasDisponibles$.next([]);
-        this.cdr.detectChanges();
-
-        this.showCalendar = false;
-        this.cdr.detectChanges(); 
-
+        // Primero verificar si hay fechas disponibles
         this.horarioService.getFechasDisponibles(tipo).subscribe({
           next: (fechas) => {
+            if (fechas.length === 0) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Sin cupos disponibles',
+                text: 'No hay cupos disponibles para la licencia ' + tipo + ' en este momento. Por favor, intente más tarde.',
+                confirmButtonColor: '#3085d6'
+              });
+              return;
+            }
+
+            // Si hay fechas disponibles, continuar con el proceso
+            this.tipoLicenciaSeleccionado = tipo;
+            this.licenciaSeleccionada = true;
+            this.fechaSeleccionada = null;
+            this.horaSeleccionada = null;
+            this.horasDisponibles = [];
             this.fechasDisponibles$.next(fechas);
+            this.cdr.detectChanges();
+
+            this.showCalendar = false;
             this.cdr.detectChanges();
 
             setTimeout(() => {
@@ -339,9 +347,104 @@ export class Reserva2Component implements OnInit {
     });
   }
 
+  mostrarFormularioReserva() {
+    if (!this.fechaSeleccionada) {
+      this.toast.error('Por favor, selecciona una fecha', 'Error');
+      return;
+    }
+    if (!this.horaSeleccionada) {
+      this.toast.error('Por favor, selecciona una hora', 'Error');
+      return;
+    }
+
+    Swal.fire({
+      title: 'Confirmar Reserva',
+      html: `
+        <div class="form-group">
+          <label for="documentos">Documentos requeridos:</label>
+            <mat-card class="mb-4">
+              <mat-card-content style="text-align: left;">
+                <ul class="document-list">
+                  <p>&nbsp;</p>
+                  <li>Cédula de identidad</li>
+                  <li>Licencia de Conducir actual</li>
+                  <li>Certificado de antecedentes</li>
+                  <li>Fotocopias: De la cédula de identidad y la licencia de conducir actual</li>
+                  <p>&nbsp;</p>
+                  <p>Si vienes de otra comuna:
+                  Certificado de Residencia
+                  </p>                                                                                       
+                </ul>
+              </mat-card-content>
+            </mat-card>
+          <input type="file" 
+                 id="documentos" 
+                 class="swal2-input" 
+                 multiple 
+                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+          <small class="text-muted">Formatos permitidos: PDF, Word, imágenes. Máximo 3 archivos.</small>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Reservar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      focusConfirm: false,
+      preConfirm: () => {
+        const documentos = (document.getElementById('documentos') as HTMLInputElement).files;
+
+        if (!documentos || documentos.length === 0) {
+          Swal.showValidationMessage('Por favor adjunte al menos un documento');
+          return false;
+        }
+
+        if (documentos.length > 3) { // Máximo 3 archivos para renovación
+          Swal.showValidationMessage('Máximo 3 archivos permitidos para renovación');
+          return false;
+        }
+
+        // Convertir archivos a base64
+        const promesas = Array.from(documentos).map(file => {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve({
+              nombre: file.name,
+              tipo: file.type,
+              contenido: reader.result,
+              fecha: new Date().toISOString()
+            });
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        });
+
+        return Promise.all(promesas)
+          .then(documentosBase64 => {
+            return {
+              documentos: documentosBase64
+            };
+          });
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.documentos = result.value.documentos;
+        this.onSubmit();
+      }
+    });
+  }
+
   onSubmit() {
-    if (!this.fechaSeleccionada || !this.horaSeleccionada) {
-      this.toast.error('Por favor, selecciona una fecha y hora', 'Error');
+    if (!this.tipoLicenciaSeleccionado && this.tipoTramite !== 'Renovación') {
+      this.toast.error('Por favor, selecciona un tipo de licencia', 'Error');
+      return;
+    }
+    if (!this.fechaSeleccionada) {
+      this.toast.error('Por favor, selecciona una fecha', 'Error');
+      return;
+    }
+    if (!this.horaSeleccionada) {
+      this.toast.error('Por favor, selecciona una hora', 'Error');
       return;
     }
 
@@ -356,9 +459,9 @@ export class Reserva2Component implements OnInit {
       userId: user.id,
       fecha: this.formatDate(this.fechaSeleccionada),
       hora: this.horaSeleccionada,
-      name: this.tipoLicenciaSeleccionado || this.tipoTramite,
+      name: this.tipoLicenciaSeleccionado || 'Renovación',
       tipoTramite: this.tipoTramite,
-      documentos: []
+      documentos: this.documentos || []
     };
 
     console.log('Enviando solicitud:', solicitud);
@@ -387,7 +490,8 @@ export class Reserva2Component implements OnInit {
             Swal.fire({
               icon: 'success',
               title: '¡Reserva realizada con éxito!',
-              text: `Estimado/a usuario, su reserva para el día ${this.formatDateForDisplay(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.`,
+              text: `Estimado/a usuario, su reserva para el día ${this.formatDateForDisplay(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.
+                    Se le ha enviado un correo electrónico con los detalles de la reserva.`,
               confirmButtonColor: '#3085d6'
             }).then(() => {
               this.router.navigate(['/user-dashboard']); // Redirigir al dashboard de usuario
@@ -398,7 +502,8 @@ export class Reserva2Component implements OnInit {
           Swal.fire({
             icon: 'success',
             title: '¡Reserva realizada con éxito!',
-            text: `Estimado/a usuario, su reserva para el día ${this.formatDateForDisplay(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.`,
+            text: `Estimado/a usuario, su reserva para el día ${this.formatDateForDisplay(this.fechaSeleccionada!)} a las ${this.horaSeleccionada} ha sido registrada correctamente.
+                    Se le ha enviado un correo electrónico con los detalles de la reserva.`,
             confirmButtonColor: '#3085d6'
           }).then(() => {
             this.router.navigate(['/user-dashboard']); // Redirigir al dashboard de usuario
@@ -414,12 +519,32 @@ export class Reserva2Component implements OnInit {
           setTimeout(() => {
             Swal.close();
             console.error('Error al registrar la solicitud:', error);
-            this.toast.error('Error al realizar la reserva', 'Error');
+            // Verificar si es un error de tipo warning (reserva existente)
+            if (error.error?.type === 'warning') {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Reserva existente',
+                text: error.error.msg,
+                confirmButtonColor: '#3085d6'
+              });
+            } else {
+              this.toast.error(error.error?.msg || 'Error al realizar la reserva', 'Error');
+            }
           }, remainingTime);
         } else {
           Swal.close();
           console.error('Error al registrar la solicitud:', error);
-          this.toast.error('Error al realizar la reserva', 'Error');
+          // Verificar si es un error de tipo warning (reserva existente)
+          if (error.error?.type === 'warning') {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Reserva existente',
+              text: error.error.msg,
+              confirmButtonColor: '#3085d6'
+            });
+          } else {
+            this.toast.error(error.error?.msg || 'Error al realizar la reserva', 'Error');
+          }
         }
       }
     });
