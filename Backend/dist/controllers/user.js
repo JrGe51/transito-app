@@ -20,11 +20,22 @@ const sequelize_1 = require("sequelize");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, rut, lastname, email, password, telefono, fechanacimiento, direccion } = req.body;
-    // Verificar si el email existe en la tabla de usuarios
-    const user = yield user_1.User.findOne({ where: { [sequelize_1.Op.or]: { email: email, rut: rut } } });
-    // Verificar si el email existe en la tabla de administradores
-    const admin = yield admin_1.Admin.findOne({ where: { email: email } });
-    if (user || admin) {
+    const existingUserByEmail = yield user_1.User.findOne({ where: { email: email } });
+    if (existingUserByEmail) {
+        res.status(400).json({
+            msg: `El email ${email} ya se encuentra registrado.`
+        });
+        return;
+    }
+    const existingUserByRut = yield user_1.User.findOne({ where: { rut: rut } });
+    if (existingUserByRut) {
+        res.status(400).json({
+            msg: `El RUT ${rut} ya se encuentra registrado.`
+        });
+        return;
+    }
+    const existingAdminByEmail = yield admin_1.Admin.findOne({ where: { email: email } });
+    if (existingAdminByEmail) {
         res.status(400).json({
             msg: `El email ${email} ya se encuentra registrado.`
         });

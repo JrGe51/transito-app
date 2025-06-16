@@ -121,7 +121,7 @@ export const registerSolicitud = async (req: Request, res: Response, next: NextF
             </ul>
 
             <p>Por favor, asegúrese de traer todos los documentos necesarios el día de su cita.</p>
-            <p>Si necesita realizar algún cambio o cancelar su reserva, por favor contáctenos.</p>
+            <p>Si necesita realizar algún cambio o cancelar su reserva, por favor contáctenos al **+569 73146125**.</p>
             <p>Saludos cordiales,<br>Equipo de Tránsito</p>
         `;
 
@@ -155,13 +155,13 @@ export const registerSolicitud = async (req: Request, res: Response, next: NextF
 
 export const getSolicitudesByUser = async (req: Request, res: Response): Promise<void> => {
     try {
-        const id_usuario = (req as any).userId; // Asumiendo que el ID del usuario está en req.userId del middleware de autenticación
+        const id_usuario = (req as any).userId; 
         console.log(`[getSolicitudesByUser] Intentando obtener solicitudes para el usuario ID: ${id_usuario}`);
 
         if (!id_usuario) {
             console.warn('[getSolicitudesByUser] Usuario no autenticado: id_usuario es nulo o indefinido.');
             res.status(401).json({ msg: 'Usuario no autenticado.' });
-            return; // Añadir return aquí para que la función termine con void
+            return; 
         }
 
         console.log('[getSolicitudesByUser] Construyendo consulta Sequelize...');
@@ -170,7 +170,7 @@ export const getSolicitudesByUser = async (req: Request, res: Response): Promise
             include: [
                 { model: Horario, as: 'horario' },
                 { model: Licencia, as: 'tipoLicencia' },
-                { model: User, as: 'usuario', attributes: ['name', 'lastname', 'email'] } // Incluir solo algunos atributos del usuario
+                { model: User, as: 'usuario', attributes: ['name', 'lastname', 'email'] } 
             ]
         });
 
@@ -180,7 +180,7 @@ export const getSolicitudesByUser = async (req: Request, res: Response): Promise
                 msg: 'No se encontraron solicitudes para este usuario.'
             });
             console.log('[getSolicitudesByUser] No se encontraron solicitudes para este usuario.');
-            return; // Añadir return aquí para que la función termine con void
+            return; 
         }
 
         res.status(200).json({
@@ -202,7 +202,7 @@ export const getAllSolicitudes = async (req: Request, res: Response): Promise<vo
         console.log('[getAllSolicitudes] Intentando obtener todas las solicitudes...');
 
         const solicitudes = await Solicitud.findAll({
-            attributes: { exclude: ['documentos'] }, // Excluir el campo documentos
+            attributes: { exclude: ['documentos'] }, 
             include: [
                 { 
                     model: User, 
@@ -241,7 +241,7 @@ export const getAllSolicitudes = async (req: Request, res: Response): Promise<vo
 
 export const getSolicitudById = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { id } = req.params; // Obtener el ID de los parámetros de la URL
+        const { id } = req.params; 
 
         if (!id) {
             res.status(400).json({ msg: 'ID de solicitud es requerido.' });
@@ -302,12 +302,12 @@ export const deleteSolicitud = async (req: Request, res: Response): Promise<void
             return;
         }
 
-        // Liberar el cupo del horario
+
         if (solicitud.horario) {
             await solicitud.horario.update({ cupodisponible: true });
         }
 
-        // Preparar el correo de cancelación
+
         const emailContent = `
             <h1>Cancelación de Solicitud</h1>
             <p>Estimado/a ${solicitud.usuario?.name} ${solicitud.usuario?.lastname},</p>
@@ -319,10 +319,11 @@ export const deleteSolicitud = async (req: Request, res: Response): Promise<void
                 <li><strong>Tipo de Trámite:</strong> ${solicitud.tipoTramite}</li>
             </ul>
             <p>Si necesita realizar una nueva solicitud, puede hacerlo a través de nuestra plataforma.</p>
+            <p>Para cualquier consulta, no dude en contactarnos al **+569 73146125**.</p>
             <p>Saludos cordiales,<br>Equipo de Tránsito</p>
         `;
 
-        // Enviar correo de cancelación
+
         try {
             await sendEmail({
                 to: solicitud.usuario?.email || '',
@@ -333,7 +334,7 @@ export const deleteSolicitud = async (req: Request, res: Response): Promise<void
             console.error('Error al enviar el correo de cancelación:', emailError);
         }
 
-        // Eliminar la solicitud
+
         await solicitud.destroy();
 
         res.json({

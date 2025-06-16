@@ -107,7 +107,7 @@ const registerSolicitud = (req, res, next) => __awaiter(void 0, void 0, void 0, 
             </ul>
 
             <p>Por favor, asegúrese de traer todos los documentos necesarios el día de su cita.</p>
-            <p>Si necesita realizar algún cambio o cancelar su reserva, por favor contáctenos.</p>
+            <p>Si necesita realizar algún cambio o cancelar su reserva, por favor contáctenos al **+569 73146125**.</p>
             <p>Saludos cordiales,<br>Equipo de Tránsito</p>
         `;
         try {
@@ -141,12 +141,12 @@ const registerSolicitud = (req, res, next) => __awaiter(void 0, void 0, void 0, 
 exports.registerSolicitud = registerSolicitud;
 const getSolicitudesByUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const id_usuario = req.userId; // Asumiendo que el ID del usuario está en req.userId del middleware de autenticación
+        const id_usuario = req.userId;
         console.log(`[getSolicitudesByUser] Intentando obtener solicitudes para el usuario ID: ${id_usuario}`);
         if (!id_usuario) {
             console.warn('[getSolicitudesByUser] Usuario no autenticado: id_usuario es nulo o indefinido.');
             res.status(401).json({ msg: 'Usuario no autenticado.' });
-            return; // Añadir return aquí para que la función termine con void
+            return;
         }
         console.log('[getSolicitudesByUser] Construyendo consulta Sequelize...');
         const solicitudes = yield solicitud_1.Solicitud.findAll({
@@ -154,7 +154,7 @@ const getSolicitudesByUser = (req, res) => __awaiter(void 0, void 0, void 0, fun
             include: [
                 { model: horario_1.Horario, as: 'horario' },
                 { model: licencia_1.Licencia, as: 'tipoLicencia' },
-                { model: user_1.User, as: 'usuario', attributes: ['name', 'lastname', 'email'] } // Incluir solo algunos atributos del usuario
+                { model: user_1.User, as: 'usuario', attributes: ['name', 'lastname', 'email'] }
             ]
         });
         console.log(`[getSolicitudesByUser] Solicitudes encontradas: ${solicitudes.length}`);
@@ -163,7 +163,7 @@ const getSolicitudesByUser = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 msg: 'No se encontraron solicitudes para este usuario.'
             });
             console.log('[getSolicitudesByUser] No se encontraron solicitudes para este usuario.');
-            return; // Añadir return aquí para que la función termine con void
+            return;
         }
         res.status(200).json({
             solicitudes
@@ -183,7 +183,7 @@ const getAllSolicitudes = (req, res) => __awaiter(void 0, void 0, void 0, functi
     try {
         console.log('[getAllSolicitudes] Intentando obtener todas las solicitudes...');
         const solicitudes = yield solicitud_1.Solicitud.findAll({
-            attributes: { exclude: ['documentos'] }, // Excluir el campo documentos
+            attributes: { exclude: ['documentos'] },
             include: [
                 {
                     model: user_1.User,
@@ -220,7 +220,7 @@ const getAllSolicitudes = (req, res) => __awaiter(void 0, void 0, void 0, functi
 exports.getAllSolicitudes = getAllSolicitudes;
 const getSolicitudById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id } = req.params; // Obtener el ID de los parámetros de la URL
+        const { id } = req.params;
         if (!id) {
             res.status(400).json({ msg: 'ID de solicitud es requerido.' });
             return;
@@ -276,11 +276,9 @@ const deleteSolicitud = (req, res) => __awaiter(void 0, void 0, void 0, function
             });
             return;
         }
-        // Liberar el cupo del horario
         if (solicitud.horario) {
             yield solicitud.horario.update({ cupodisponible: true });
         }
-        // Preparar el correo de cancelación
         const emailContent = `
             <h1>Cancelación de Solicitud</h1>
             <p>Estimado/a ${(_a = solicitud.usuario) === null || _a === void 0 ? void 0 : _a.name} ${(_b = solicitud.usuario) === null || _b === void 0 ? void 0 : _b.lastname},</p>
@@ -292,9 +290,9 @@ const deleteSolicitud = (req, res) => __awaiter(void 0, void 0, void 0, function
                 <li><strong>Tipo de Trámite:</strong> ${solicitud.tipoTramite}</li>
             </ul>
             <p>Si necesita realizar una nueva solicitud, puede hacerlo a través de nuestra plataforma.</p>
+            <p>Para cualquier consulta, no dude en contactarnos al **+569 73146125**.</p>
             <p>Saludos cordiales,<br>Equipo de Tránsito</p>
         `;
-        // Enviar correo de cancelación
         try {
             yield (0, emailService_1.sendEmail)({
                 to: ((_f = solicitud.usuario) === null || _f === void 0 ? void 0 : _f.email) || '',
@@ -305,7 +303,6 @@ const deleteSolicitud = (req, res) => __awaiter(void 0, void 0, void 0, function
         catch (emailError) {
             console.error('Error al enviar el correo de cancelación:', emailError);
         }
-        // Eliminar la solicitud
         yield solicitud.destroy();
         res.json({
             msg: 'Solicitud eliminada correctamente'

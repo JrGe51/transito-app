@@ -9,6 +9,13 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto"></ul>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" (click)="goBack()" style="cursor: pointer;">
+              <i class="bi bi-arrow-left-circle"></i> Volver
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
 </nav>
@@ -36,3 +43,52 @@
         </div>
     </div>
 </div>
+  <footer class="footer mt-5">
+    <div class="footer-bg">
+      <div class="container">
+        <div class="row justify-content-around">
+          <!-- Departamento -->
+          <div class="col-md-4 mb-3">
+            <h5 class="text-primary">Departamento de Tránsito</h5>
+            <ul class="list-unstyled">
+              <li><i class="bi bi-geo-alt-fill"></i> Municipalidad Lo espejo</li>
+              <li><i class="bi bi-telephone-fill"></i> Teléfono: 973146125 </li>
+              <li><i class="bi bi-envelope-fill"></i> transito.loespejo1&#64;gmail.com</li>
+            </ul>
+          </div>
+          <!-- Información -->
+          <div class="col-md-4 mb-3">
+            <h5 class="text-primary">Información Importante</h5>
+            <ul class="list-unstyled">
+              <li><a href="https://www.chileatiende.gob.cl/fichas/20592-licencias-de-conducir" target="_blank"><i
+                    class="bi bi-chevron-right"></i> Licencias de Conducir</a></li>
+              <li><a href="https://practicatest.cl/preguntas/que-documentos-debe-presentar-para-sacar-licencia-de-conducir-clase-b-en-chile/ZJyToQ==" target="_blank"><i
+                    class="bi bi-chevron-right"></i> Documentos Necesarios</a></li>
+              <li><a href="https://www.loespejo.cl/" target="_blank"><i
+                    class="bi bi-chevron-right"></i> Municipalidad</a></li>
+              <li><a href="https://www.educacionvial.cl/categoria/preguntas-frecuentes/valores-de-licencias-de-conducir" target="_blank"><i
+                    class="bi bi-chevron-right"></i> Valores y Aranceles</a></li>
+            </ul>
+          </div>
+          <!-- Horario de Atención -->
+          <div class="col-md-4 mb-3">
+            <h5 class="text-primary">Horario de Atención</h5>
+            <div>
+              <span><i class="bi bi-clock-fill"></i> Atención General:</span>
+              <p class="mb-1">Lunes a Viernes:</p>
+              <ul class="list-unstyled ps-3 mb-2">
+                <li>• Mañana: 9:00 - 14:00</li>
+                <li>• Tarde: 15:00 - 18:00</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <hr class="my-4">
+        <div class="row footer-bottom">
+          <div class="col-12 text-center">
+            <p class="mb-0">&copy; 2025 Departamento de Tránsito Municipalidad Lo espejo. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>

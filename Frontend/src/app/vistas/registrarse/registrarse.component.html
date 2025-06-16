@@ -91,6 +91,12 @@
           <ng-container *ngIf="password !== '' && password.length < 6">
             ❌ La contraseña debe tener al menos 6 caracteres
           </ng-container>
+          <ng-container *ngIf="password !== '' && !validarMayuscula(password)">
+            ❌ La contraseña debe contener al menos una letra mayúscula
+          </ng-container>
+          <ng-container *ngIf="password !== '' && !validarNumero(password)">
+            ❌ La contraseña debe contener al menos un número
+          </ng-container>
         </div>
       </div>
       <div class="form-group">
