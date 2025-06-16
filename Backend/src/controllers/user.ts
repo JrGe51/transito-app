@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import bcrypt from 'bcrypt'
 import { User } from "../models/user"
+import { Admin } from "../models/admin"
 import { Op } from "sequelize"
 import jwt from "jsonwebtoken"
 
@@ -8,11 +9,15 @@ import jwt from "jsonwebtoken"
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { name, rut, lastname, email, password, telefono, fechanacimiento, direccion } = req.body
 
+    // Verificar si el email existe en la tabla de usuarios
     const user = await User.findOne({where: { [Op.or]: { email: email, rut: rut }}})
+    
+    // Verificar si el email existe en la tabla de administradores
+    const admin = await Admin.findOne({where: { email: email }})
 
-    if(user){
+    if(user || admin){
         res.status(400).json({
-            msg: `El usuario ya existe con el email ${email} o rut ${rut}.`
+            msg: `El email ${email} ya se encuentra registrado.`
         })
         return
     }

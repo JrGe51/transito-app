@@ -15,14 +15,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.getAllUsers = exports.updateUser = exports.login = exports.register = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const user_1 = require("../models/user");
+const admin_1 = require("../models/admin");
 const sequelize_1 = require("sequelize");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, rut, lastname, email, password, telefono, fechanacimiento, direccion } = req.body;
+    // Verificar si el email existe en la tabla de usuarios
     const user = yield user_1.User.findOne({ where: { [sequelize_1.Op.or]: { email: email, rut: rut } } });
-    if (user) {
+    // Verificar si el email existe en la tabla de administradores
+    const admin = yield admin_1.Admin.findOne({ where: { email: email } });
+    if (user || admin) {
         res.status(400).json({
-            msg: `El usuario ya existe con el email ${email} o rut ${rut}.`
+            msg: `El email ${email} ya se encuentra registrado.`
         });
         return;
     }
