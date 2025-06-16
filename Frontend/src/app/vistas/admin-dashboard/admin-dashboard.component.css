@@ -42,6 +42,45 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+  margin-right: auto;
+  flex-wrap: wrap;
+}
+
+.filter-controls .form-group {
+  margin-bottom: 0;
+}
+
+.filter-controls label {
+  font-size: 0.9em;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.filter-controls .form-control {
+  height: 38px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.filter-controls select.form-control {
+  background-position: right 0.75rem center;
+  background-size: 0.8em;
+  padding-right: 25px;
+}
+
+.filter-controls .btn {
+  padding: 8px 15px;
+  font-size: 14px;
+  border-radius: 4px;
 }
 
 .create-schedule-button {
