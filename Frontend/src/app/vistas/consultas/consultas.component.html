@@ -1,38 +1,99 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">
-        <i class="bi bi-car-front"></i> Departamento de Tránsito
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto"></ul>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">
+            <i class="bi bi-car-front"></i> Departamento de Tránsito
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                  aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto"></ul>
+          </div>
+        </div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="wrapper fadeIn">
+      <div id="formContent">
+        <h1 class="fadeIn first">Consultas y preguntas frecuentes</h1>
+            
+          <div class="form-group fadeInDown delay">
+            <div class="accordion">
+              <div class="accordion-item" *ngFor="let item of items; let i = index">                    
+                <button 
+                  class="accordion-header"
+                  [class.active]="openIndex === i"
+                  (click)="toggle(i)">
+                  {{ item.title }}
+                </button>
+                <div 
+                  class="accordion-content"
+                  [style.maxHeight]="openIndex === i ? '200px' : '0'">
+                  <p>{{ item.content }}</p>
+                </div>
+              </div>                
+            </div>
+          </div>
       </div>
     </div>
-</nav>
+  </main>
 
-<div class="wrapper fadeIn">
-    <div id="formContent">
-        <h1 class="fadeIn first">Consultas y preguntas frecuentes</h1>
-        
-        <div class="form-group fadeInDown delay">
-            <div class="accordion">
-                <div class="accordion-item" *ngFor="let item of items; let i = index">                    
-                  <button 
-                    class="accordion-header"
-                    [class.active]="openIndex === i"
-                    (click)="toggle(i)">
-                    {{ item.title }}
-                  </button>
-                  <div 
-                    class="accordion-content"
-                    [style.maxHeight]="openIndex === i ? '200px' : '0'">
-                    <p>{{ item.content }}</p>
-                  </div>
-                </div>                
-              </div>
+  <footer class="footer mt-5">
+    <div class="footer-bg">
+      <div class="container">
+        <div class="row justify-content-around">
+          <!-- Departamento -->
+          <div class="col-md-4 mb-3">
+            <h5 class="text-primary">Departamento de Tránsito</h5>
+            <ul class="list-unstyled">
+              <li><i class="bi bi-geo-alt-fill"></i> Municipalidad Lo espejo</li>
+              <li><i class="bi bi-telephone-fill"></i> Teléfono: 973146125 </li>
+              <li><i class="bi bi-envelope-fill"></i> loespejomunicipal.cl</li>
+            </ul>
+          </div>
+          <!-- Información -->
+          <div class="col-md-4 mb-3">
+            <h5 class="text-primary">Información Importante</h5>
+            <ul class="list-unstyled">
+              <li><a href="https://www.chileatiende.gob.cl/fichas/20592-licencias-de-conducir" target="_blank"><i
+                    class="bi bi-chevron-right"></i> Licencias de Conducir</a></li>
+              <li><a href="https://practicatest.cl/preguntas/que-documentos-debe-presentar-para-sacar-licencia-de-conducir-clase-b-en-chile/ZJyToQ==" target="_blank"><i
+                    class="bi bi-chevron-right"></i> Documentos Necesarios</a></li>
+              <li><a href="https://www.loespejo.cl/" target="_blank"><i
+                    class="bi bi-chevron-right"></i> Municipalidad</a></li>
+              <li><a href="https://www.educacionvial.cl/categoria/preguntas-frecuentes/valores-de-licencias-de-conducir" target="_blank"><i
+                    class="bi bi-chevron-right"></i> Valores y Aranceles</a></li>
+            </ul>
+          </div>
+          <!-- Horario de Atención -->
+          <div class="col-md-4 mb-3">
+            <h5 class="text-primary">Horario de Atención</h5>
+            <div>
+              <span><i class="bi bi-clock-fill"></i> Atención General:</span>
+              <p class="mb-1">Lunes a Viernes:</p>
+              <ul class="list-unstyled ps-3 mb-2">
+                <li>• Mañana: 8:30 - 14:00</li>
+                <li>• Tarde: 15:00 - 17:30</li>
+              </ul>
+              <span><i class="bi bi-car-front-fill"></i> Exámenes prácticos:</span>
+              <p class="mb-1">Lunes a Jueves:</p>
+              <ul class="list-unstyled ps-3">
+                <li>• 9:00 - 13:00</li>
+              </ul>
+            </div>
+          </div>
         </div>
+        <hr class="my-4">
+        <div class="row footer-bottom">
+          <div class="col-12 text-center">
+            <p class="mb-0">&copy; 2025 Departamento de Tránsito Municipalidad Lo espejo. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+  </footer>
+</body>
