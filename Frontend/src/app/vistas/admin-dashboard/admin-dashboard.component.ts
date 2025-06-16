@@ -28,6 +28,7 @@ export class AdminDashboardComponent implements OnInit {
   showCreateLicenciaForm: boolean = false;
   showSolicitudesManagement: boolean = false;
   horarios: any[] = [];
+  allHorarios: any[] = [];
   licencias: any[] = [];
   users: User[] = [];
   filteredUsers: User[] = [];
@@ -45,6 +46,9 @@ export class AdminDashboardComponent implements OnInit {
   adminData: Admin | undefined;
   showCrearLicencia = false;
   
+  filterFecha: string = '';
+  filterLicencia: string = '';
+
 
   nuevoHorario = {
     fecha: '',
@@ -108,6 +112,7 @@ export class AdminDashboardComponent implements OnInit {
     }
     this.loadAdminData();
     this.loadLicencias();
+    this.loadHorarios();
   }
 
   loadAdminData(): void {
@@ -172,23 +177,18 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadHorarios() {
-
     this.shouldShowTable = false;
     this.cdr.markForCheck();
-
     this.horarioService.getAllHorarios().subscribe({
       next: (data: any) => {
-
         setTimeout(() => {
-          this.horarios = data.map((item: any) => ({
-            id: item.id,
-            fecha: item.fecha,
-            hora: item.hora,
-            tipoLicenciaMostrado: item.licenciaName || 'N/A',
-            cupodisponible: item.cupodisponible
+          this.allHorarios = data.map((horario: any) => ({
+            ...horario,
+            fecha: horario.fecha ? new Date(horario.fecha).toISOString().split('T')[0] : '',
+            hora: horario.hora ? horario.hora.substring(0, 5) : '',
+            tipoLicenciaMostrado: horario.licenciaName || 'N/A'
           }));
-          
-
+          this.horarios = [...this.allHorarios];
           this.shouldShowTable = true;
           this.cdr.markForCheck();
         }, 100);
@@ -250,6 +250,29 @@ export class AdminDashboardComponent implements OnInit {
         });
       }
     });
+  }
+
+  filterHorarios() {
+    let filtered = [...this.allHorarios];
+
+    if (this.filterFecha) {
+      filtered = filtered.filter(horario => horario.fecha === this.filterFecha);
+    }
+
+    if (this.filterLicencia) {
+      filtered = filtered.filter(horario => 
+        horario.licenciaName && horario.licenciaName.toLowerCase() === this.filterLicencia.toLowerCase()
+      );
+    }
+    this.horarios = filtered;
+    this.cdr.detectChanges();
+  }
+
+  clearHorariosFilters() {
+    this.filterFecha = '';
+    this.filterLicencia = '';
+    this.horarios = [...this.allHorarios];
+    this.cdr.detectChanges();
   }
 
   toggleLicenciasManagement() {
