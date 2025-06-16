@@ -67,7 +67,7 @@ export class AdminDashboardComponent implements OnInit {
     'Clase B',
     'Clase C',
     'Clase D',
-    'Clase E',
+    'Clase F',
     'Clase A1',
     'Clase A2',
     'Clase A3',

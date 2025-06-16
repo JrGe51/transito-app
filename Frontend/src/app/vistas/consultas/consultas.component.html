@@ -39,8 +39,8 @@
                 </button>
                 <div 
                   class="accordion-content"
-                  [style.maxHeight]="openIndex === i ? '200px' : '0'">
-                  <p>{{ item.content }}</p>
+                  [style.maxHeight]="openIndex === i ? '1500px' : '0'">
+                  <p [innerHTML]="item.content" style="font-size: 0.9rem;"></p>
                 </div>
               </div>                
             </div>

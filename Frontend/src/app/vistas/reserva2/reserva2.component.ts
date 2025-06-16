@@ -46,7 +46,7 @@ export class Reserva2Component implements OnInit {
   horasDisponibles: string[] = [];
   fechaSeleccionada: Date | null = null;
   horaSeleccionada: string | null = null;
-  tiposLicencia: string[] = ['Clase B', 'Clase C', 'Clase D','Clase E' ,'Clase A1', 'Clase A2', 'Clase A3', 'Clase A4', 'Clase A5']; 
+  tiposLicencia: string[] = ['Clase B', 'Clase C', 'Clase D','Clase F' ,'Clase A1', 'Clase A2', 'Clase A3', 'Clase A4', 'Clase A5']; 
   tipoLicenciaSeleccionado: string | null = null;
   licenciaSeleccionada: boolean = false;
   rut: string = '';
@@ -235,9 +235,9 @@ export class Reserva2Component implements OnInit {
         edadMinima = 18;
         mensajeError = 'Debes ser mayor de 18 años para obtener una licencia Clase D';
         break;
-      case 'Clase E':
+      case 'Clase F':
         edadMinima = 18;
-        mensajeError = 'Debes ser mayor de 18 años para obtener una licencia Clase E';
+        mensajeError = 'Debes ser mayor de 18 años para obtener una licencia Clase F';
         break;
       default:
         return true; 
