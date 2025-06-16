@@ -99,7 +99,7 @@
                           <th scope="col">Tipo Licencia</th>
                           <th scope="col">Fecha Cita</th>
                           <th scope="col">Hora Cita</th>
-                          <th scope="col">Documentos</th>
+                          <th scope="col">Acciones</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -111,10 +111,9 @@
                           <td>{{ solicitud.horario?.fecha | date:'dd/MM/yyyy' }}</td>
                           <td>{{ solicitud.horario?.hora }}</td>
                           <td>
-                            <span *ngIf="solicitud.documentos && solicitud.documentos.length > 0">
-                              <span *ngFor="let doc of solicitud.documentos">{{ doc.nombre }} ({{ doc.estado }})<br></span>
-                            </span>
-                            <span *ngIf="!solicitud.documentos || solicitud.documentos.length === 0">N/A</span>
+                            <button class="btn btn-danger btn-sm" (click)="cancelarSolicitud(solicitud.id!)">
+                              Cancelar
+                            </button>
                           </td>
                         </tr>
                       </tbody>

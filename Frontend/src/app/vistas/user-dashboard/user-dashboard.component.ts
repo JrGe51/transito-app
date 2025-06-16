@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -7,6 +7,7 @@ import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angula
 import { UserService } from '../../servicios/user.service';
 import { SolicitudService } from '../../servicios/solicitud.service';
 import { Solicitud } from '../../interfaces/solicitud';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -26,7 +27,14 @@ export class UserDashboardComponent implements OnInit {
   loadingSolicitudes: boolean = false;
   solicitudesErrorMessage: string = '';
 
-  constructor(private router: Router, private toast: ToastrService, private fb: FormBuilder, private userService: UserService, private solicitudService: SolicitudService) {
+  constructor(
+    private router: Router,
+    private toast: ToastrService,
+    private fb: FormBuilder,
+    private userService: UserService,
+    private solicitudService: SolicitudService,
+    private cdr: ChangeDetectorRef
+  ) {
     this.editUserForm = this.fb.group({
       name: ['', Validators.required],
       lastname: ['', Validators.required],
@@ -135,23 +143,65 @@ export class UserDashboardComponent implements OnInit {
           next: (data) => {
             this.userSolicitudes = data.solicitudes;
             this.loadingSolicitudes = false;
+            this.cdr.detectChanges();
           },
           error: (error) => {
             console.error('Error al obtener las solicitudes:', error);
             this.solicitudesErrorMessage = error.error?.msg || 'Error al cargar las solicitudes.';
-            this.toast.error(this.solicitudesErrorMessage, 'Error');
+            if (error.status === 404) {
+              this.userSolicitudes = [];
+            } else {
+              this.toast.error(this.solicitudesErrorMessage, 'Error');
+            }
             this.loadingSolicitudes = false;
+            this.cdr.detectChanges();
           }
         });
       } else {
         this.solicitudesErrorMessage = 'No se encontró el ID del usuario en el almacenamiento local.';
         this.toast.error(this.solicitudesErrorMessage, 'Error de usuario');
         this.loadingSolicitudes = false;
+        this.cdr.detectChanges();
       }
     } else {
       this.solicitudesErrorMessage = 'No se encontraron datos de usuario en el almacenamiento local.';
       this.toast.error(this.solicitudesErrorMessage, 'Error de usuario');
       this.loadingSolicitudes = false;
+      this.cdr.detectChanges();
     }
+  }
+
+  cancelarSolicitud(id: number): void {
+    Swal.fire({
+      title: '¿Está seguro de que desea cancelar esta solicitud?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, cancelar',
+      cancelButtonText: 'No'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.solicitudService.deleteSolicitud(id).subscribe({
+          next: () => {
+            Swal.fire(
+              '¡Cancelada!',
+              'La solicitud ha sido cancelada exitosamente.',
+              'success'
+            );
+            this.getSolicitudes();
+          },
+          error: (error) => {
+            console.error('Error al cancelar la solicitud:', error);
+            Swal.fire(
+              'Error',
+              'Error al cancelar la solicitud',
+              'error'
+            );
+          }
+        });
+      }
+    });
   }
 } 

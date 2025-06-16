@@ -260,10 +260,15 @@ const getSolicitudById = (req, res) => __awaiter(void 0, void 0, void 0, functio
 });
 exports.getSolicitudById = getSolicitudById;
 const deleteSolicitud = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d, _e, _f;
     try {
         const { id } = req.params;
         const solicitud = yield solicitud_1.Solicitud.findByPk(id, {
-            include: [{ model: horario_1.Horario, as: 'horario' }]
+            include: [
+                { model: horario_1.Horario, as: 'horario' },
+                { model: user_1.User, as: 'usuario' },
+                { model: licencia_1.Licencia, as: 'tipoLicencia' }
+            ]
         });
         if (!solicitud) {
             res.status(404).json({
@@ -274,6 +279,31 @@ const deleteSolicitud = (req, res) => __awaiter(void 0, void 0, void 0, function
         // Liberar el cupo del horario
         if (solicitud.horario) {
             yield solicitud.horario.update({ cupodisponible: true });
+        }
+        // Preparar el correo de cancelación
+        const emailContent = `
+            <h1>Cancelación de Solicitud</h1>
+            <p>Estimado/a ${(_a = solicitud.usuario) === null || _a === void 0 ? void 0 : _a.name} ${(_b = solicitud.usuario) === null || _b === void 0 ? void 0 : _b.lastname},</p>
+            <p>Su solicitud ha sido cancelada exitosamente con los siguientes detalles:</p>
+            <ul>
+                <li><strong>Tipo de Licencia:</strong> ${(_c = solicitud.tipoLicencia) === null || _c === void 0 ? void 0 : _c.name}</li>
+                <li><strong>Fecha de Cita:</strong> ${(_d = solicitud.horario) === null || _d === void 0 ? void 0 : _d.fecha}</li>
+                <li><strong>Hora de Cita:</strong> ${(_e = solicitud.horario) === null || _e === void 0 ? void 0 : _e.hora}</li>
+                <li><strong>Tipo de Trámite:</strong> ${solicitud.tipoTramite}</li>
+            </ul>
+            <p>Si necesita realizar una nueva solicitud, puede hacerlo a través de nuestra plataforma.</p>
+            <p>Saludos cordiales,<br>Equipo de Tránsito</p>
+        `;
+        // Enviar correo de cancelación
+        try {
+            yield (0, emailService_1.sendEmail)({
+                to: ((_f = solicitud.usuario) === null || _f === void 0 ? void 0 : _f.email) || '',
+                subject: 'Cancelación de Solicitud - Cita Licencia Conducir',
+                html: emailContent
+            });
+        }
+        catch (emailError) {
+            console.error('Error al enviar el correo de cancelación:', emailError);
         }
         // Eliminar la solicitud
         yield solicitud.destroy();

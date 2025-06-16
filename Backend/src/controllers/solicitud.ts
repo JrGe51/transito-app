@@ -288,7 +288,11 @@ export const deleteSolicitud = async (req: Request, res: Response): Promise<void
     try {
         const { id } = req.params;
         const solicitud = await Solicitud.findByPk(id, {
-            include: [{ model: Horario, as: 'horario' }]
+            include: [
+                { model: Horario, as: 'horario' },
+                { model: User, as: 'usuario' },
+                { model: Licencia, as: 'tipoLicencia' }
+            ]
         });
 
         if (!solicitud) {
@@ -301,6 +305,32 @@ export const deleteSolicitud = async (req: Request, res: Response): Promise<void
         // Liberar el cupo del horario
         if (solicitud.horario) {
             await solicitud.horario.update({ cupodisponible: true });
+        }
+
+        // Preparar el correo de cancelación
+        const emailContent = `
+            <h1>Cancelación de Solicitud</h1>
+            <p>Estimado/a ${solicitud.usuario?.name} ${solicitud.usuario?.lastname},</p>
+            <p>Su solicitud ha sido cancelada exitosamente con los siguientes detalles:</p>
+            <ul>
+                <li><strong>Tipo de Licencia:</strong> ${solicitud.tipoLicencia?.name}</li>
+                <li><strong>Fecha de Cita:</strong> ${solicitud.horario?.fecha}</li>
+                <li><strong>Hora de Cita:</strong> ${solicitud.horario?.hora}</li>
+                <li><strong>Tipo de Trámite:</strong> ${solicitud.tipoTramite}</li>
+            </ul>
+            <p>Si necesita realizar una nueva solicitud, puede hacerlo a través de nuestra plataforma.</p>
+            <p>Saludos cordiales,<br>Equipo de Tránsito</p>
+        `;
+
+        // Enviar correo de cancelación
+        try {
+            await sendEmail({
+                to: solicitud.usuario?.email || '',
+                subject: 'Cancelación de Solicitud - Cita Licencia Conducir',
+                html: emailContent
+            });
+        } catch (emailError) {
+            console.error('Error al enviar el correo de cancelación:', emailError);
         }
 
         // Eliminar la solicitud
