@@ -53,4 +53,10 @@ export class HorarioService {
     });
     return this.http.delete(`${this.apiUrl}api/horario/${id}`, { headers });
   }
+
+  getLicencias(): Observable<any[]> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any[]>(`${this.apiUrl}api/licencia/all`, { headers });
+  }
 }

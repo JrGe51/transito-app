@@ -168,15 +168,22 @@
     </div>
 
     <!-- Formulario de creación de licencia -->
-    <div class="create-schedule-form" *ngIf="showCreateLicenciaForm">
+    <div class="create-license-form" *ngIf="showCreateLicenciaForm">
+      <h3>Crear Nueva Licencia</h3>
       <div class="form-row">
         <div class="form-group">
           <label>Nombre de la Licencia</label>
-          <input type="text" [(ngModel)]="nuevaLicencia.name" class="form-control" placeholder="Ej: Clase B">
+          <select [(ngModel)]="nuevaLicencia.name" class="form-control">
+            <option value="">Seleccione una licencia</option>
+            <option *ngFor="let tipo of TIPOS_LICENCIA" [value]="tipo">{{tipo}}</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Descripción</label>
-          <input type="text" [(ngModel)]="nuevaLicencia.description" class="form-control" placeholder="Descripción de la licencia">
+          <select [(ngModel)]="nuevaLicencia.description" class="form-control">
+            <option value="">Seleccione una descripción</option>
+            <option *ngFor="let desc of TIPOS_DESCRIPCION" [value]="desc">{{desc}}</option>
+          </select>
         </div>
         <button class="btn btn-primary" (click)="crearLicencia()">Crear</button>
       </div>

@@ -149,4 +149,77 @@
     grid-column: 1 / -1;
     text-align: right;
   }
+}
+
+.create-license-form {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.create-license-form h3 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.create-license-form .form-group {
+  margin-bottom: 15px;
+}
+
+.create-license-form label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+  font-weight: 500;
+}
+
+.create-license-form select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+}
+
+.create-license-form select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.create-license-form .form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.create-license-form .btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.create-license-form .btn-primary {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+.create-license-form .btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.create-license-form .btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+}
+
+.create-license-form .btn-secondary:hover {
+  background-color: #545b62;
 } 

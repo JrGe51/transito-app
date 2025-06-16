@@ -192,73 +192,94 @@ export class ReservaComponent implements OnInit {
       return;
     }
 
-    this.tipoLicenciaSeleccionado = tipo;
-    this.licenciaSeleccionada = true;
-    this.fechaSeleccionada = null;
-    this.horaSeleccionada = null;
-    this.horasDisponibles = [];
-    this.fechasDisponibles$.next([]);
-    this.cdr.detectChanges();
+    // Verificar si la licencia existe en la base de datos
+    this.horarioService.getLicencias().subscribe({
+      next: (licencias: any[]) => {
+        const licenciaExiste = licencias.some(
+          lic => lic.name.toLowerCase() === tipo.toLowerCase()
+        );
 
-    // OCULTAR CALENDARIO
-    this.showCalendar = false;
-    this.cdr.detectChanges(); // Forzar la detección de cambios para que se oculte
-
-    this.horarioService.getFechasDisponibles(tipo).subscribe({
-      next: (fechas) => {
-        if (fechas && fechas.length > 0) {
-          this.fechasDisponibles$.next(fechas);
-          this.cdr.detectChanges();
-
-          // MOSTRAR CALENDARIO después de un pequeño retraso para asegurar que se recree
-          setTimeout(() => {
-            this.showCalendar = true;
-            this.cdr.detectChanges();
-
-            if (this.calendar) {
-              // Reasignar las funciones dateClass y filtrarFechasDisponibles para forzar reevaluación
-              this.dateClass = (d: Date) => {
-                const dateString = this.formatDate(d);
-                return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
-              };
-              this.filtrarFechasDisponibles = (date: Date | null): boolean => {
-                if (!date) return false;
-                const dateString = this.formatDate(date);
-                return this.fechasDisponibles$.value.includes(dateString);
-              };
-
-              // Intentar establecer la fecha activa para forzar la reevaluación
-              if (fechas.length > 0) {
-                this.calendar.activeDate = new Date(fechas[0]);
-              } else {
-                this.calendar.activeDate = new Date(); // Si no hay fechas, mostrar el mes actual
-              }
-              this.calendar.updateTodaysDate(); // Fuerza la reevaluación de los filtros
-              this.cdr.detectChanges();
-            }
-          }, 0);
-        } else {
+        if (!licenciaExiste) {
           Swal.fire({
-            icon: 'info',
-            title: 'Sin cupos disponibles',
-            text: `No hay fechas disponibles para reservar la licencia ${tipo}. Por favor, intenta más tarde.`,
+            icon: 'error',
+            title: 'Licencia no disponible',
+            text: 'De momento no se está impartiendo este tipo de licencia',
             confirmButtonColor: '#3085d6'
           });
-          this.tipoLicenciaSeleccionado = null;
-          this.licenciaSeleccionada = false;
+          return;
         }
-      },
-      error: (error) => {
-        console.error('Error al obtener fechas por licencia:', error);
+
+        // Si la licencia existe, continuar con el proceso
+        this.tipoLicenciaSeleccionado = tipo;
+        this.licenciaSeleccionada = true;
+        this.fechaSeleccionada = null;
+        this.horaSeleccionada = null;
+        this.horasDisponibles = [];
         this.fechasDisponibles$.next([]);
-        this.toast.error('Error al cargar fechas disponibles', 'Error');
         this.cdr.detectChanges();
 
-        // Asegurarse de que el calendario se muestre incluso en caso de error
-        setTimeout(() => {
-          this.showCalendar = true;
-          this.cdr.detectChanges();
-        }, 0);
+        // OCULTAR CALENDARIO
+        this.showCalendar = false;
+        this.cdr.detectChanges();
+
+        this.horarioService.getFechasDisponibles(tipo).subscribe({
+          next: (fechas) => {
+            if (fechas && fechas.length > 0) {
+              this.fechasDisponibles$.next(fechas);
+              this.cdr.detectChanges();
+
+              // MOSTRAR CALENDARIO después de un pequeño retraso
+              setTimeout(() => {
+                this.showCalendar = true;
+                this.cdr.detectChanges();
+
+                if (this.calendar) {
+                  this.dateClass = (d: Date) => {
+                    const dateString = this.formatDate(d);
+                    return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
+                  };
+                  this.filtrarFechasDisponibles = (date: Date | null): boolean => {
+                    if (!date) return false;
+                    const dateString = this.formatDate(date);
+                    return this.fechasDisponibles$.value.includes(dateString);
+                  };
+
+                  if (fechas.length > 0) {
+                    this.calendar.activeDate = new Date(fechas[0]);
+                  } else {
+                    this.calendar.activeDate = new Date();
+                  }
+                  this.calendar.updateTodaysDate();
+                  this.cdr.detectChanges();
+                }
+              }, 0);
+            } else {
+              Swal.fire({
+                icon: 'info',
+                title: 'Sin cupos disponibles',
+                text: `No hay fechas disponibles para reservar la licencia ${tipo}. Por favor, intenta más tarde.`,
+                confirmButtonColor: '#3085d6'
+              });
+              this.tipoLicenciaSeleccionado = null;
+              this.licenciaSeleccionada = false;
+            }
+          },
+          error: (error) => {
+            console.error('Error al obtener fechas por licencia:', error);
+            this.fechasDisponibles$.next([]);
+            this.toast.error('Error al cargar fechas disponibles', 'Error');
+            this.cdr.detectChanges();
+
+            setTimeout(() => {
+              this.showCalendar = true;
+              this.cdr.detectChanges();
+            }, 0);
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error al verificar licencia:', error);
+        this.toast.error('Error al verificar la licencia', 'Error');
       }
     });
   }
@@ -472,5 +493,54 @@ export class ReservaComponent implements OnInit {
     this.horasDisponibles = [];
     this.rut = '';
     this.documentos = [];
+  }
+
+  onTipoLicenciaChange() {
+    if (this.tipoLicenciaSeleccionado) {
+      // Verificar si la licencia existe en la base de datos
+      this.horarioService.getLicencias().subscribe({
+        next: (licencias: any[]) => {
+          const licenciaExiste = licencias.some(
+            lic => lic.name.toLowerCase() === this.tipoLicenciaSeleccionado?.toLowerCase()
+          );
+
+          if (!licenciaExiste) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Licencia no disponible',
+              text: 'De momento no se está impartiendo este tipo de licencia',
+              confirmButtonColor: '#3085d6'
+            });
+            this.tipoLicenciaSeleccionado = '';
+            return;
+          }
+
+          // Si la licencia existe, continuar con la carga de fechas
+          if (this.tipoLicenciaSeleccionado) {
+            this.horarioService.getFechasDisponibles(this.tipoLicenciaSeleccionado).subscribe({
+              next: (fechas: string[]) => {
+                this.fechasDisponibles$.next(fechas);
+                if (fechas.length === 0) {
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Sin cupos disponibles',
+                    text: 'No hay cupos disponibles para esta licencia en este momento',
+                    confirmButtonColor: '#3085d6'
+                  });
+                }
+              },
+              error: (error: any) => {
+                console.error('Error al obtener fechas disponibles:', error);
+                this.toast.error('Error al cargar fechas disponibles', 'Error');
+              }
+            });
+          }
+        },
+        error: (error: any) => {
+          console.error('Error al verificar licencia:', error);
+          this.toast.error('Error al verificar la licencia', 'Error');
+        }
+      });
+    }
   }
 }

@@ -43,6 +43,7 @@ export class AdminDashboardComponent implements OnInit {
   filteredSolicitudes: Solicitud[] = [];
   solicitudSearchRut: string = '';
   adminData: Admin | undefined;
+  showCrearLicencia = false;
   
 
   nuevoHorario = {
@@ -57,6 +58,24 @@ export class AdminDashboardComponent implements OnInit {
     name: '',
     description: ''
   };
+
+  readonly TIPOS_LICENCIA = [
+    'Clase B',
+    'Clase C',
+    'Clase D',
+    'Clase E',
+    'Clase A1',
+    'Clase A2',
+    'Clase A3',
+    'Clase A4',
+    'Clase A5'
+  ];
+
+  readonly TIPOS_DESCRIPCION = [
+    'Licencia Profesional',
+    'Licencia No Profesional',
+    'Licencia Especial'
+  ];
 
   constructor(
     private horarioService: HorarioService,
@@ -290,17 +309,28 @@ export class AdminDashboardComponent implements OnInit {
 
   crearLicencia() {
     if (!this.nuevaLicencia.name || !this.nuevaLicencia.description) {
-      this.toast.error('Por favor complete todos los campos', 'Error');
+      this.toast.error('Por favor complete todos los campos', 'error');
       return;
     }
+
+    // Verificar si la licencia ya existe
+    const licenciaExistente = this.licencias.find(
+      lic => lic.name.toLowerCase() === this.nuevaLicencia.name.toLowerCase()
+    );
+
+    if (licenciaExistente) {
+      Swal.fire('Error', 'Esta licencia ya existe en el sistema', 'error');
+      return;
+    }
+
     this.licenciaService.registerLicencia(this.nuevaLicencia).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         Swal.fire('¡Éxito!', 'Licencia creada exitosamente', 'success');
         this.loadLicencias();
-        this.toggleCreateLicenciaForm();
-        this.resetNuevaLicencia();
+        this.nuevaLicencia = { name: '', description: '' };
+        this.showCreateLicenciaForm = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error al crear licencia:', error);
         Swal.fire('Error', error.error?.msg || 'Error al crear la licencia', 'error');
       }
