@@ -106,7 +106,7 @@ items = [
               </div>`
   },
   {
-    title: 'Rquisitos Licencias Profesionales A1, A2, A3, A4 y A5',
+    title: 'Requisitos Licencias Profesionales A1, A2, A3, A4 y A5',
     content: `<div>
                 <b>Transporte de pasajeros:</b>
                 <br></br>
