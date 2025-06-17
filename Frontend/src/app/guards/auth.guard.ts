@@ -14,13 +14,15 @@ export const authGuard: CanActivateFn = (
 
   const targetUrl = state.url;
   const previousUrl = router.getCurrentNavigation()?.previousNavigation?.finalUrl?.toString() || '/';
+  const targetPath = targetUrl.split('?')[0];
 
 
-  const publicRoutes = ['/nuevo', '/login', '/registrarse'];
+  const publicRoutes = ['/nuevo', '/login', '/registrarse', '/recuperar-password', '/verificar-codigo', '/nueva-password'];
   const allowedUserRoutes = ['/user-dashboard', '/reserva', '/reserva2', '/reserva3', '/consultas'];
 
   console.log('--- authGuard Debug (REESTRUCTURANDO LÓGICA DE ROLES) ---');
   console.log('URL de destino:', targetUrl);
+  console.log('URL de destino sin query params:', targetPath);
   console.log('URL anterior:', previousUrl);
   console.log('-----------------------------------------------------');
 
@@ -74,9 +76,9 @@ export const authGuard: CanActivateFn = (
 
 
 
-    if (publicRoutes.includes(targetUrl)) {
+    if (publicRoutes.includes(targetPath)) {
       console.log('Guard: Usuario autenticado en ruta pública. Evaluando redirección...');
-      console.log('publicRoutes incluye targetUrl (' + targetUrl + '):', publicRoutes.includes(targetUrl));
+      console.log('publicRoutes incluye targetPath (' + targetPath + '):', publicRoutes.includes(targetPath));
       if (isAdmin) {
         console.log('Guard: Admin autenticado en ruta pública. Redirigiendo a /admin-dashboard.');
         router.navigate(['/admin-dashboard']);
@@ -118,7 +120,7 @@ export const authGuard: CanActivateFn = (
 
 
   if (previousUrl.includes('/login') && targetUrl !== '/login') {
-    if (targetUrl !== '/nuevo' && targetUrl !== '/registrarse') {
+    if (targetUrl !== '/nuevo' && targetUrl !== '/registrarse' && targetUrl !== '/recuperar-password' && targetUrl !== '/verificar-codigo' && targetUrl !== '/nueva-password') {
       console.log(`Guard: Usuario NO autenticado. Desde /login, acceso denegado a ${targetUrl}. Redirigiendo a /login.`);
       router.navigate(['/login']);
       return of(false);
@@ -126,7 +128,7 @@ export const authGuard: CanActivateFn = (
   }
 
   if (previousUrl.includes('/nuevo') && targetUrl !== '/nuevo') {
-    if (targetUrl !== '/login' && targetUrl !== '/registrarse') {
+    if (targetUrl !== '/login' && targetUrl !== '/registrarse' && targetUrl !== '/recuperar-password' && targetUrl !== '/verificar-codigo' && targetUrl !== '/nueva-password') {
       console.log(`Guard: Usuario NO autenticado. Desde /nuevo, acceso denegado a ${targetUrl}. Redirigiendo a /nuevo.`);
       router.navigate(['/nuevo']);
       return of(false);
@@ -134,7 +136,7 @@ export const authGuard: CanActivateFn = (
   }
 
 
-  if (publicRoutes.includes(targetUrl)) {
+  if (publicRoutes.includes(targetPath)) {
     console.log('Guard: Usuario NO autenticado en ruta pública. Permitido.');
     return of(true);
   } else {

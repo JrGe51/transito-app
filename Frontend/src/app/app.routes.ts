@@ -28,8 +28,8 @@ export const routes: Routes = [
   { path: 'reserva2', component: Reserva2Component, canActivate: [authGuard] },
   { path: 'reserva3', component: Reserva3Component, canActivate: [authGuard] },
   { path: 'consultas', component: ConsultasComponent, canActivate: [authGuard] },
-  { path: 'recuperar-password', component: RecuperarPasswordComponent },
-  { path: 'verificar-codigo', component: VerificarCodigoComponent},
-  { path: 'nueva-password', component: NuevaPasswordComponent },
+  { path: 'recuperar-password', component: RecuperarPasswordComponent, canActivate: [authGuard] },
+  { path: 'verificar-codigo', component: VerificarCodigoComponent, canActivate: [authGuard] },
+  { path: 'nueva-password', component: NuevaPasswordComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '/login', pathMatch: 'full' }
 ]; 
