@@ -19,6 +19,8 @@ export class RegistroAdminComponent {
   lastname: string = '';
   password: string = '';
   repetirPassword: string = '';
+  showPassword: boolean = false;
+  showRepeatPassword: boolean = false;
 
   // New properties to track validation errors for display in HTML
   passwordHasUppercase: boolean = true;
@@ -133,5 +135,13 @@ export class RegistroAdminComponent {
         this.toast.error('Error', 'No se pudo registrar el administrador');
       }
     });
+  }
+
+  toggleShowPassword() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleShowRepeatPassword() {
+    this.showRepeatPassword = !this.showRepeatPassword;
   }
 } 

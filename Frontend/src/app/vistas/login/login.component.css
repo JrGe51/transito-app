@@ -49,9 +49,10 @@ h2 {
     flex-direction: column;
     justify-content: center;
     width: 100%;
-    min-height: 100%;
+    min-height: 100vh;
     padding: 20px;
     background-color: #f7f8f9; 
+    overflow-y: auto;
 }
 
 #formContent {
@@ -167,4 +168,58 @@ input[type=text]:placeholder, input[type=password]:placeholder, input[type=email
 
 #icon:hover {
   transform: scale(1.1);
+}
+
+/* Grupo de contraseña con ojo */
+.password-group {
+    position: relative;
+}
+
+.password-group .form-control {
+    width: 100%;
+    padding-right: 3rem;
+}
+
+.toggle-password-eye {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #888;
+    font-size: 1.2em;
+    z-index: 2;
+}
+
+.toggle-password-eye:hover {
+    color: #56baed;
+}
+
+.form-control {
+    width: 100%;
+}
+
+form .form-control, .form-control {
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+.input-eye-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+.input-eye-wrapper .form-control {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    padding-right: 2.5rem;
+    box-sizing: border-box;
+}
+
+.form-group .form-control {
+    width: 100%;
+    box-sizing: border-box;
 }

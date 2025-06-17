@@ -3,10 +3,12 @@ import { UserService } from '../../servicios/user.service';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { User } from '../../interfaces/user';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErroresService } from '../../servicios/errores.service';
 import { MasterAccessService } from '../../servicios/master-access.service';
+import Swal from 'sweetalert2';
 
 // Variable de sesión para el acceso maestro (debe ser la misma que en auth.guard.ts)
 declare let masterAccessSession: boolean;
@@ -14,7 +16,7 @@ declare let masterAccessSession: boolean;
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -22,6 +24,7 @@ export class LoginComponent {
 
   email: string = ''
   password: string = ''
+  showPassword: boolean = false;
 
   constructor(
     private userService: UserService,
@@ -63,8 +66,35 @@ export class LoginComponent {
         }
       },
       error: (e: HttpErrorResponse) => {
-        this.errorService.messageError(e)
+        if (e.error && e.error.msg) {
+          let titulo = 'Error de autenticación';
+          let texto = '';
+          if (e.error.msg.includes('Email incorrecto')) {
+            texto = 'El email ingresado no está registrado.';
+          } else if (e.error.msg.includes('Contraseña incorrecta')) {
+            texto = 'La contraseña ingresada es incorrecta.';
+          } else {
+            texto = 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.';
+          }
+          Swal.fire({
+            icon: 'error',
+            title: titulo,
+            text: texto,
+            confirmButtonColor: '#56baed'
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error inesperado. Intenta nuevamente.',
+            confirmButtonColor: '#56baed'
+          });
+        }
       }
     })
+  }
+
+  toggleShowPassword() {
+    this.showPassword = !this.showPassword;
   }
 }
