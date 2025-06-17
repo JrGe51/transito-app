@@ -7,5 +7,7 @@ export interface User {
     password: string;
     telefono?: string;
     fechanacimiento?: string;
-    direccion?: string
+    direccion?: string;
+    codigoRecuperacion?: string;
+    codigoExpiracion?: Date;
 }

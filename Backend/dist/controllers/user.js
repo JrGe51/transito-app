@@ -12,12 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.getAllUsers = exports.updateUser = exports.login = exports.register = void 0;
+exports.cambiarPassword = exports.verificarCodigo = exports.recuperarPassword = exports.deleteUser = exports.getAllUsers = exports.updateUser = exports.login = exports.register = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const user_1 = require("../models/user");
 const admin_1 = require("../models/admin");
 const sequelize_1 = require("sequelize");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const emailService_1 = require("../utils/emailService");
+const crypto_1 = __importDefault(require("crypto"));
 const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, rut, lastname, email, password, telefono, fechanacimiento, direccion } = req.body;
     const existingUserByEmail = yield user_1.User.findOne({ where: { email: email } });
@@ -216,3 +218,124 @@ const deleteUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.deleteUser = deleteUser;
+const recuperarPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.body;
+    try {
+        const user = yield user_1.User.findOne({ where: { email } });
+        if (!user) {
+            res.status(404).json({
+                msg: 'No existe un usuario con ese correo electrónico'
+            });
+            return;
+        }
+        // Generar código de recuperación
+        const codigoRecuperacion = crypto_1.default.randomInt(100000, 999999).toString();
+        const codigoHash = yield bcrypt_1.default.hash(codigoRecuperacion, 10);
+        // Guardar el código en el usuario
+        yield user.update({
+            codigoRecuperacion: codigoHash,
+            codigoExpiracion: new Date(Date.now() + 3600000) // 1 hora de expiración
+        });
+        // Enviar email con el código
+        yield (0, emailService_1.sendRecoveryEmail)(email, codigoRecuperacion);
+        res.json({
+            msg: 'Se ha enviado un código de recuperación a tu correo electrónico'
+        });
+    }
+    catch (error) {
+        console.error('Error en recuperarPassword:', error);
+        res.status(500).json({
+            msg: 'Error al procesar la solicitud de recuperación de contraseña'
+        });
+    }
+});
+exports.recuperarPassword = recuperarPassword;
+const verificarCodigo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, codigo } = req.body;
+    try {
+        const user = yield user_1.User.findOne({ where: { email } });
+        if (!user) {
+            res.status(404).json({
+                msg: 'No existe un usuario con ese correo electrónico'
+            });
+            return;
+        }
+        if (!user.codigoRecuperacion || !user.codigoExpiracion) {
+            res.status(400).json({
+                msg: 'No hay un código de recuperación activo'
+            });
+            return;
+        }
+        if (new Date() > user.codigoExpiracion) {
+            res.status(400).json({
+                msg: 'El código de recuperación ha expirado'
+            });
+            return;
+        }
+        const codigoValido = yield bcrypt_1.default.compare(codigo, user.codigoRecuperacion);
+        if (!codigoValido) {
+            res.status(400).json({
+                msg: 'Código de recuperación inválido'
+            });
+            return;
+        }
+        res.json({
+            msg: 'Código verificado correctamente'
+        });
+    }
+    catch (error) {
+        console.error('Error en verificarCodigo:', error);
+        res.status(500).json({
+            msg: 'Error al verificar el código'
+        });
+    }
+});
+exports.verificarCodigo = verificarCodigo;
+const cambiarPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, codigo, nuevaPassword } = req.body;
+    try {
+        const user = yield user_1.User.findOne({ where: { email } });
+        if (!user) {
+            res.status(404).json({
+                msg: 'No existe un usuario con ese correo electrónico'
+            });
+            return;
+        }
+        if (!user.codigoRecuperacion || !user.codigoExpiracion) {
+            res.status(400).json({
+                msg: 'No hay un código de recuperación activo'
+            });
+            return;
+        }
+        if (new Date() > user.codigoExpiracion) {
+            res.status(400).json({
+                msg: 'El código de recuperación ha expirado'
+            });
+            return;
+        }
+        const codigoValido = yield bcrypt_1.default.compare(codigo, user.codigoRecuperacion);
+        if (!codigoValido) {
+            res.status(400).json({
+                msg: 'Código de recuperación inválido'
+            });
+            return;
+        }
+        // Actualizar la contraseña
+        const passwordHash = yield bcrypt_1.default.hash(nuevaPassword, 10);
+        yield user.update({
+            password: passwordHash,
+            codigoRecuperacion: null,
+            codigoExpiracion: null
+        });
+        res.json({
+            msg: 'Contraseña actualizada correctamente'
+        });
+    }
+    catch (error) {
+        console.error('Error en cambiarPassword:', error);
+        res.status(500).json({
+            msg: 'Error al cambiar la contraseña'
+        });
+    }
+});
+exports.cambiarPassword = cambiarPassword;

@@ -8,4 +8,7 @@ router.post("/api/user/login", user_1.login);
 router.put("/api/user/updateUser/:id", user_1.updateUser);
 router.get("/api/user/all", user_1.getAllUsers);
 router.delete("/api/user/delete/:id", user_1.deleteUser);
+router.post("/api/user/recuperar-password", user_1.recuperarPassword);
+router.post("/api/user/verificar-codigo", user_1.verificarCodigo);
+router.post("/api/user/cambiar-password", user_1.cambiarPassword);
 exports.default = router;

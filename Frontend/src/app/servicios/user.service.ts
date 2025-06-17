@@ -87,4 +87,16 @@ export class UserService {
   deleteUser(id: number): Observable<any> {
     return this.http.delete(`${this.AppUrl}${this.APIUrl}/delete/${id}`);
   }
+
+  recuperarPassword(email: string): Observable<any> {
+    return this.http.post(`${this.AppUrl}${this.APIUrl}/recuperar-password`, { email });
+  }
+
+  verificarCodigo(email: string, codigo: string): Observable<any> {
+    return this.http.post(`${this.AppUrl}${this.APIUrl}/verificar-codigo`, { email, codigo });
+  }
+
+  cambiarPassword(email: string, codigo: string, nuevaPassword: string): Observable<any> {
+    return this.http.post(`${this.AppUrl}${this.APIUrl}/cambiar-password`, { email, codigo, nuevaPassword });
+  }
 }

@@ -1,0 +1,17 @@
+<div class="wrapper">
+  <div id="formContent">
+    <div class="">
+      <img src="../../../assets/img/user-icon.jpg" id="icon" alt="User Icon" />
+    </div>
+    <h2>Verificar Código</h2>
+    <form (ngSubmit)="verificarCodigo()" #verificarForm="ngForm">
+      <div class="form-group">
+        <input type="text" class="form-control" name="codigo" [(ngModel)]="codigo" id="floatingInput" placeholder="Código de verificación" required>
+      </div>
+      <button type="submit" class="">Verificar</button>
+    </form>
+    <div id="formFooter">
+      <a class="underlineHover" href="/recuperar-password">Volver</a>
+    </div>
+  </div>
+</div>

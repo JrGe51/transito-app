@@ -85,4 +85,23 @@ export const emailTemplates = {
             <p>${message}</p>
         `
     })
+};
+
+export const sendRecoveryEmail = async (to: string, codigo: string): Promise<void> => {
+    try {
+        const emailContent = `
+            <h1>Recuperación de Contraseña</h1>
+            <p>Tu código de recuperación es: <strong>${codigo}</strong></p>
+            <p>Este código expirará en 1 hora.</p>
+        `;
+
+        await sendEmail({
+            to,
+            subject: 'Código de Recuperación de Contraseña',
+            html: emailContent
+        });
+    } catch (error) {
+        console.error('Error sending recovery email:', error);
+        throw new Error('Error al enviar el correo de recuperación');
+    }
 }; 
