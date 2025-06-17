@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const licencia_1 = require("../controllers/licencia");
+const auth_1 = require("../middlewares/auth");
+const router = (0, express_1.Router)();
+router.post("/api/licencia/register", licencia_1.registerLicencia);
+router.get("/api/licencia/all", auth_1.authenticateToken, licencia_1.getAllLicencias);
+router.delete("/api/licencia/:id", auth_1.authenticateToken, licencia_1.deleteLicencia);
+exports.default = router;
