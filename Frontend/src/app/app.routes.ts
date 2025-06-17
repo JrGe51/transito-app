@@ -14,10 +14,11 @@ import { RecuperarPasswordComponent } from './vistas/recuperar-password/recupera
 import { VerificarCodigoComponent } from './vistas/verificar-codigo/verificar-codigo.component';
 import { NuevaPasswordComponent } from './vistas/nueva-password/nueva-password.component';
 import { authGuard } from './guards/auth.guard';
+import { passwordRecoveryGuard } from './guards/password-recovery.guard';
 
 export const routes: Routes = [
   { path: 'nuevo', component: NuevoComponent, canActivate: [authGuard] },
-  { path: 'login', component: LoginComponent },
+  { path: 'login', component: LoginComponent, canActivate: [authGuard] },
   { path: 'registrarse', component: RegistrarseComponent, canActivate: [authGuard] },
   { path: 'registro-admin', component: RegistroAdminComponent, canActivate: [authGuard] },
   { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [authGuard] },
@@ -27,8 +28,8 @@ export const routes: Routes = [
   { path: 'reserva2', component: Reserva2Component, canActivate: [authGuard] },
   { path: 'reserva3', component: Reserva3Component, canActivate: [authGuard] },
   { path: 'consultas', component: ConsultasComponent, canActivate: [authGuard] },
-  { path: 'recuperar-password', component: RecuperarPasswordComponent },
-  { path: 'verificar-codigo', component: VerificarCodigoComponent },
-  { path: 'nueva-password', component: NuevaPasswordComponent },
+  { path: 'recuperar-password', component: RecuperarPasswordComponent, canActivate: [passwordRecoveryGuard] },
+  { path: 'verificar-codigo', component: VerificarCodigoComponent, canActivate: [passwordRecoveryGuard] },
+  { path: 'nueva-password', component: NuevaPasswordComponent, canActivate: [passwordRecoveryGuard] },
   { path: '**', redirectTo: '/login', pathMatch: 'full' }
 ]; 

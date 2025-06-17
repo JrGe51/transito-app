@@ -349,6 +349,7 @@ export class Reserva3Component implements OnInit {
                  multiple 
                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
           <small class="text-muted">Formatos permitidos: PDF, Word, imágenes. Máximo 6 archivos.</small>
+          <p class="text-info mt-2">Nota: La carga de documentos es opcional. Puedes entregarlos de forma presencial el día de tu cita.</p>
         </div>
       `,
       showCancelButton: true,
@@ -360,37 +361,36 @@ export class Reserva3Component implements OnInit {
       preConfirm: () => {
         const documentos = (document.getElementById('documentos') as HTMLInputElement).files;
 
-        if (!documentos || documentos.length === 0) {
-          Swal.showValidationMessage('Por favor adjunte al menos un documento');
-          return false;
-        }
-
-        if (documentos.length > 6) {
+        if (documentos && documentos.length > 6) {
           Swal.showValidationMessage('Máximo 6 archivos permitidos');
           return false;
         }
 
-        // Convertir archivos a base64
-        const promesas = Array.from(documentos).map(file => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve({
-              nombre: file.name,
-              tipo: file.type,
-              contenido: reader.result,
-              fecha: new Date().toISOString()
+        // Convertir archivos a base64 si existen
+        if (documentos && documentos.length > 0) {
+          const promesas = Array.from(documentos).map(file => {
+            return new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve({
+                nombre: file.name,
+                tipo: file.type,
+                contenido: reader.result,
+                fecha: new Date().toISOString()
+              });
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
             });
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
           });
-        });
 
-        return Promise.all(promesas)
-          .then(documentosBase64 => {
-            return {
-              documentos: documentosBase64
-            };
-          });
+          return Promise.all(promesas)
+            .then(documentosBase64 => {
+              return {
+                documentos: documentosBase64
+              };
+            });
+        }
+
+        return { documentos: [] };
       }
     }).then((result) => {
       if (result.isConfirmed) {
