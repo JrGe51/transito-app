@@ -348,7 +348,7 @@ export class Reserva3Component implements OnInit {
                  class="swal2-input" 
                  multiple 
                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-          <small class="text-muted">Formatos permitidos: PDF, Word, imágenes. Máximo 3 archivos.</small>
+          <small class="text-muted">Formatos permitidos: PDF, Word, imágenes. Máximo 5 archivos.</small>
         </div>
       `,
       showCancelButton: true,

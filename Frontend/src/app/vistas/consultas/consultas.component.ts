@@ -106,17 +106,60 @@ items = [
               </div>`
   },
   {
-    title: 'a',
-    content: `<div>Info
+    title: 'Rquisitos Licencias Profesionales A1, A2, A3, A4 y A5',
+    content: `<div>
+                <b>Transporte de pasajeros:</b>
                 <br></br>
-                <li>Info</li>
+                <div><li><b>Clase A1/A2</b></li></div>
+                <div><b>Clase A1:</b>Lo habilita para conducir taxis.</div>
+                <div><b>Clase A2:</b>Para conducir indistintamente taxis, colectivos, ambulancias o vehículos motorizados de transporte público y privado de personas, 
+                      con capacidad de 10 a 17 asientos.</div>
+                <div><li><b>Clase A3</b></li></div>
+                <div>Para conducir indistintamente taxis, transporte escolar, ambulancias o vehículos motorizados de transporte público y privado de personas, 
+                      sin limitación de capacidad de asientos.</div>
+                <br></br>
+                <b>Transporte de Carga:</b>
+                <br></br>
+                <div><li><b>Clase A4/A5</b></li></div>
+                <div><b>Clase A4:</b>Para conducir vehículos simples destinados al transporte de carga, cuyo peso bruto vehicular sea superior a 3.500 Kilogramos.</div>
+                <div><b>Clase A5:</b>Para conducir todo tipo de vehículos motorizados, simples o articulados, 
+                      destinados al transporte de carga, cuyo peso bruto vehicular sea superior a 3.500 Kilogramos.</div>
+                <br></br>
+                <b><u>Requisitos:</u></b>
+                <li>Profesional clases <b>A1/A2/A3/A4/A5</b> con <b>curso realizado en una escuela profesional para conductores</b>.</li>
+                <li>Tener como mínimo 20 años de edad.</li>
+                <li>Acreditar haber estado en posesión de la licencia Clase B durante dos años.</li>
+                <li>Acreditar, en caso de la Clase A-3, haber estado en posesión, durante a lo menos dos años, de la Licencia Profesional Clases A-1, A-2, A-4 o A-5. 
+                      Tratándose de la Clase A-5, los postulantes deberán acreditar haber estado en posesión, durante a lo menos dos años, 
+                      de la licencia profesional clases A-2, A-3 o A-4.</li>
+                <br></br>
+                <b>Examenes a rendir:</b>
+                <li>Examen Teórico.</li>
+                <li>Examen Psicosensometrico.</li>
+                <li>Examen Médico.</li>
               </div>`
   },
   {
-    title: 'a',
-    content: `<div>Info
+    title: 'Controles según licencia de conducir',
+    content: `<div>
+                <b>LICENCIA NO PROFESIONAL</b>
                 <br></br>
-                <li>Info</li>
+                <b>Clase: B, C, D, F.</b>
+                <li>Cada 6 años el conductor deberá someterse a un examen psicosensométrico en el Departamento de Licencias, 
+                    a través del cual se evaluará la idoneidad física y mental del postulante.</li>
+                <li>La idoneidad moral será evaluada por el Director de Tránsito, teniendo a la vista el Certificado de Antecedentes, y la idoneidad física por el médico del departamento. 
+                    Si la licencia es denegada por idoneidad moral, el postulante puede apelar al Juzgado de Policía Local, y si se denegare por un médico, 
+                    el afectado tiene la posibilidad de apelar ante el Servicio Médico Legal.</li>
+                <br></br>
+                <b>LICENCIAS PROFESIONALES LEY 18.290 (A1-A2, antes del 08 de Marzo de 1997)</b>
+                <br></br>
+                <li>Cada 4 años deben someterse a control y realizar examen teórico, sensométrico y psicométrico. Los contribuyentes en posesión de estas licencias. 
+                    (Según Ley Nº 18.290, modificada por la Ley Nº 20.068 del 15 de diciembre de 2005, lo que aumenta de 2 a 4 años la vigencia de estas licencias).</li>
+                <br></br>
+                <b>LICENCIAS PROFESIONALES A LEY 19.495</b>
+                <br></br>
+                <li>Contribuyentes que hayan obtenido licencia  Clase A1-A2-A3-A4-A5, Ley N° 19.495 profesional, 
+                    Cada 4 años deben someterse a control y realizar examen médico, sensométrico y psicométrico.</li>
               </div>`
   },
   {

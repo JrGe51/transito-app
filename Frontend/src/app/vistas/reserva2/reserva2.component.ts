@@ -382,7 +382,7 @@ export class Reserva2Component implements OnInit {
                  class="swal2-input" 
                  multiple 
                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-          <small class="text-muted">Formatos permitidos: PDF, Word, imágenes. Máximo 3 archivos.</small>
+          <small class="text-muted">Formatos permitidos: PDF, Word, imágenes. Máximo 5 archivos.</small>
         </div>
       `,
       showCancelButton: true,
@@ -399,8 +399,8 @@ export class Reserva2Component implements OnInit {
           return false;
         }
 
-        if (documentos.length > 3) { // Máximo 3 archivos para renovación
-          Swal.showValidationMessage('Máximo 3 archivos permitidos para renovación');
+        if (documentos.length > 6) {
+          Swal.showValidationMessage('Máximo 6 archivos permitidos para renovación');
           return false;
         }
 
