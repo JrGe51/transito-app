@@ -163,19 +163,45 @@ items = [
               </div>`
   },
   {
-    title: 'aa',
-    content: `<div>Info
+    title: 'Duplicado (no requiere cupo de atención)',
+    content: `<div>El Duplicado se podrá solicitar directamente en el Departamento de Licencias de Conducir de martes a sábado entre las 8:30 y 13:00 hrs. 
+                y en la tarde de 15:15 a 17:00. Día vienes 8:30 y 13:00 hrs. y en la tarde de 15:15 a 16:00 hrs.
                 <br></br>
-                <li>Info</li>
+                <div>Deben presentar bloqueo definitivo de licencia de conducir, trámite que se realiza en forma presencia en el Registro Civil.</div>
+                <br></br>
+                <b>Requisitos:</b>
+                <li>Cédula de identidad vigente, o papeleta de retiro de su nueva cédula emitida por Registro Civil.</li>
+                <li>Fotocopia simple de cédula de identidad por ambos lados.</li>
+                <li>Bloqueo de la licencia de conductor en el Registro Civil impreso.</li>
+                <br></br>
+                <div>La entrega del duplicado en la situación de contar con licencia de otra comuna será en el momento de la recepción de los antecedentes de la comuna de origen. 
+                Se recomienda realizar cambio de domicilio en forma oportuna.</div>
               </div>`
   },
   {
-    title: 'a',
-    content: `<div>Info
+    title: 'Sobre prorrogas de licencias de conducir vencidas',
+    content: `<div>El 16 de junio de 2023 se publicó en el Diario Oficial la Ley Nº 21.579 que prorroga la vigencia de las licencias de conducir que se indican hasta el año 2024. 
+                  En su artículo 7°, la ley dice que "Prorrógase por dos años, contados desde la fecha de vencimiento consignada en el documento, la vigencia de todas las licencias 
+                  de conductor cuyo control corresponda realizar originalmente los años 2023 y 2024. Las licencias no profesionales clase B, C o especiales cuyo control corresponda 
+                  realizar originalmente durante los años 2020, 2021, 2022, 2023 y 2024, se renovarán por el plazo que resta conforme lo establecido en el artículo 19, 
+                  contado desde la fecha de vencimiento consignada en el documento. Para el caso de las licencias profesionales y aquellas que se hayan otorgado conforme al inciso 
+                  final del artículo 22, su renovación se otorgará por el término que corresponda de acuerdo con las reglas generales.
                 <br></br>
-                <li>Info</li>
+                <div>Ejemplo: Si su fecha de control era el 5 de marzo de 2024, su licencia vence el 5 de marzo de 2025, 
+                    lo que quiere decir es que usted debe renovar su licencia antes de esa fecha.</div>
+                <br></br>
+                <a href="https://www.bcn.cl/leychile/navegar?idNorma=1193517">https://www.bcn.cl/leychile/navegar?idNorma=1193517</a>
+                
               </div>`
   },
+  {
+    title: 'Sobre la Ley de Tránsito',
+    content: `<div>La Ley de Tránsito N° 18.290, establece las normas que regulan el tránsito de vehículos y personas en las vías públicas del país.
+                Esta ley es fundamental para garantizar la seguridad vial y el orden en las carreteras y calles de Chile.
+                <br></br>
+                <a href="https://www.bcn.cl/leychile/navegar?idNorma=30468">https://www.bcn.cl/leychile/navegar?idNorma=30468</a>
+              </div>`
+  }
   
 ];
 

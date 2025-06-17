@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { HorarioService } from '../../servicios/horario.service';
-import { RutService } from '../../servicios/rut.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,7 +9,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule, MatCalendar } from '@angular/material/datepicker';
 import { HttpClientModule } from '@angular/common/http';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { MatDialog } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
@@ -86,7 +84,10 @@ export class ReservaComponent implements OnInit {
   cargarTiposLicencia(): void {
     this.horarioService.getLicencias().subscribe({
       next: (licencias: any[]) => {
-        this.tiposLicencia = licencias.map(licencia => licencia.name);
+        // Filtrar las licencias para excluir las clases A1 a A5
+        this.tiposLicencia = licencias
+          .map(licencia => licencia.name)
+          .filter(licencia => !['Clase A1', 'Clase A2', 'Clase A3', 'Clase A4', 'Clase A5'].includes(licencia));
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -592,4 +593,6 @@ export class ReservaComponent implements OnInit {
   goBack(): void {
     this.location.back();
   }
+
+
 }
