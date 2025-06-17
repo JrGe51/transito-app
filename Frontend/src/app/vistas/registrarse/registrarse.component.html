@@ -84,29 +84,29 @@
       </div>
       <div class="form-group">
         <input type="password" class="form-control" name="password" [(ngModel)]="password" id="floatingPassword" placeholder="Contraseña (mínimo 6 caracteres)" required>
-        <div class="error-message">
-          <ng-container *ngIf="password === ''">
-            ❌ Debes ingresar una contraseña
-          </ng-container>
-          <ng-container *ngIf="password !== '' && password.length < 6">
-            ❌ La contraseña debe tener al menos 6 caracteres
-          </ng-container>
-          <ng-container *ngIf="password !== '' && !validarMayuscula(password)">
-            ❌ La contraseña debe contener al menos una letra mayúscula
-          </ng-container>
-          <ng-container *ngIf="password !== '' && !validarNumero(password)">
-            ❌ La contraseña debe contener al menos un número
+        <div class="message-container">
+          <p *ngIf="password.length === 0" [class.error-message]="true">❌Debes ingresar una contraseña</p>
+
+          <ng-container *ngIf="password.length > 0">
+            <p *ngIf="password.length < 6" [class.error-message]="true">❌La contraseña debe tener al menos 6 caracteres.</p>
+            <p *ngIf="password.length >= 6" [class.success-message]="true">La contraseña tiene al menos 6 caracteres.</p>
+
+            <p *ngIf="!validarMayuscula(password)" [class.error-message]="true">❌La contraseña debe contener al menos una letra mayúscula.</p>
+            <p *ngIf="validarMayuscula(password)" [class.success-message]="true">La contraseña contiene una letra mayúscula.</p>
+
+            <p *ngIf="!validarNumero(password)" [class.error-message]="true">❌La contraseña debe contener al menos un número.</p>
+            <p *ngIf="validarNumero(password)" [class.success-message]="true">La contraseña contiene un número.</p>
           </ng-container>
         </div>
       </div>
       <div class="form-group">
         <input type="password" class="form-control" name="repetirpassword" [(ngModel)]="repetirpassword" id="floatingrepetirPassword" placeholder="Repetir Contraseña" required>
-        <div class="error-message">
-          <ng-container *ngIf="repetirpassword === ''">
-            ❌ Debes repetir la contraseña
-          </ng-container>
-          <ng-container *ngIf="repetirpassword !== '' && password !== repetirpassword">
-            ❌ Las contraseñas no coinciden
+        <div class="message-container">
+          <p *ngIf="repetirpassword.length === 0" [class.error-message]="true">❌Debes repetir la contraseña</p>
+
+          <ng-container *ngIf="repetirpassword.length > 0">
+            <p *ngIf="password !== repetirpassword" [class.error-message]="true">❌Las contraseñas no coinciden</p>
+            <p *ngIf="password === repetirpassword" [class.success-message]="true">Las contraseñas coinciden</p>
           </ng-container>
         </div>
       </div>

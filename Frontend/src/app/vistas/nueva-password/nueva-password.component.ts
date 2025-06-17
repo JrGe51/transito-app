@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { UserService } from '../../servicios/user.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-nueva-password',
@@ -57,5 +58,13 @@ export class NuevaPasswordComponent implements OnInit {
         console.error('Error:', error);
       }
     });
+  }
+
+  validarMayuscula(password: string): boolean {
+    return /[A-Z]/.test(password);
+  }
+
+  validarNumero(password: string): boolean {
+    return /\d/.test(password);
   }
 }
