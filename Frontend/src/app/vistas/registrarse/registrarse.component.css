@@ -94,7 +94,7 @@ h2.active {
 }
 
 
-input[type=button], input[type=submit], input[type=reset]  {
+/* input[type=button], input[type=submit], input[type=reset]  {
     background-color: #56baed;
     border: none;
     color: white;
@@ -105,7 +105,7 @@ input[type=button], input[type=submit], input[type=reset]  {
     text-transform: uppercase;
     font-size: 13px;
     -webkit-box-shadow: 0 10px 30px 0 rgba(95,186,233,0.4);
-    -moz-box-shadow: 0 10px 30px 0 rgba(95,186,233,0.4);
+    -moz-box-shadow: 0 10px 30px 0 rgba(0,0,0,0.3);
     box-shadow: 0 10px 30px 0 rgba(95,186,233,0.4);
     border-radius: 5px;
     margin: 5px 20px 40px 20px;
@@ -118,8 +118,8 @@ input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover  {
     transform: scale(0.95);
 }
 
-input[type=text], input[type=password] {
-    background-color: #f6f6f6;
+input[type=text], input[type=password] {*/
+    /*background-color: #f6f6f6;
     border: none;
     color: #0d0d0d;
     padding: 15px 32px;
@@ -141,7 +141,7 @@ input[type=text]:focus, input[type=password]:focus {
 
 input[type=text]:placeholder {
     color: #cccccc;
-}
+}*/
 
 .fadeInDown {
   animation-name: fadeInDown;
@@ -266,11 +266,12 @@ input[type=text]:placeholder {
 }
 
 .register-header h2 {
-  color: #0d0d0d;
-  font-size: 28px;
+  color: #2c3e50;
+  font-size: 36px;
   margin: 0;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 2px;
 }
 
 .user-icon {
@@ -282,30 +283,41 @@ input[type=text]:placeholder {
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 5px;
   align-items: center;
+  padding-bottom: 20px;
 }
 
 .form-row {
   display: flex;
   gap: 20px;
   width: 100%;
-  max-width: 560px;
-}
-
-.form-row .form-group {
-  flex: 1;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
 .form-group {
-  width: 100%;
-  max-width: 560px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  max-width: 250px;
+  flex: 0 0 calc(50% - 10px);
+}
+
+.form-group:only-child {
+  flex: 1; /* Permite que el elemento único crezca para ocupar todo el espacio */
+  max-width: 100%; /* Asegura que no haya límite de ancho para un solo elemento */
+  width: 100%; /* Fuerza el ancho al 100% */
 }
 
 .form-control {
   width: 100%;
-  padding: 15px;
+  padding: 10px 15px;
+  height: 48px;
   border: none;
   background-color: #f6f6f6;
   color: #0d0d0d;
@@ -315,6 +327,19 @@ input[type=text]:placeholder {
   outline: none;
   margin: 0;
   box-sizing: border-box;
+  min-width: 0;
+}
+
+.form-control[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="%23cccccc"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.11 0-1.99.89-1.99 2L2 21c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 18H4V8h16v13z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  max-width: 100%;
+  display: block;
 }
 
 .form-control:focus {
@@ -338,7 +363,7 @@ input[type=text]:placeholder {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 10px 30px 0 rgba(95,186,233,0.4); 
-  margin-top: 20px; 
+  margin-top: 20px;
 }
 
 .register-button:hover {
@@ -375,9 +400,10 @@ input[type=text]:placeholder {
 .error-message {
   color: #dc3545;
   font-size: 12px;
-  margin-top: 5px;
+  margin-top: 0;
   text-align: left;
   padding-left: 5px;
+  min-height: 20px;
 }
 
 .form-control.ng-invalid {
