@@ -16,6 +16,8 @@ import Swal from 'sweetalert2';
 export class NuevaPasswordComponent implements OnInit {
   password: string = '';
   confirmPassword: string = '';
+  showPassword: boolean = false;
+  showConfirmPassword: boolean = false;
   email: string = '';
   codigo: string = '';
 
@@ -66,5 +68,13 @@ export class NuevaPasswordComponent implements OnInit {
 
   validarNumero(password: string): boolean {
     return /\d/.test(password);
+  }
+
+  toggleShowPassword() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleShowConfirmPassword() {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 }
