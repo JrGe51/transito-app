@@ -439,3 +439,55 @@ input[type=text]:placeholder {
     transform: translateY(0);
   }
 }
+
+.password-group {
+    position: relative;
+}
+
+.password-group .form-control {
+    width: 100%;
+    padding-right: 3rem;
+}
+
+.toggle-password-eye {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #888;
+    font-size: 1.2em;
+    z-index: 2;
+}
+
+.toggle-password-eye:hover {
+    color: #56baed;
+}
+
+.input-eye-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+.input-eye-wrapper .form-control {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    padding-right: 2.5rem;
+    box-sizing: border-box;
+}
+
+.toggle-password-eye {
+    margin-left: -2.5rem;
+    cursor: pointer;
+    color: #888;
+    font-size: 1.2em;
+    z-index: 2;
+    /* Si quieres que el ojo esté encima del input, puedes usar position: absolute; */
+}
+
+.toggle-password-eye:hover {
+    color: #56baed;
+}

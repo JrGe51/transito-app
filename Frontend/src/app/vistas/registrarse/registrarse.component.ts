@@ -26,6 +26,8 @@ export class RegistrarseComponent implements OnInit {
   fechanacimiento: string = '';
   direccion: string = '';
   repetirpassword: string = '';
+  showPassword: boolean = false;
+  showRepeatPassword: boolean = false;
 
   private rutPattern = /^\d{1,2}\.\d{3}\.\d{3}[-][0-9kK]{1}$/;
   private emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -254,5 +256,13 @@ export class RegistrarseComponent implements OnInit {
         }
       }
     });
-  } 
+  }
+
+  toggleShowPassword() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleShowRepeatPassword() {
+    this.showRepeatPassword = !this.showRepeatPassword;
+  }
 }

@@ -13,7 +13,12 @@ export class ErroresService {
   messageError(e: HttpErrorResponse) {
     if(e.error.msg){
       console.log(e.error.msg);
-      this.toastr.warning('Error', e.error.msg)
+      // Mostrar mensaje seguro para errores de autenticación
+      if(e.error.msg.includes('Credenciales incorrectas')){
+        this.toastr.warning('Error', 'Credenciales incorrectas')
+      } else {
+        this.toastr.warning('Error', e.error.msg)
+      }
     } else{
         this.toastr.error('Error', 'Credenciales incorrectas')
     }

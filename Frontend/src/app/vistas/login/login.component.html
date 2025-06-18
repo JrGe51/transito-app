@@ -5,10 +5,17 @@
     </div>
     <form (ngSubmit)="login()" #loginForm="ngForm">
         <div class="form-group">
+          <div class="input-eye-wrapper">
             <input type="email" class="form-control" name="email" [(ngModel)]="email" id="floatingInput" placeholder="Email" required>
+          </div>
         </div>
-      <div class="form-group">
-        <input type="password" class="form-control" name="password" [(ngModel)]="password" id="floatingPassword" placeholder="Contraseña" required>
+      <div class="form-group password-group">
+        <div class="input-eye-wrapper">
+          <input [type]="showPassword ? 'text' : 'password'" class="form-control" name="password" [(ngModel)]="password" id="floatingPassword" placeholder="Contraseña" required>
+          <span (click)="toggleShowPassword()" class="toggle-password-eye">
+            <i [ngClass]="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
+          </span>
+        </div>
       </div>
       <button type="submit" class="">Ingresar</button>
     </form>

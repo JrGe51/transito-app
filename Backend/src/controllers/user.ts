@@ -75,7 +75,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
     if(!user){
         res.status(400).json({
-            msg: `El usuario no existe con el email ${email}.`
+            msg: 'Email incorrecto'
         })
         return
     }
@@ -84,7 +84,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
     if(!passwordValid){
         res.status(400).json({
-            msg: `Contraseña Incorrecta ${password}.`
+            msg: 'Contraseña incorrecta'
         })
         return
     }

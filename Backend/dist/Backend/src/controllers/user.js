@@ -74,14 +74,14 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
     const user = yield user_1.User.findOne({ where: { email: email } });
     if (!user) {
         res.status(400).json({
-            msg: `El usuario no existe con el email ${email}.`
+            msg: 'Email incorrecto'
         });
         return;
     }
     const passwordValid = yield bcrypt_1.default.compare(password, user.password);
     if (!passwordValid) {
         res.status(400).json({
-            msg: `Contraseña Incorrecta ${password}.`
+            msg: 'Contraseña incorrecta'
         });
         return;
     }

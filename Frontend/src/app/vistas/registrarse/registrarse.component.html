@@ -85,8 +85,13 @@
         </div>
       </div>
       <div class="form-row">
-        <div class="form-group">
-          <input type="password" class="form-control" name="password" [(ngModel)]="password" id="floatingPassword" placeholder="Contraseña (mínimo 6 caracteres)" required>
+        <div class="form-group password-group">
+          <div class="input-eye-wrapper">
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control" name="password" [(ngModel)]="password" id="floatingPassword" placeholder="Contraseña (mínimo 6 caracteres)" required>
+            <span (click)="toggleShowPassword()" class="toggle-password-eye">
+              <i [ngClass]="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
+            </span>
+          </div>
           <div class="message-container">
             <p *ngIf="password.length === 0" [class.error-message]="true">❌Debes ingresar una contraseña</p>
 
@@ -104,8 +109,13 @@
         </div>
       </div>
       <div class="form-row">
-        <div class="form-group">
-          <input type="password" class="form-control" name="repetirpassword" [(ngModel)]="repetirpassword" id="floatingrepetirPassword" placeholder="Repetir Contraseña" required>
+        <div class="form-group password-group">
+          <div class="input-eye-wrapper">
+            <input [type]="showRepeatPassword ? 'text' : 'password'" class="form-control" name="repetirpassword" [(ngModel)]="repetirpassword" id="floatingrepetirPassword" placeholder="Repetir Contraseña" required>
+            <span (click)="toggleShowRepeatPassword()" class="toggle-password-eye">
+              <i [ngClass]="showRepeatPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
+            </span>
+          </div>
           <div class="message-container">
             <p *ngIf="repetirpassword.length === 0" [class.error-message]="true">❌Debes repetir la contraseña</p>
 
