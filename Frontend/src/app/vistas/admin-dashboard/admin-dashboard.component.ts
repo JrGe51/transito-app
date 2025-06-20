@@ -11,6 +11,7 @@ import { User } from '../../interfaces/user';
 import { SolicitudService } from '../../servicios/solicitud.service';
 import { Solicitud } from '../../interfaces/solicitud';
 import { Admin } from '../../interfaces/admin';
+import { RutService } from '../../servicios/rut.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -89,14 +90,15 @@ export class AdminDashboardComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private toast: ToastrService,
     private fb: FormBuilder,
-    private solicitudService: SolicitudService
+    private solicitudService: SolicitudService,
+    private rutService: RutService
   ) {
     this.minDate = this.getTomorrowDate();
 
     this.editUserForm = this.fb.group({
       id: [''],
       name: ['', Validators.required],
-      rut: ['', [Validators.required, Validators.pattern(/^\d{1,2}\.\d{3}\.\d{3}-[0-9kK]$/)]],
+      rut: ['', [Validators.required, this.rutValidator.bind(this)]],
       lastname: ['', Validators.required],
       email: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@gmail\.com$/)]],
       telefono: ['', Validators.required],
@@ -673,5 +675,18 @@ export class AdminDashboardComponent implements OnInit {
         Swal.fire('Error', 'Error al cargar los documentos de la solicitud.', 'error');
       }
     });
+  }
+
+  // Validador personalizado para RUT
+  rutValidator(control: any) {
+    if (!control.value) {
+      return null;
+    }
+    
+    if (!this.rutService.validarRut(control.value)) {
+      return { invalidRut: true };
+    }
+    
+    return null;
   }
 } 

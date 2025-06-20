@@ -8,12 +8,21 @@ import { sendRecoveryEmail } from '../utils/emailService'
 import crypto from 'crypto'
 import { User as UserInterface } from '../../../Frontend/src/app/interfaces/user'
 import { Model } from 'sequelize'
+import { validarRut } from '../utils/rutValidation'
 
 type UserModel = Model<UserInterface> & UserInterface
 
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { name, rut, lastname, email, password, telefono, fechanacimiento, direccion } = req.body
 
+    // Validar RUT antes de continuar
+    const validacionRut = validarRut(rut);
+    if (!validacionRut.esValido) {
+        res.status(400).json({
+            msg: validacionRut.mensaje
+        });
+        return;
+    }
 
     const existingUserByEmail = await User.findOne({ where: { email: email } });
     if (existingUserByEmail) {
@@ -126,6 +135,14 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
+        // Validar RUT antes de continuar
+        const validacionRut = validarRut(rut);
+        if (!validacionRut.esValido) {
+            res.status(400).json({
+                msg: validacionRut.mensaje
+            });
+            return;
+        }
 
         const existingRutUser = await User.findOne({
             where: {

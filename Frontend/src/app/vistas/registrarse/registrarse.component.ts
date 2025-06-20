@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { RutService } from '../../servicios/rut.service';
 
 @Component({
   selector: 'app-registrarse',
@@ -36,12 +37,13 @@ export class RegistrarseComponent implements OnInit {
   constructor(
     private toast: ToastrService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private rutService: RutService
   ) { }
   ngOnInit(): void {}
 
   validarRut(rut: string): boolean {
-    return this.rutPattern.test(rut);
+    return this.rutService.validarRut(rut);
   }
 
   validarEmail(email: string): boolean {
@@ -140,8 +142,13 @@ export class RegistrarseComponent implements OnInit {
     if (!this.rut.includes('.')) {
       return '❌ Falta el formato con puntos (.) en el RUT';
     }
-    if (!this.validarRut(this.rut)) {
+    if (!this.rutService.validarFormatoRut(this.rut)) {
       return '❌ El formato del RUT no es válido. Debe ser como: 12.345.678-9';
+    }
+    if (!this.rutService.validarRut(this.rut)) {
+      const rutLimpio = this.rut.split('-')[0];
+      const dvCalculado = this.rutService.calcularDigitoVerificador(rutLimpio);
+      return `❌ El dígito verificador es incorrecto. Debería ser: ${dvCalculado}`;
     }
     return '';
   }
@@ -173,7 +180,8 @@ export class RegistrarseComponent implements OnInit {
     }
 
     if (!this.validarRut(this.rut)) {
-      this.toast.error('Error', 'El formato del RUT no es válido (ejemplo: 12.345.678-9)')
+      const validacion = this.rutService.esMayorDeEdad(this.rut);
+      this.toast.error('Error', validacion.mensaje)
       return
     }
 

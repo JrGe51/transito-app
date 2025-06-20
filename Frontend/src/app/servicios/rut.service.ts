@@ -8,7 +8,7 @@ export class RutService {
 
   // Función para validar el formato del RUT
   validarFormatoRut(rut: string): boolean {
-    if (!/^[0-9]{7,8}-[0-9kK]{1}$/.test(rut)) {
+    if (!/^\d{1,2}\.\d{3}\.\d{3}-[0-9kK]$/.test(rut)) {
       return false;
     }
     return true;
@@ -17,7 +17,7 @@ export class RutService {
   // Función para calcular el dígito verificador
   calcularDigitoVerificador(rut: string): string {
     // Eliminar el dígito verificador y el guión si existen
-    const rutLimpio = rut.split('-')[0];
+    const rutLimpio = rut.replace(/\./g, '');
     
     // Calcular dígito verificador
     let suma = 0;

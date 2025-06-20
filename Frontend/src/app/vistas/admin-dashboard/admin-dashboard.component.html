@@ -115,7 +115,7 @@
               <input type="text" id="editRut" formControlName="rut" class="form-control" (input)="formatRut($event)">
               <div *ngIf="editUserForm.get('rut')?.invalid && editUserForm.get('rut')?.touched" class="text-danger">
                 <span *ngIf="editUserForm.get('rut')?.errors?.['required']">RUT es requerido.</span>
-                <span *ngIf="editUserForm.get('rut')?.errors?.['pattern']">Formato de RUT inválido (Ej: 12.345.678-9).</span>
+                <span *ngIf="editUserForm.get('rut')?.errors?.['invalidRut']">RUT inválido. Verifica el formato y el dígito verificador.</span>
               </div>
             </div>
             <div class="col-md-6">
