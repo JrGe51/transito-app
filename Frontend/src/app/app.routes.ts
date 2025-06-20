@@ -31,5 +31,5 @@ export const routes: Routes = [
   { path: 'recuperar-password', component: RecuperarPasswordComponent, canActivate: [authGuard] },
   { path: 'verificar-codigo', component: VerificarCodigoComponent, canActivate: [authGuard] },
   { path: 'nueva-password', component: NuevaPasswordComponent, canActivate: [authGuard] },
-  { path: '**', redirectTo: '/login', pathMatch: 'full' }
+  { path: '**', redirectTo: '/nuevo', pathMatch: 'full' }
 ]; 

@@ -55,6 +55,10 @@ h3 {
   margin-bottom: 15px;
 }
 
+.form-group .form-control {
+  width: 100%;
+}
+
 input[type=text], input[type=email], input[type=password] {
   background-color: #f6f6f6;
   border: none;
