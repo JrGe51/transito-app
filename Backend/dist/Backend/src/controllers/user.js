@@ -64,6 +64,11 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
             telefono: telefono,
             fechanacimiento: fechanacimiento,
             direccion: direccion,
+            licenciaVigente: null,
+            examenMedicoAprobado: false,
+            examenPracticoAprobado: false,
+            examenTeoricoAprobado: false,
+            examenPsicotecnicoAprobado: false,
         });
         res.json({
             msg: `User ${name} ${lastname} create succes..`,

@@ -10,4 +10,9 @@ export interface User {
     direccion?: string;
     codigoRecuperacion?: string;
     codigoExpiracion?: Date;
+    licenciaVigente?: string;
+    examenMedicoAprobado?: boolean;
+    examenPracticoAprobado?: boolean;
+    examenTeoricoAprobado?: boolean;
+    examenPsicotecnicoAprobado?: boolean;
 }

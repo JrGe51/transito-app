@@ -14,7 +14,12 @@ export const User = sequelize.define(
         fechanacimiento: {type: DataTypes.DATEONLY, allowNull: false},
         direccion: {type: DataTypes.STRING, allowNull: false},
         codigoRecuperacion: {type: DataTypes.STRING, allowNull: true},
-        codigoExpiracion: {type: DataTypes.DATE, allowNull: true}
+        codigoExpiracion: {type: DataTypes.DATE, allowNull: true},
+        licenciaVigente: {type: DataTypes.STRING(15), allowNull: true},
+        examenMedicoAprobado: {type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false},
+        examenPracticoAprobado: {type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false},
+        examenTeoricoAprobado: {type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false},
+        examenPsicotecnicoAprobado: {type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false},
     },
     {
         freezeTableName: true,

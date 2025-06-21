@@ -6,7 +6,7 @@ import  sequelize  from '../database/connection';
 export const registerHorario = async (req: Request, res: Response,): Promise<void> => {
     const t = await sequelize.transaction();
     try {
-        const { fecha, hora, cupodisponible, name } = req.body;
+        const { fecha, hora, name } = req.body;
 
         // Validar formato de fecha (YYYY-MM-DD)
         if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {

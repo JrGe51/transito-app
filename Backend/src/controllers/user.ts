@@ -64,6 +64,11 @@ export const register = async (req: Request, res: Response, next: NextFunction):
             telefono: telefono,
             fechanacimiento: fechanacimiento,
             direccion: direccion,
+            licenciaVigente: null,
+            examenMedicoAprobado: false,
+            examenPracticoAprobado: false,
+            examenTeoricoAprobado: false,
+            examenPsicotecnicoAprobado: false,
         })
         
         res.json({
