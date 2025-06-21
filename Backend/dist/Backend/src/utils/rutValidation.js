@@ -8,7 +8,7 @@ const validarFormatoRut = (rut) => {
     return formatoRut.test(rut);
 };
 exports.validarFormatoRut = validarFormatoRut;
-// Función para limpiar el RUT 
+// Función para limpiar el RUT (quitar puntos y guión)
 const limpiarRut = (rut) => {
     return rut.replace(/[.-]/g, '');
 };

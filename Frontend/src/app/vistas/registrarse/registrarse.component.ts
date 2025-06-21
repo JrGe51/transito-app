@@ -8,11 +8,15 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { RutService } from '../../servicios/rut.service';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-registrarse',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, MatCardModule, MatFormFieldModule, MatInputModule, MatIconModule],
   templateUrl: './registrarse.component.html',
   styleUrl: './registrarse.component.css'
 })
