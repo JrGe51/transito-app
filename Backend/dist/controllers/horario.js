@@ -19,7 +19,7 @@ const connection_1 = __importDefault(require("../database/connection"));
 const registerHorario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const t = yield connection_1.default.transaction();
     try {
-        const { fecha, hora, cupodisponible, name } = req.body;
+        const { fecha, hora, name } = req.body;
         // Validar formato de fecha (YYYY-MM-DD)
         if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
             res.status(400).json({

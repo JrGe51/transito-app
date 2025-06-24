@@ -20,8 +20,17 @@ const sequelize_1 = require("sequelize");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const emailService_1 = require("../utils/emailService");
 const crypto_1 = __importDefault(require("crypto"));
+const rutValidation_1 = require("../utils/rutValidation");
 const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, rut, lastname, email, password, telefono, fechanacimiento, direccion } = req.body;
+    // Validar RUT antes de continuar
+    const validacionRut = (0, rutValidation_1.validarRut)(rut);
+    if (!validacionRut.esValido) {
+        res.status(400).json({
+            msg: validacionRut.mensaje
+        });
+        return;
+    }
     const existingUserByEmail = yield user_1.User.findOne({ where: { email: email } });
     if (existingUserByEmail) {
         res.status(400).json({
@@ -55,6 +64,11 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
             telefono: telefono,
             fechanacimiento: fechanacimiento,
             direccion: direccion,
+            licenciaVigente: null,
+            examenMedicoAprobado: false,
+            examenPracticoAprobado: false,
+            examenTeoricoAprobado: false,
+            examenPsicotecnicoAprobado: false,
         });
         res.json({
             msg: `User ${name} ${lastname} create succes..`,
@@ -74,14 +88,14 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
     const user = yield user_1.User.findOne({ where: { email: email } });
     if (!user) {
         res.status(400).json({
-            msg: `El usuario no existe con el email ${email}.`
+            msg: 'Email incorrecto'
         });
         return;
     }
     const passwordValid = yield bcrypt_1.default.compare(password, user.password);
     if (!passwordValid) {
         res.status(400).json({
-            msg: `Contraseña Incorrecta ${password}.`
+            msg: 'Contraseña incorrecta'
         });
         return;
     }
@@ -115,6 +129,14 @@ const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         if (!user) {
             res.status(404).json({
                 msg: `No se encontró un usuario con el ID ${id}`
+            });
+            return;
+        }
+        // Validar RUT antes de continuar
+        const validacionRut = (0, rutValidation_1.validarRut)(rut);
+        if (!validacionRut.esValido) {
+            res.status(400).json({
+                msg: validacionRut.mensaje
             });
             return;
         }
@@ -324,8 +346,8 @@ const cambiarPassword = (req, res) => __awaiter(void 0, void 0, void 0, function
         const passwordHash = yield bcrypt_1.default.hash(nuevaPassword, 10);
         yield user.update({
             password: passwordHash,
-            codigoRecuperacion: null,
-            codigoExpiracion: null
+            codigoRecuperacion: undefined,
+            codigoExpiracion: undefined
         });
         res.json({
             msg: 'Contraseña actualizada correctamente'

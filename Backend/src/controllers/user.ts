@@ -6,7 +6,7 @@ import { Op } from "sequelize"
 import jwt from "jsonwebtoken"
 import { sendRecoveryEmail } from '../utils/emailService'
 import crypto from 'crypto'
-import { User as UserInterface } from '../../../Frontend/src/app/interfaces/user'
+import { User as UserInterface } from '../interfaces/user'
 import { Model } from 'sequelize'
 import { validarRut } from '../utils/rutValidation'
 

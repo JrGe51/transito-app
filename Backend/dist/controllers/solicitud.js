@@ -160,9 +160,9 @@ const getSolicitudesByUser = (req, res) => __awaiter(void 0, void 0, void 0, fun
         console.log(`[getSolicitudesByUser] Solicitudes encontradas: ${solicitudes.length}`);
         if (solicitudes.length === 0) {
             res.status(404).json({
-                msg: 'No se encontraron solicitudes para este usuario.'
+                msg: 'Usted no cuenta con una reserva activa.'
             });
-            console.log('[getSolicitudesByUser] No se encontraron solicitudes para este usuario.');
+            console.log('[getSolicitudesByUser] Usted no cuenta con una reserva activa.');
             return;
         }
         res.status(200).json({
