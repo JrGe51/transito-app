@@ -99,4 +99,8 @@ export class UserService {
   cambiarPassword(email: string, codigo: string, nuevaPassword: string): Observable<any> {
     return this.http.post(`${this.AppUrl}${this.APIUrl}/cambiar-password`, { email, codigo, nuevaPassword });
   }
+
+  hasActiveSolicitud(userId: number): Observable<{ hasActive: boolean }> {
+    return this.http.get<{ hasActive: boolean }>(`${this.AppUrl}api/solicitud/byUserId/${userId}`);
+  }
 }

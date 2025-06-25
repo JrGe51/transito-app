@@ -348,3 +348,27 @@ export const deleteSolicitud = async (req: Request, res: Response): Promise<void
         });
     }
 };
+
+export const getSolicitudesByUserId = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            res.status(400).json({ msg: 'ID de usuario es requerido.' });
+            return;
+        }
+        const solicitudes = await Solicitud.findAll({
+            where: { id_usuario: id },
+        });
+        if (solicitudes.length === 0) {
+            res.status(200).json({ hasActive: false });
+            return;
+        }
+        res.status(200).json({ hasActive: true, solicitudes });
+    } catch (error) {
+        console.error('[getSolicitudesByUserId] Error al obtener solicitudes por usuario:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al obtener las solicitudes.',
+            error
+        });
+    }
+};

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSolicitud = exports.getSolicitudById = exports.getAllSolicitudes = exports.getSolicitudesByUser = exports.registerSolicitud = void 0;
+exports.getSolicitudesByUserId = exports.deleteSolicitud = exports.getSolicitudById = exports.getAllSolicitudes = exports.getSolicitudesByUser = exports.registerSolicitud = void 0;
 const solicitud_1 = require("../models/solicitud");
 const horario_1 = require("../models/horario");
 const licencia_1 = require("../models/licencia");
@@ -317,3 +317,28 @@ const deleteSolicitud = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.deleteSolicitud = deleteSolicitud;
+const getSolicitudesByUserId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            res.status(400).json({ msg: 'ID de usuario es requerido.' });
+            return;
+        }
+        const solicitudes = yield solicitud_1.Solicitud.findAll({
+            where: { id_usuario: id },
+        });
+        if (solicitudes.length === 0) {
+            res.status(200).json({ hasActive: false });
+            return;
+        }
+        res.status(200).json({ hasActive: true, solicitudes });
+    }
+    catch (error) {
+        console.error('[getSolicitudesByUserId] Error al obtener solicitudes por usuario:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al obtener las solicitudes.',
+            error
+        });
+    }
+});
+exports.getSolicitudesByUserId = getSolicitudesByUserId;

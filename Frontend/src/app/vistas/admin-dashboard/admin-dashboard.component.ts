@@ -82,6 +82,10 @@ export class AdminDashboardComponent implements OnInit {
     'Licencia Especial'
   ];
 
+  validatingUser: User | null = null;
+  validateDocsForm: FormGroup;
+  userHasActiveSolicitud: boolean | null = null;
+
   constructor(
     private horarioService: HorarioService,
     private licenciaService: LicenciaService,
@@ -104,6 +108,13 @@ export class AdminDashboardComponent implements OnInit {
       telefono: ['', Validators.required],
       fechanacimiento: ['', Validators.required],
       direccion: ['', Validators.required],
+    });
+
+    this.validateDocsForm = this.fb.group({
+      examenMedicoAprobado: [false],
+      examenPracticoAprobado: [false],
+      examenTeoricoAprobado: [false],
+      examenPsicotecnicoAprobado: [false],
     });
   }
 
@@ -688,5 +699,67 @@ export class AdminDashboardComponent implements OnInit {
     }
     
     return null;
+  }
+
+  openValidateDocs(user: User): void {
+    this.validatingUser = { ...user };
+    this.userHasActiveSolicitud = null;
+    this.validateDocsForm.patchValue({
+      examenMedicoAprobado: !!user.examenMedicoAprobado,
+      examenPracticoAprobado: !!user.examenPracticoAprobado,
+      examenTeoricoAprobado: !!user.examenTeoricoAprobado,
+      examenPsicotecnicoAprobado: !!user.examenPsicotecnicoAprobado,
+    });
+    this.cdr.markForCheck();
+    if (user.id) {
+      this.userService.hasActiveSolicitud(user.id).subscribe({
+        next: (res) => {
+          this.userHasActiveSolicitud = res.hasActive;
+          if (res.hasActive) {
+            this.validateDocsForm.enable();
+          } else {
+            this.validateDocsForm.disable();
+          }
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.userHasActiveSolicitud = false;
+          this.validateDocsForm.disable();
+          this.cdr.markForCheck();
+        }
+      });
+    } else {
+      this.userHasActiveSolicitud = false;
+      this.validateDocsForm.disable();
+      this.cdr.markForCheck();
+    }
+  }
+
+  saveValidatedDocs(): void {
+    if (this.userHasActiveSolicitud && this.validatingUser) {
+      const updatedFields = this.validateDocsForm.value;
+      const updatedUser: User = {
+        ...this.validatingUser,
+        ...updatedFields,
+      };
+      this.userService.updateUser(updatedUser.id!, updatedUser).subscribe({
+        next: () => {
+          Swal.fire('¡Éxito!', 'Documentos validados correctamente', 'success');
+          this.loadUsers();
+          this.cancelValidateDocs();
+        },
+        error: (error) => {
+          console.error('Error al validar documentos:', error);
+          Swal.fire('Error', 'No se pudo validar los documentos', 'error');
+        }
+      });
+    }
+  }
+
+  cancelValidateDocs(): void {
+    this.validatingUser = null;
+    this.userHasActiveSolicitud = null;
+    this.validateDocsForm.reset();
+    this.cdr.markForCheck();
   }
 } 

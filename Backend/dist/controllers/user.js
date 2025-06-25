@@ -123,7 +123,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
 exports.login = login;
 const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const { name, lastname, email, telefono, fechanacimiento, direccion, rut } = req.body;
+    const { name, lastname, email, telefono, fechanacimiento, direccion, rut, examenMedicoAprobado, examenPracticoAprobado, examenTeoricoAprobado, examenPsicotecnicoAprobado } = req.body;
     try {
         const user = yield user_1.User.findByPk(id);
         if (!user) {
@@ -132,47 +132,68 @@ const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
             });
             return;
         }
-        // Validar RUT antes de continuar
-        const validacionRut = (0, rutValidation_1.validarRut)(rut);
-        if (!validacionRut.esValido) {
-            res.status(400).json({
-                msg: validacionRut.mensaje
-            });
-            return;
-        }
-        const existingRutUser = yield user_1.User.findOne({
-            where: {
-                rut: rut,
-                id: { [sequelize_1.Op.ne]: id }
+        // Validar RUT antes de continuar (solo si se está actualizando)
+        if (rut && rut !== user.rut) {
+            const validacionRut = (0, rutValidation_1.validarRut)(rut);
+            if (!validacionRut.esValido) {
+                res.status(400).json({
+                    msg: validacionRut.mensaje
+                });
+                return;
             }
-        });
-        if (existingRutUser) {
-            res.status(400).json({
-                msg: `El RUT '${rut}' ya está en uso por otro usuario.`
+            const existingRutUser = yield user_1.User.findOne({
+                where: {
+                    rut: rut,
+                    id: { [sequelize_1.Op.ne]: id }
+                }
             });
-            return;
-        }
-        const existingEmailUser = yield user_1.User.findOne({
-            where: {
-                email: email,
-                id: { [sequelize_1.Op.ne]: id }
+            if (existingRutUser) {
+                res.status(400).json({
+                    msg: `El RUT '${rut}' ya está en uso por otro usuario.`
+                });
+                return;
             }
-        });
-        if (existingEmailUser) {
-            res.status(400).json({
-                msg: `El email '${email}' ya está en uso por otro usuario.`
-            });
-            return;
         }
-        yield user.update({
-            name,
-            lastname,
-            email,
-            telefono,
-            fechanacimiento,
-            direccion,
-            rut
-        });
+        // Validar email solo si se está actualizando
+        if (email && email !== user.email) {
+            const existingEmailUser = yield user_1.User.findOne({
+                where: {
+                    email: email,
+                    id: { [sequelize_1.Op.ne]: id }
+                }
+            });
+            if (existingEmailUser) {
+                res.status(400).json({
+                    msg: `El email '${email}' ya está en uso por otro usuario.`
+                });
+                return;
+            }
+        }
+        // Preparar objeto de actualización con campos opcionales
+        const updateData = {};
+        if (name !== undefined)
+            updateData.name = name;
+        if (lastname !== undefined)
+            updateData.lastname = lastname;
+        if (email !== undefined)
+            updateData.email = email;
+        if (telefono !== undefined)
+            updateData.telefono = telefono;
+        if (fechanacimiento !== undefined)
+            updateData.fechanacimiento = fechanacimiento;
+        if (direccion !== undefined)
+            updateData.direccion = direccion;
+        if (rut !== undefined)
+            updateData.rut = rut;
+        if (examenMedicoAprobado !== undefined)
+            updateData.examenMedicoAprobado = examenMedicoAprobado;
+        if (examenPracticoAprobado !== undefined)
+            updateData.examenPracticoAprobado = examenPracticoAprobado;
+        if (examenTeoricoAprobado !== undefined)
+            updateData.examenTeoricoAprobado = examenTeoricoAprobado;
+        if (examenPsicotecnicoAprobado !== undefined)
+            updateData.examenPsicotecnicoAprobado = examenPsicotecnicoAprobado;
+        yield user.update(updateData);
         res.json({
             msg: 'Usuario actualizado correctamente',
             user
