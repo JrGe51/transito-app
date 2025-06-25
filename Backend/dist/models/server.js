@@ -25,6 +25,7 @@ const solicitud_2 = require("./solicitud");
 const admin_2 = require("./admin");
 const cors_1 = __importDefault(require("cors"));
 const associations_1 = require("./associations");
+const horario_3 = require("../controllers/horario");
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -75,6 +76,8 @@ class Server {
                 yield solicitud_2.Solicitud.sync();
                 yield admin_2.Admin.sync();
                 console.log("Base de datos conectada correctamente");
+                // Eliminar horarios pasados automáticamente
+                yield (0, horario_3.eliminarHorariosPasados)({}, { json: (msg) => console.log(msg) });
             }
             catch (error) {
                 console.log("Error de conexion", error);

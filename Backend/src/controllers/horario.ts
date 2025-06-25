@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Horario } from '../models/horario';
 import { Licencia } from '../models/licencia';
 import  sequelize  from '../database/connection';
+import { Op } from 'sequelize';
 
 export const registerHorario = async (req: Request, res: Response,): Promise<void> => {
     const t = await sequelize.transaction();
@@ -400,3 +401,20 @@ export const deleteHorario = async (req: Request, res: Response) => {
         });
     }
 }
+
+export const eliminarHorariosPasados = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const hoyStr = hoy.toISOString().split('T')[0];
+    const eliminados = await Horario.destroy({
+      where: {
+        fecha: { [Op.lte]: hoyStr }
+      }
+    });
+    res.json({ msg: `Se eliminaron ${eliminados} horarios pasados.` });
+  } catch (error) {
+    console.error('Error al eliminar horarios pasados:', error);
+    res.status(500).json({ msg: 'Error al eliminar horarios pasados', error });
+  }
+};

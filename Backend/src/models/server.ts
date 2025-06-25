@@ -11,6 +11,7 @@ import { Solicitud } from './solicitud';
 import { Admin } from './admin';
 import cors from 'cors';
 import { defineAssociations } from './associations';
+import { eliminarHorariosPasados } from '../controllers/horario';
 
 
 class Server {
@@ -73,6 +74,8 @@ class Server {
             await Admin.sync();
             
             console.log("Base de datos conectada correctamente")
+            // Eliminar horarios pasados automáticamente
+            await eliminarHorariosPasados({} as any, { json: (msg: any) => console.log(msg) } as any);
         } catch (error) {
             console.log("Error de conexion", error);
 
