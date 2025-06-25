@@ -120,7 +120,8 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
             rut: user.rut,
             telefono: user.telefono,
             fechanacimiento: user.fechanacimiento,
-            direccion: user.direccion
+            direccion: user.direccion,
+            licenciaVigente: user.licenciaVigente
         }
     })
     return
@@ -128,7 +129,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
-    const { name, lastname, email, telefono, fechanacimiento, direccion, rut, examenMedicoAprobado, examenPracticoAprobado, examenTeoricoAprobado, examenPsicotecnicoAprobado } = req.body;
+    const { name, lastname, email, telefono, fechanacimiento, direccion, rut, examenMedicoAprobado, examenPracticoAprobado, examenTeoricoAprobado, examenPsicotecnicoAprobado, licenciaVigente } = req.body;
 
     try {
         const user = await User.findByPk(id) as UserModel;
@@ -195,6 +196,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
         if (examenPracticoAprobado !== undefined) updateData.examenPracticoAprobado = examenPracticoAprobado;
         if (examenTeoricoAprobado !== undefined) updateData.examenTeoricoAprobado = examenTeoricoAprobado;
         if (examenPsicotecnicoAprobado !== undefined) updateData.examenPsicotecnicoAprobado = examenPsicotecnicoAprobado;
+        if (licenciaVigente !== undefined) updateData.licenciaVigente = licenciaVigente;
 
         await user.update(updateData);
 

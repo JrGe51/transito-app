@@ -115,7 +115,8 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
             rut: user.rut,
             telefono: user.telefono,
             fechanacimiento: user.fechanacimiento,
-            direccion: user.direccion
+            direccion: user.direccion,
+            licenciaVigente: user.licenciaVigente
         }
     });
     return;
@@ -123,7 +124,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
 exports.login = login;
 const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const { name, lastname, email, telefono, fechanacimiento, direccion, rut, examenMedicoAprobado, examenPracticoAprobado, examenTeoricoAprobado, examenPsicotecnicoAprobado } = req.body;
+    const { name, lastname, email, telefono, fechanacimiento, direccion, rut, examenMedicoAprobado, examenPracticoAprobado, examenTeoricoAprobado, examenPsicotecnicoAprobado, licenciaVigente } = req.body;
     try {
         const user = yield user_1.User.findByPk(id);
         if (!user) {
@@ -193,6 +194,8 @@ const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
             updateData.examenTeoricoAprobado = examenTeoricoAprobado;
         if (examenPsicotecnicoAprobado !== undefined)
             updateData.examenPsicotecnicoAprobado = examenPsicotecnicoAprobado;
+        if (licenciaVigente !== undefined)
+            updateData.licenciaVigente = licenciaVigente;
         yield user.update(updateData);
         res.json({
             msg: 'Usuario actualizado correctamente',
