@@ -334,12 +334,25 @@
 
     <div class="solicitudes-management-container" *ngIf="showSolicitudesManagement">
       <h2>Gestión de Solicitudes</h2>
-      <div class="search-bar mb-3">
-        <input type="text" class="form-control" placeholder="Buscar por RUT" [(ngModel)]="solicitudSearchRut" (input)="formatSolicitudSearchRut($event)">
+      <!-- Controles de Filtro para Solicitudes -->
+      <div class="filter-controls">
+        <div class="form-group">
+          <label for="solicitudSearchRut">Filtrar por RUT:</label>
+          <input type="text" id="solicitudSearchRut" class="form-control" [(ngModel)]="solicitudSearchRut" (input)="formatSolicitudSearchRut($event); applySolicitudFilters()" placeholder="Ingrese RUT del usuario">
+        </div>
+        <div class="form-group">
+          <label for="solicitudSearchDate">Filtrar por Fecha:</label>
+          <input type="date" id="solicitudSearchDate" class="form-control" [(ngModel)]="solicitudSearchDate" (change)="applySolicitudFilters()">
+        </div>
+        <button class="btn btn-secondary" (click)="clearSolicitudFilters()">Limpiar Filtros</button>
+        <button class="btn btn-success" (click)="exportToExcel()">
+          <i class="fas fa-file-excel"></i> Exportar a Excel
+        </button>
       </div>
 
+      <!-- Lista de Solicitudes -->
       <div class="table-responsive">
-        <table class="table table-striped">
+        <table class="table table-striped" *ngIf="filteredSolicitudes.length > 0">
           <thead>
             <tr>
               <th>Fecha Solicitud</th>
@@ -361,7 +374,7 @@
               <td>{{ solicitud.tipoTramite }}</td>
               <td>{{ solicitud.tipoLicencia?.name }}</td>
               <td>{{ solicitud.horario?.fecha | date:'dd/MM/yyyy' }}</td>
-              <td>{{ solicitud.horario?.hora }}</td>
+              <td>{{ solicitud.horario?.hora?.substring(0, 5) || 'N/A' }}</td>
               <td>
                 <button class="btn btn-info btn-sm" (click)="viewDocuments(solicitud)">
                   Descargar Documentos
@@ -375,6 +388,10 @@
             </tr>
           </tbody>
         </table>
+        
+        <div *ngIf="filteredSolicitudes.length === 0">
+          <p class="no-schedules-message">No se encontraron solicitudes que coincidan con los filtros.</p>
+        </div>
       </div>
     </div>
   </div>
