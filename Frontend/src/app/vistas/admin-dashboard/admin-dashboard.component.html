@@ -28,308 +28,354 @@
     </div>
   </nav>
 
-<div class="dashboard-container">
-  <h1>Panel de Administrador</h1>
-  <p>Bienvenido al panel de administración.</p>
+<div class="admin-dashboard-bg">
+  <div class="dashboard-container">
+    <h1>Panel de Administrador</h1>
+    <p>Bienvenido al panel de administración.</p>
 
-  <div class="admin-buttons-wrapper">
-    <button class="btn btn-primary admin-button" (click)="toggleUsersManagement()">Usuarios</button>
-    <button class="btn btn-primary admin-button" (click)="toggleLicenciasManagement()">Licencias</button>
-    <button class="btn btn-primary admin-button" (click)="toggleHorariosManagement()">Horarios</button>
-    <button class="btn btn-primary admin-button" (click)="toggleSolicitudesManagement()">Solicitudes</button>
-  </div>
-
-
-  <div class="user-management-container" *ngIf="showUsersManagement">
-    <h2>Gestión de Usuarios</h2>
-    <div class="search-bar mb-3">
-      <input type="text" class="form-control" placeholder="Buscar por RUT" [(ngModel)]="userSearchRut" (input)="formatSearchRut($event); filterUsersByRut()">
+    <div class="admin-buttons-wrapper">
+      <button class="btn btn-primary admin-button" (click)="toggleUsersManagement()">Usuarios</button>
+      <button class="btn btn-primary admin-button" (click)="toggleLicenciasManagement()">Licencias</button>
+      <button class="btn btn-primary admin-button" (click)="toggleHorariosManagement()">Horarios</button>
+      <button class="btn btn-primary admin-button" (click)="toggleSolicitudesManagement()">Solicitudes</button>
     </div>
 
-    <div class="user-list-wrapper" *ngIf="shouldShowUsersTable">
+
+    <div class="user-management-container" *ngIf="showUsersManagement">
+      <h2>Gestión de Usuarios</h2>
+      <div class="search-bar mb-3">
+        <input type="text" class="form-control" placeholder="Buscar por RUT" [(ngModel)]="userSearchRut" (input)="formatSearchRut($event); filterUsersByRut()">
+      </div>
+
+      <div class="user-list-wrapper" *ngIf="shouldShowUsersTable">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover shadow-sm">
+            <thead class="bg-primary text-white">
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">RUT</th>
+                <th scope="col">Apellido</th>
+                <th scope="col">Email</th>
+                <th scope="col">Teléfono</th>
+                <th scope="col">F. Nacimiento</th>
+                <th scope="col">Dirección</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of filteredUsers">
+                <td>{{ user.id }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.rut }}</td>
+                <td>{{ user.lastname }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.telefono }}</td>
+                <td>{{ user.fechanacimiento | date:'dd/MM/yyyy' }}</td>
+                <td>{{ user.direccion }}</td>
+                <td>
+                  <button class="btn btn-warning btn-sm me-2" (click)="editUser(user)">Editar</button>
+                  <button class="btn btn-info btn-sm me-2" (click)="openValidateDocs(user)">Validar documentos</button>
+                  <button class="btn btn-danger btn-sm" (click)="deleteUser(user.id!)">Eliminar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div *ngIf="filteredUsers.length === 0 && userSearchRut" class="alert alert-info mt-3">
+          No se encontraron usuarios con el RUT ingresado.
+        </div>
+        <div *ngIf="users.length === 0 && !userSearchRut" class="alert alert-info mt-3">
+          No hay usuarios registrados.
+        </div>
+      </div>
+
+
+      <div class="edit-user-form-container card shadow-sm mt-4" *ngIf="editingUser">
+        <div class="card-header bg-secondary text-white">
+          <h5>Editar Usuario</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="editUserForm" (ngSubmit)="saveUser()">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="editName" class="form-label">Nombre:</label>
+                <input type="text" id="editName" formControlName="name" class="form-control">
+                <div *ngIf="editUserForm.get('name')?.invalid && editUserForm.get('name')?.touched" class="text-danger">
+                  Nombre es requerido.
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="editLastname" class="form-label">Apellido:</label>
+                <input type="text" id="editLastname" formControlName="lastname" class="form-control">
+                <div *ngIf="editUserForm.get('lastname')?.invalid && editUserForm.get('lastname')?.touched" class="text-danger">
+                  Apellido es requerido.
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="editRut" class="form-label">RUT:</label>
+                <input type="text" id="editRut" formControlName="rut" class="form-control" (input)="formatRut($event)">
+                <div *ngIf="editUserForm.get('rut')?.invalid && editUserForm.get('rut')?.touched" class="text-danger">
+                  <span *ngIf="editUserForm.get('rut')?.errors?.['required']">RUT es requerido.</span>
+                  <span *ngIf="editUserForm.get('rut')?.errors?.['invalidRut']">RUT inválido. Verifica el formato y el dígito verificador.</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="editEmail" class="form-label">Email:</label>
+                <input type="email" id="editEmail" formControlName="email" class="form-control">
+                <div *ngIf="editUserForm.get('email')?.invalid && editUserForm.get('email')?.touched" class="text-danger">
+                  <span *ngIf="editUserForm.get('email')?.errors?.['required']">Email es requerido.</span>
+                  <span *ngIf="editUserForm.get('email')?.errors?.['email']">Formato de email inválido.</span>
+                  <span *ngIf="editUserForm.get('email')?.errors?.['pattern']">El email debe ser &#64;gmail.com.</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="editTelefono" class="form-label">Teléfono:</label>
+                <input type="text" id="editTelefono" formControlName="telefono" class="form-control">
+                <div *ngIf="editUserForm.get('telefono')?.invalid && editUserForm.get('telefono')?.touched" class="text-danger">
+                  Teléfono es requerido.
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="editFechaNacimiento" class="form-label">Fecha de Nacimiento:</label>
+                <input type="date" id="editFechaNacimiento" formControlName="fechanacimiento" class="form-control">
+                <div *ngIf="editUserForm.get('fechanacimiento')?.invalid && editUserForm.get('fechanacimiento')?.touched" class="text-danger">
+                  Fecha de Nacimiento es requerida.
+                </div>
+              </div>
+              <div class="col-12">
+                <label for="editDireccion" class="form-label">Dirección:</label>
+                <input type="text" id="editDireccion" formControlName="direccion" class="form-control">
+                <div *ngIf="editUserForm.get('direccion')?.invalid && editUserForm.get('direccion')?.touched" class="text-danger">
+                  Dirección es requerida.
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 text-end">
+              <button type="submit" class="btn btn-success me-2" [disabled]="!editUserForm.valid">Guardar</button>
+              <button type="button" class="btn btn-secondary" (click)="cancelEditUser()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="validate-docs-form-container card shadow-sm mt-4 bg-light-docs" *ngIf="validatingUser">
+        <div class="card-header bg-info text-white">
+          <h5>Validar Documentos</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="validateDocsForm" (ngSubmit)="saveValidatedDocs()">
+            <div *ngIf="userHasActiveSolicitud === false" class="alert alert-warning mb-3">
+              El usuario no tiene documentos a validar.
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input type="checkbox" id="examenMedicoAprobado" class="form-check-input" formControlName="examenMedicoAprobado">
+                  <label for="examenMedicoAprobado" class="form-check-label">Examen Médico Aprobado</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input type="checkbox" id="examenPracticoAprobado" class="form-check-input" formControlName="examenPracticoAprobado">
+                  <label for="examenPracticoAprobado" class="form-check-label">Examen Práctico Aprobado</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input type="checkbox" id="examenTeoricoAprobado" class="form-check-input" formControlName="examenTeoricoAprobado">
+                  <label for="examenTeoricoAprobado" class="form-check-label">Examen Teórico Aprobado</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input type="checkbox" id="examenPsicotecnicoAprobado" class="form-check-input" formControlName="examenPsicotecnicoAprobado">
+                  <label for="examenPsicotecnicoAprobado" class="form-check-label">Examen Psicotécnico Aprobado</label>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 text-end">
+              <button type="submit" class="btn btn-success me-2" [disabled]="!userHasActiveSolicitud">Guardar</button>
+              <button type="button" class="btn btn-secondary" (click)="cancelValidateDocs()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gestión de Licencias -->
+    <div class="schedule-management-container" *ngIf="showLicenciasManagement">
+      <div class="schedule-header">
+        <h2>Gestión de Licencias</h2>
+        <button class="btn btn-info create-schedule-button" (click)="toggleCreateLicenciaForm()">
+          {{ showCreateLicenciaForm ? 'Cancelar' : 'Crear licencia' }}
+        </button>
+      </div>
+
+      <!-- Formulario de creación de licencia -->
+      <div class="create-license-form" *ngIf="showCreateLicenciaForm">
+        <h3>Crear Nueva Licencia</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre de la Licencia</label>
+            <select [(ngModel)]="nuevaLicencia.name" class="form-control">
+              <option value="">Seleccione una licencia</option>
+              <option *ngFor="let tipo of TIPOS_LICENCIA" [value]="tipo">{{tipo}}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Descripción</label>
+            <select [(ngModel)]="nuevaLicencia.description" class="form-control">
+              <option value="">Seleccione una descripción</option>
+              <option *ngFor="let desc of TIPOS_DESCRIPCION" [value]="desc">{{desc}}</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" (click)="crearLicencia()">Crear</button>
+        </div>
+      </div>
+
+      <div class="schedule-list-wrapper" *ngIf="shouldShowLicenciasTable">
+        <!-- Encabezados de la tabla de licencias -->
+        <div class="schedule-item header-row">
+          <div class="schedule-field">Nombre</div>
+          <div class="schedule-field">Descripción</div>
+          <div class="schedule-actions"></div>
+        </div>
+        <div *ngIf="licencias.length === 0" class="no-schedules-message">
+          No hay licencias registradas.
+        </div>
+        <div *ngFor="let licencia of licencias" class="schedule-item">
+          <div class="schedule-field">{{ licencia.name }}</div>
+          <div class="schedule-field">{{ licencia.description }}</div>
+          <div class="schedule-actions">
+            <button class="btn btn-danger delete-schedule-button" (click)="eliminarLicencia(licencia.id)">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gestión de Horarios -->
+    <div class="schedule-management-container" *ngIf="showHorariosManagement">
+      <div class="schedule-header">
+        <h2>Gestión de Horarios</h2>
+        <div class="filter-controls">
+          <div class="form-group">
+            <label for="filterFecha">Filtrar por Fecha:</label>
+            <input type="date" id="filterFecha" [(ngModel)]="filterFecha" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="filterLicencia">Filtrar por Licencia:</label>
+            <select id="filterLicencia" [(ngModel)]="filterLicencia" class="form-control">
+              <option value="">Todas las Licencias</option>
+              <option *ngFor="let tipo of TIPOS_LICENCIA" [value]="tipo">{{tipo}}</option>
+            </select>
+          </div>
+          <button class="btn btn-info" (click)="filterHorarios()">Aplicar Filtro</button>
+          <button class="btn btn-secondary" (click)="clearHorariosFilters()">Limpiar Filtros</button>
+        </div>
+        <button class="btn btn-info create-schedule-button" (click)="toggleCreateForm()">
+          {{ showCreateForm ? 'Cancelar' : 'Crear horario' }}
+        </button>
+      </div>
+
+      <!-- Formulario de creación de horario -->
+      <div class="create-schedule-form" *ngIf="showCreateForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" [(ngModel)]="nuevoHorario.fecha" [min]="minDate" class="form-control">
+            <small class="form-text text-muted">Horario de lunes a viernes</small>
+          </div>
+
+          <div class="form-group">
+            <label>Hora</label>
+            <input type="time" [(ngModel)]="nuevoHorario.hora" class="form-control">
+            <small class="form-text text-muted">Horario de 09:00 a 18:00 horas</small>
+          </div>
+
+          <div class="form-group">
+            <label>Tipo de Licencia</label>
+            <select [(ngModel)]="nuevoHorario.name" class="form-control">
+              <option value="">Seleccione una licencia</option>
+              <option *ngFor="let tipo of tiposLicencia" [value]="tipo">{{tipo}}</option>
+            </select>
+            <small class="form-text text-muted">&nbsp;</small>
+          </div>
+
+          <button class="btn btn-primary" (click)="crearHorario()">Crear</button>
+        </div>
+      </div>
+
+      <div class="schedule-list-wrapper" *ngIf="shouldShowTable">
+        <!-- Encabezados de la tabla de horarios -->
+        <div class="schedule-item header-row">
+          <div class="schedule-field">Fecha</div>
+          <div class="schedule-field">Hora</div>
+          <div class="schedule-field">Licencia</div>
+          <div class="schedule-field">Disponible</div>
+          <div class="schedule-actions"></div>
+        </div>
+        <!-- Aquí se iterarán los horarios -->
+        <div *ngIf="horarios.length === 0" class="no-schedules-message">
+          No hay horarios disponibles.
+        </div>
+        <div *ngFor="let horario of horarios" class="schedule-item">
+          <div class="schedule-field">{{ horario.fecha }}</div>
+          <div class="schedule-field">{{ horario.hora }}</div>
+          <div class="schedule-field">{{ horario.tipoLicenciaMostrado }}</div>
+          <div class="schedule-field">{{ horario.cupodisponible ? 'Sí' : 'No' }}</div>
+          <div class="schedule-actions">
+            <button class="btn btn-danger delete-schedule-button" (click)="eliminarHorario(horario.id)">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="solicitudes-management-container" *ngIf="showSolicitudesManagement">
+      <h2>Gestión de Solicitudes</h2>
+      <div class="search-bar mb-3">
+        <input type="text" class="form-control" placeholder="Buscar por RUT" [(ngModel)]="solicitudSearchRut" (input)="formatSolicitudSearchRut($event)">
+      </div>
+
       <div class="table-responsive">
-        <table class="table table-striped table-hover shadow-sm">
-          <thead class="bg-primary text-white">
+        <table class="table table-striped">
+          <thead>
             <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Nombre</th>
-              <th scope="col">RUT</th>
-              <th scope="col">Apellido</th>
-              <th scope="col">Email</th>
-              <th scope="col">Teléfono</th>
-              <th scope="col">F. Nacimiento</th>
-              <th scope="col">Dirección</th>
-              <th scope="col">Acciones</th>
+              <th>Fecha Solicitud</th>
+              <th>Usuario</th>
+              <th>RUT</th>
+              <th>Tipo Trámite</th>
+              <th>Licencia</th>
+              <th>Fecha Cita</th>
+              <th>Hora Cita</th>
+              <th>Documentos</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let user of filteredUsers">
-              <td>{{ user.id }}</td>
-              <td>{{ user.name }}</td>
-              <td>{{ user.rut }}</td>
-              <td>{{ user.lastname }}</td>
-              <td>{{ user.email }}</td>
-              <td>{{ user.telefono }}</td>
-              <td>{{ user.fechanacimiento | date:'dd/MM/yyyy' }}</td>
-              <td>{{ user.direccion }}</td>
+            <tr *ngFor="let solicitud of filteredSolicitudes">
+              <td>{{ solicitud.fechaSolicitud | date:'dd/MM/yyyy' }}</td>
+              <td>{{ solicitud.usuario?.name }} {{ solicitud.usuario?.lastname }}</td>
+              <td>{{ solicitud.usuario?.rut }}</td>
+              <td>{{ solicitud.tipoTramite }}</td>
+              <td>{{ solicitud.tipoLicencia?.name }}</td>
+              <td>{{ solicitud.horario?.fecha | date:'dd/MM/yyyy' }}</td>
+              <td>{{ solicitud.horario?.hora }}</td>
               <td>
-                <button class="btn btn-warning btn-sm me-2" (click)="editUser(user)">Editar</button>
-                <button class="btn btn-danger btn-sm" (click)="deleteUser(user.id!)">Eliminar</button>
+                <button class="btn btn-info btn-sm" (click)="viewDocuments(solicitud)">
+                  Descargar Documentos
+                </button>
+              </td>
+              <td>
+                <button class="btn btn-danger btn-sm" (click)="deleteSolicitud(solicitud.id!)">
+                  Eliminar
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div *ngIf="filteredUsers.length === 0 && userSearchRut" class="alert alert-info mt-3">
-        No se encontraron usuarios con el RUT ingresado.
-      </div>
-      <div *ngIf="users.length === 0 && !userSearchRut" class="alert alert-info mt-3">
-        No hay usuarios registrados.
-      </div>
-    </div>
-
-
-    <div class="edit-user-form-container card shadow-sm mt-4" *ngIf="editingUser">
-      <div class="card-header bg-secondary text-white">
-        <h5>Editar Usuario</h5>
-      </div>
-      <div class="card-body">
-        <form [formGroup]="editUserForm" (ngSubmit)="saveUser()">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label for="editName" class="form-label">Nombre:</label>
-              <input type="text" id="editName" formControlName="name" class="form-control">
-              <div *ngIf="editUserForm.get('name')?.invalid && editUserForm.get('name')?.touched" class="text-danger">
-                Nombre es requerido.
-              </div>
-            </div>
-            <div class="col-md-6">
-              <label for="editLastname" class="form-label">Apellido:</label>
-              <input type="text" id="editLastname" formControlName="lastname" class="form-control">
-              <div *ngIf="editUserForm.get('lastname')?.invalid && editUserForm.get('lastname')?.touched" class="text-danger">
-                Apellido es requerido.
-              </div>
-            </div>
-            <div class="col-md-6">
-              <label for="editRut" class="form-label">RUT:</label>
-              <input type="text" id="editRut" formControlName="rut" class="form-control" (input)="formatRut($event)">
-              <div *ngIf="editUserForm.get('rut')?.invalid && editUserForm.get('rut')?.touched" class="text-danger">
-                <span *ngIf="editUserForm.get('rut')?.errors?.['required']">RUT es requerido.</span>
-                <span *ngIf="editUserForm.get('rut')?.errors?.['invalidRut']">RUT inválido. Verifica el formato y el dígito verificador.</span>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <label for="editEmail" class="form-label">Email:</label>
-              <input type="email" id="editEmail" formControlName="email" class="form-control">
-              <div *ngIf="editUserForm.get('email')?.invalid && editUserForm.get('email')?.touched" class="text-danger">
-                <span *ngIf="editUserForm.get('email')?.errors?.['required']">Email es requerido.</span>
-                <span *ngIf="editUserForm.get('email')?.errors?.['email']">Formato de email inválido.</span>
-                <span *ngIf="editUserForm.get('email')?.errors?.['pattern']">El email debe ser &#64;gmail.com.</span>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <label for="editTelefono" class="form-label">Teléfono:</label>
-              <input type="text" id="editTelefono" formControlName="telefono" class="form-control">
-              <div *ngIf="editUserForm.get('telefono')?.invalid && editUserForm.get('telefono')?.touched" class="text-danger">
-                Teléfono es requerido.
-              </div>
-            </div>
-            <div class="col-md-6">
-              <label for="editFechaNacimiento" class="form-label">Fecha de Nacimiento:</label>
-              <input type="date" id="editFechaNacimiento" formControlName="fechanacimiento" class="form-control">
-              <div *ngIf="editUserForm.get('fechanacimiento')?.invalid && editUserForm.get('fechanacimiento')?.touched" class="text-danger">
-                Fecha de Nacimiento es requerida.
-              </div>
-            </div>
-            <div class="col-12">
-              <label for="editDireccion" class="form-label">Dirección:</label>
-              <input type="text" id="editDireccion" formControlName="direccion" class="form-control">
-              <div *ngIf="editUserForm.get('direccion')?.invalid && editUserForm.get('direccion')?.touched" class="text-danger">
-                Dirección es requerida.
-              </div>
-            </div>
-          </div>
-          <div class="mt-4 text-end">
-            <button type="submit" class="btn btn-success me-2" [disabled]="!editUserForm.valid">Guardar</button>
-            <button type="button" class="btn btn-secondary" (click)="cancelEditUser()">Cancelar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Gestión de Licencias -->
-  <div class="schedule-management-container" *ngIf="showLicenciasManagement">
-    <div class="schedule-header">
-      <h2>Gestión de Licencias</h2>
-      <button class="btn btn-info create-schedule-button" (click)="toggleCreateLicenciaForm()">
-        {{ showCreateLicenciaForm ? 'Cancelar' : 'Crear licencia' }}
-      </button>
-    </div>
-
-    <!-- Formulario de creación de licencia -->
-    <div class="create-license-form" *ngIf="showCreateLicenciaForm">
-      <h3>Crear Nueva Licencia</h3>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nombre de la Licencia</label>
-          <select [(ngModel)]="nuevaLicencia.name" class="form-control">
-            <option value="">Seleccione una licencia</option>
-            <option *ngFor="let tipo of TIPOS_LICENCIA" [value]="tipo">{{tipo}}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Descripción</label>
-          <select [(ngModel)]="nuevaLicencia.description" class="form-control">
-            <option value="">Seleccione una descripción</option>
-            <option *ngFor="let desc of TIPOS_DESCRIPCION" [value]="desc">{{desc}}</option>
-          </select>
-        </div>
-        <button class="btn btn-primary" (click)="crearLicencia()">Crear</button>
-      </div>
-    </div>
-
-    <div class="schedule-list-wrapper" *ngIf="shouldShowLicenciasTable">
-      <!-- Encabezados de la tabla de licencias -->
-      <div class="schedule-item header-row">
-        <div class="schedule-field">Nombre</div>
-        <div class="schedule-field">Descripción</div>
-        <div class="schedule-actions"></div>
-      </div>
-      <div *ngIf="licencias.length === 0" class="no-schedules-message">
-        No hay licencias registradas.
-      </div>
-      <div *ngFor="let licencia of licencias" class="schedule-item">
-        <div class="schedule-field">{{ licencia.name }}</div>
-        <div class="schedule-field">{{ licencia.description }}</div>
-        <div class="schedule-actions">
-          <button class="btn btn-danger delete-schedule-button" (click)="eliminarLicencia(licencia.id)">Eliminar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Gestión de Horarios -->
-  <div class="schedule-management-container" *ngIf="showHorariosManagement">
-    <div class="schedule-header">
-      <h2>Gestión de Horarios</h2>
-      <div class="filter-controls">
-        <div class="form-group">
-          <label for="filterFecha">Filtrar por Fecha:</label>
-          <input type="date" id="filterFecha" [(ngModel)]="filterFecha" class="form-control">
-        </div>
-        <div class="form-group">
-          <label for="filterLicencia">Filtrar por Licencia:</label>
-          <select id="filterLicencia" [(ngModel)]="filterLicencia" class="form-control">
-            <option value="">Todas las Licencias</option>
-            <option *ngFor="let tipo of TIPOS_LICENCIA" [value]="tipo">{{tipo}}</option>
-          </select>
-        </div>
-        <button class="btn btn-info" (click)="filterHorarios()">Aplicar Filtro</button>
-        <button class="btn btn-secondary" (click)="clearHorariosFilters()">Limpiar Filtros</button>
-      </div>
-      <button class="btn btn-info create-schedule-button" (click)="toggleCreateForm()">
-        {{ showCreateForm ? 'Cancelar' : 'Crear horario' }}
-      </button>
-    </div>
-
-    <!-- Formulario de creación de horario -->
-    <div class="create-schedule-form" *ngIf="showCreateForm">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Fecha</label>
-          <input type="date" [(ngModel)]="nuevoHorario.fecha" [min]="minDate" class="form-control">
-          <small class="form-text text-muted">Horario de lunes a viernes</small>
-        </div>
-
-        <div class="form-group">
-          <label>Hora</label>
-          <input type="time" [(ngModel)]="nuevoHorario.hora" class="form-control">
-          <small class="form-text text-muted">Horario de 09:00 a 18:00 horas</small>
-        </div>
-
-        <div class="form-group">
-          <label>Tipo de Licencia</label>
-          <select [(ngModel)]="nuevoHorario.name" class="form-control">
-            <option value="">Seleccione una licencia</option>
-            <option *ngFor="let tipo of tiposLicencia" [value]="tipo">{{tipo}}</option>
-          </select>
-          <small class="form-text text-muted">&nbsp;</small>
-        </div>
-
-        <button class="btn btn-primary" (click)="crearHorario()">Crear</button>
-      </div>
-    </div>
-
-    <div class="schedule-list-wrapper" *ngIf="shouldShowTable">
-      <!-- Encabezados de la tabla de horarios -->
-      <div class="schedule-item header-row">
-        <div class="schedule-field">Fecha</div>
-        <div class="schedule-field">Hora</div>
-        <div class="schedule-field">Licencia</div>
-        <div class="schedule-field">Disponible</div>
-        <div class="schedule-actions"></div>
-      </div>
-      <!-- Aquí se iterarán los horarios -->
-      <div *ngIf="horarios.length === 0" class="no-schedules-message">
-        No hay horarios disponibles.
-      </div>
-      <div *ngFor="let horario of horarios" class="schedule-item">
-        <div class="schedule-field">{{ horario.fecha }}</div>
-        <div class="schedule-field">{{ horario.hora }}</div>
-        <div class="schedule-field">{{ horario.tipoLicenciaMostrado }}</div>
-        <div class="schedule-field">{{ horario.cupodisponible ? 'Sí' : 'No' }}</div>
-        <div class="schedule-actions">
-          <button class="btn btn-danger delete-schedule-button" (click)="eliminarHorario(horario.id)">Eliminar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  <div class="solicitudes-management-container" *ngIf="showSolicitudesManagement">
-    <h2>Gestión de Solicitudes</h2>
-    <div class="search-bar mb-3">
-      <input type="text" class="form-control" placeholder="Buscar por RUT" [(ngModel)]="solicitudSearchRut" (input)="formatSolicitudSearchRut($event)">
-    </div>
-
-    <div class="table-responsive">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Fecha Solicitud</th>
-            <th>Usuario</th>
-            <th>RUT</th>
-            <th>Tipo Trámite</th>
-            <th>Licencia</th>
-            <th>Fecha Cita</th>
-            <th>Hora Cita</th>
-            <th>Documentos</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let solicitud of filteredSolicitudes">
-            <td>{{ solicitud.fechaSolicitud | date:'dd/MM/yyyy' }}</td>
-            <td>{{ solicitud.usuario?.name }} {{ solicitud.usuario?.lastname }}</td>
-            <td>{{ solicitud.usuario?.rut }}</td>
-            <td>{{ solicitud.tipoTramite }}</td>
-            <td>{{ solicitud.tipoLicencia?.name }}</td>
-            <td>{{ solicitud.horario?.fecha | date:'dd/MM/yyyy' }}</td>
-            <td>{{ solicitud.horario?.hora }}</td>
-            <td>
-              <button class="btn btn-info btn-sm" (click)="viewDocuments(solicitud)">
-                Descargar Documentos
-              </button>
-            </td>
-            <td>
-              <button class="btn btn-danger btn-sm" (click)="deleteSolicitud(solicitud.id!)">
-                Eliminar
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   </div>
 </div>

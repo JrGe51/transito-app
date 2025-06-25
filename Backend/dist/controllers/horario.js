@@ -12,14 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteHorario = exports.getAllHorarios = exports.liberarHorario = exports.getHorasPorFecha = exports.getFechasDisponibles = exports.registerHorario = void 0;
+exports.eliminarHorariosPasados = exports.deleteHorario = exports.getAllHorarios = exports.liberarHorario = exports.getHorasPorFecha = exports.getFechasDisponibles = exports.registerHorario = void 0;
 const horario_1 = require("../models/horario");
 const licencia_1 = require("../models/licencia");
 const connection_1 = __importDefault(require("../database/connection"));
+const sequelize_1 = require("sequelize");
 const registerHorario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const t = yield connection_1.default.transaction();
     try {
-        const { fecha, hora, cupodisponible, name } = req.body;
+        const { fecha, hora, name } = req.body;
         // Validar formato de fecha (YYYY-MM-DD)
         if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
             res.status(400).json({
@@ -364,3 +365,21 @@ const deleteHorario = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.deleteHorario = deleteHorario;
+const eliminarHorariosPasados = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const hoyStr = hoy.toISOString().split('T')[0];
+        const eliminados = yield horario_1.Horario.destroy({
+            where: {
+                fecha: { [sequelize_1.Op.lte]: hoyStr }
+            }
+        });
+        res.json({ msg: `Se eliminaron ${eliminados} horarios pasados.` });
+    }
+    catch (error) {
+        console.error('Error al eliminar horarios pasados:', error);
+        res.status(500).json({ msg: 'Error al eliminar horarios pasados', error });
+    }
+});
+exports.eliminarHorariosPasados = eliminarHorariosPasados;

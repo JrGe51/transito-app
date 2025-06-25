@@ -6,7 +6,7 @@ import { Op } from "sequelize"
 import jwt from "jsonwebtoken"
 import { sendRecoveryEmail } from '../utils/emailService'
 import crypto from 'crypto'
-import { User as UserInterface } from '../../../Frontend/src/app/interfaces/user'
+import { User as UserInterface } from '../interfaces/user'
 import { Model } from 'sequelize'
 import { validarRut } from '../utils/rutValidation'
 
@@ -64,6 +64,11 @@ export const register = async (req: Request, res: Response, next: NextFunction):
             telefono: telefono,
             fechanacimiento: fechanacimiento,
             direccion: direccion,
+            licenciaVigente: null,
+            examenMedicoAprobado: false,
+            examenPracticoAprobado: false,
+            examenTeoricoAprobado: false,
+            examenPsicotecnicoAprobado: false,
         })
         
         res.json({
@@ -115,7 +120,8 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
             rut: user.rut,
             telefono: user.telefono,
             fechanacimiento: user.fechanacimiento,
-            direccion: user.direccion
+            direccion: user.direccion,
+            licenciaVigente: user.licenciaVigente
         }
     })
     return
@@ -123,10 +129,10 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
-    const { name, lastname, email, telefono, fechanacimiento, direccion, rut } = req.body;
+    const { name, lastname, email, telefono, fechanacimiento, direccion, rut, examenMedicoAprobado, examenPracticoAprobado, examenTeoricoAprobado, examenPsicotecnicoAprobado, licenciaVigente } = req.body;
 
     try {
-        const user = await User.findByPk(id);
+        const user = await User.findByPk(id) as UserModel;
 
         if (!user) {
             res.status(404).json({
@@ -135,53 +141,64 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
-        // Validar RUT antes de continuar
-        const validacionRut = validarRut(rut);
-        if (!validacionRut.esValido) {
-            res.status(400).json({
-                msg: validacionRut.mensaje
-            });
-            return;
-        }
-
-        const existingRutUser = await User.findOne({
-            where: {
-                rut: rut,
-                id: { [Op.ne]: id } 
+        // Validar RUT antes de continuar (solo si se está actualizando)
+        if (rut && rut !== user.rut) {
+            const validacionRut = validarRut(rut);
+            if (!validacionRut.esValido) {
+                res.status(400).json({
+                    msg: validacionRut.mensaje
+                });
+                return;
             }
-        });
 
-        if (existingRutUser) {
-            res.status(400).json({
-                msg: `El RUT '${rut}' ya está en uso por otro usuario.`
+            const existingRutUser = await User.findOne({
+                where: {
+                    rut: rut,
+                    id: { [Op.ne]: id } 
+                }
             });
-            return;
-        }
 
-
-        const existingEmailUser = await User.findOne({
-            where: {
-                email: email,
-                id: { [Op.ne]: id } 
+            if (existingRutUser) {
+                res.status(400).json({
+                    msg: `El RUT '${rut}' ya está en uso por otro usuario.`
+                });
+                return;
             }
-        });
-
-        if (existingEmailUser) {
-            res.status(400).json({
-                msg: `El email '${email}' ya está en uso por otro usuario.`
-            });
-            return;
         }
 
-        await user.update({
-            name,
-            lastname,
-            email,
-            telefono,
-            fechanacimiento,
-            direccion,
-            rut
-        });
+        // Validar email solo si se está actualizando
+        if (email && email !== user.email) {
+            const existingEmailUser = await User.findOne({
+                where: {
+                    email: email,
+                    id: { [Op.ne]: id } 
+                }
+            });
+
+            if (existingEmailUser) {
+                res.status(400).json({
+                    msg: `El email '${email}' ya está en uso por otro usuario.`
+                });
+                return;
+            }
+        }
+
+        // Preparar objeto de actualización con campos opcionales
+        const updateData: any = {};
+        if (name !== undefined) updateData.name = name;
+        if (lastname !== undefined) updateData.lastname = lastname;
+        if (email !== undefined) updateData.email = email;
+        if (telefono !== undefined) updateData.telefono = telefono;
+        if (fechanacimiento !== undefined) updateData.fechanacimiento = fechanacimiento;
+        if (direccion !== undefined) updateData.direccion = direccion;
+        if (rut !== undefined) updateData.rut = rut;
+        if (examenMedicoAprobado !== undefined) updateData.examenMedicoAprobado = examenMedicoAprobado;
+        if (examenPracticoAprobado !== undefined) updateData.examenPracticoAprobado = examenPracticoAprobado;
+        if (examenTeoricoAprobado !== undefined) updateData.examenTeoricoAprobado = examenTeoricoAprobado;
+        if (examenPsicotecnicoAprobado !== undefined) updateData.examenPsicotecnicoAprobado = examenPsicotecnicoAprobado;
+        if (licenciaVigente !== undefined) updateData.licenciaVigente = licenciaVigente;
+
+        await user.update(updateData);
 
         res.json({
             msg: 'Usuario actualizado correctamente',

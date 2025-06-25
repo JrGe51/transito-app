@@ -82,6 +82,12 @@ export class AdminDashboardComponent implements OnInit {
     'Licencia Especial'
   ];
 
+  validatingUser: User | null = null;
+  validateDocsForm: FormGroup;
+  userHasActiveSolicitud: boolean | null = null;
+  solicitudActivaId: number | null = null;
+  tipoLicenciaActiva: string | null = null;
+
   constructor(
     private horarioService: HorarioService,
     private licenciaService: LicenciaService,
@@ -104,6 +110,13 @@ export class AdminDashboardComponent implements OnInit {
       telefono: ['', Validators.required],
       fechanacimiento: ['', Validators.required],
       direccion: ['', Validators.required],
+    });
+
+    this.validateDocsForm = this.fb.group({
+      examenMedicoAprobado: [false],
+      examenPracticoAprobado: [false],
+      examenTeoricoAprobado: [false],
+      examenPsicotecnicoAprobado: [false],
     });
   }
 
@@ -547,16 +560,16 @@ export class AdminDashboardComponent implements OnInit {
 
   loadSolicitudes(): void {
     this.solicitudService.getAllSolicitudes().subscribe({
-      next: (response) => {
-        this.solicitudes = response.solicitudes;
+      next: (data) => {
+        this.solicitudes = data.solicitudes;
         this.filteredSolicitudes = this.solicitudes;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
-      error: (error) => {
-        console.error('Error al cargar solicitudes:', error);
-        console.log(error)
-        Swal.fire('Error', 'Error al cargar las solicitudes', 'error');
-        this.cdr.detectChanges();
+      error: (err: any) => {
+        console.error('Error al cargar solicitudes:', err);
+        this.solicitudes = [];
+        this.filteredSolicitudes = [];
+        this.cdr.markForCheck();
       }
     });
   }
@@ -688,5 +701,107 @@ export class AdminDashboardComponent implements OnInit {
     }
     
     return null;
+  }
+
+  openValidateDocs(user: User): void {
+    this.validatingUser = { ...user };
+    this.userHasActiveSolicitud = null;
+    this.solicitudActivaId = null;
+    this.tipoLicenciaActiva = null;
+    this.validateDocsForm.patchValue({
+      examenMedicoAprobado: !!user.examenMedicoAprobado,
+      examenPracticoAprobado: !!user.examenPracticoAprobado,
+      examenTeoricoAprobado: !!user.examenTeoricoAprobado,
+      examenPsicotecnicoAprobado: !!user.examenPsicotecnicoAprobado,
+    });
+    this.cdr.markForCheck();
+    if (user.id) {
+      this.userService.hasActiveSolicitud(user.id).subscribe({
+        next: (res) => {
+          this.userHasActiveSolicitud = res.hasActive;
+          if (res.hasActive) {
+            this.validateDocsForm.enable();
+            // Obtener la solicitud activa para el usuario
+            this.solicitudService.getAllSolicitudes().subscribe({
+              next: (data) => {
+                // Buscar la solicitud activa del usuario
+                const solicitud = data.solicitudes.find((s: any) => s.id_usuario === user.id);
+                if (solicitud) {
+                  this.solicitudActivaId = typeof solicitud.id === 'number' ? solicitud.id : null;
+                  this.tipoLicenciaActiva = solicitud.tipoLicencia?.name || null;
+                }
+                this.cdr.markForCheck();
+              },
+              error: () => {
+                this.solicitudActivaId = null;
+                this.tipoLicenciaActiva = null;
+                this.cdr.markForCheck();
+              }
+            });
+          } else {
+            this.validateDocsForm.disable();
+          }
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.userHasActiveSolicitud = false;
+          this.validateDocsForm.disable();
+          this.cdr.markForCheck();
+        }
+      });
+    } else {
+      this.userHasActiveSolicitud = false;
+      this.validateDocsForm.disable();
+      this.cdr.markForCheck();
+    }
+  }
+
+  saveValidatedDocs(): void {
+    if (this.userHasActiveSolicitud && this.validatingUser) {
+      const updatedFields = this.validateDocsForm.value;
+      const allTrue = updatedFields.examenMedicoAprobado && updatedFields.examenPracticoAprobado && updatedFields.examenTeoricoAprobado && updatedFields.examenPsicotecnicoAprobado;
+      let updatedUser: User = {
+        ...this.validatingUser,
+        ...updatedFields,
+      };
+      if (allTrue && this.tipoLicenciaActiva) {
+        updatedUser.licenciaVigente = this.tipoLicenciaActiva;
+      }
+      this.userService.updateUser(updatedUser.id!, updatedUser).subscribe({
+        next: () => {
+          if (allTrue && this.solicitudActivaId) {
+            this.solicitudService.deleteSolicitud(this.solicitudActivaId).subscribe({
+              next: () => {
+                Swal.fire('¡Éxito!', 'Documentos validados y licencia otorgada. Solicitud eliminada.', 'success');
+                this.loadUsers();
+                this.cancelValidateDocs();
+              },
+              error: () => {
+                Swal.fire('¡Éxito!', 'Documentos validados y licencia otorgada, pero no se pudo eliminar la solicitud.', 'warning');
+                this.loadUsers();
+                this.cancelValidateDocs();
+              }
+            });
+          } else {
+            Swal.fire('¡Éxito!', 'Documentos validados correctamente', 'success');
+            this.loadUsers();
+            this.cancelValidateDocs();
+          }
+        },
+        error: (error) => {
+          console.error('Error al validar documentos:', error);
+          Swal.fire('Error', 'No se pudo validar los documentos', 'error');
+        }
+      });
+    }
+  }
+
+  cancelValidateDocs(): void {
+    this.validatingUser = null;
+    this.userHasActiveSolicitud = null;
+    this.solicitudActivaId = null;
+    this.tipoLicenciaActiva = null;
+    this.validateDocsForm.reset();
+    this.cdr.markForCheck();
   }
 } 
