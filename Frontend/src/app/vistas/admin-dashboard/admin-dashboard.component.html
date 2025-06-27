@@ -165,8 +165,11 @@
         </div>
         <div class="card-body">
           <form [formGroup]="validateDocsForm" (ngSubmit)="saveValidatedDocs()">
-            <div *ngIf="userHasActiveSolicitud === false" class="alert alert-warning mb-3">
-              El usuario no tiene documentos a validar.
+            <div *ngIf="userHasActiveSolicitud === false && (!validatingUser.licenciaVigente || validatingUser.licenciaVigente === 'sin licencia')" class="alert alert-warning mb-3">
+              El usuario no tiene documentos a validar (sin solicitud activa ni licencia vigente).
+            </div>
+            <div *ngIf="userHasActiveSolicitud === false && validatingUser.licenciaVigente && validatingUser.licenciaVigente !== 'sin licencia'" class="alert alert-info mb-3">
+              Usuario con licencia vigente: {{ validatingUser.licenciaVigente }}. Puede validar documentos.
             </div>
             <div class="row g-3">
               <div class="col-md-6">
@@ -195,7 +198,7 @@
               </div>
             </div>
             <div class="mt-4 text-end">
-              <button type="submit" class="btn btn-success me-2" [disabled]="!userHasActiveSolicitud">Guardar</button>
+              <button type="submit" class="btn btn-success me-2" [disabled]="!(userHasActiveSolicitud || (validatingUser.licenciaVigente && validatingUser.licenciaVigente !== 'sin licencia'))">Guardar</button>
               <button type="button" class="btn btn-secondary" (click)="cancelValidateDocs()">Cancelar</button>
             </div>
           </form>

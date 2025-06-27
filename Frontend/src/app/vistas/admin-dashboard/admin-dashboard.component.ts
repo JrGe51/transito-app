@@ -715,29 +715,38 @@ export class AdminDashboardComponent implements OnInit {
       examenPsicotecnicoAprobado: !!user.examenPsicotecnicoAprobado,
     });
     this.cdr.markForCheck();
+    
+    // Verificar si el usuario tiene licencia vigente
+    const hasActiveLicense = !!user.licenciaVigente && user.licenciaVigente !== 'sin licencia';
+    
     if (user.id) {
       this.userService.hasActiveSolicitud(user.id).subscribe({
         next: (res) => {
           this.userHasActiveSolicitud = res.hasActive;
-          if (res.hasActive) {
+          
+          // Habilitar formulario si tiene solicitud activa O licencia vigente
+          if (res.hasActive || hasActiveLicense) {
             this.validateDocsForm.enable();
-            // Obtener la solicitud activa para el usuario
-            this.solicitudService.getAllSolicitudes().subscribe({
-              next: (data) => {
-                // Buscar la solicitud activa del usuario
-                const solicitud = data.solicitudes.find((s: any) => s.id_usuario === user.id);
-                if (solicitud) {
-                  this.solicitudActivaId = typeof solicitud.id === 'number' ? solicitud.id : null;
-                  this.tipoLicenciaActiva = solicitud.tipoLicencia?.name || null;
+            
+            if (res.hasActive) {
+              // Obtener la solicitud activa para el usuario
+              this.solicitudService.getAllSolicitudes().subscribe({
+                next: (data) => {
+                  // Buscar la solicitud activa del usuario
+                  const solicitud = data.solicitudes.find((s: any) => s.id_usuario === user.id);
+                  if (solicitud) {
+                    this.solicitudActivaId = typeof solicitud.id === 'number' ? solicitud.id : null;
+                    this.tipoLicenciaActiva = solicitud.tipoLicencia?.name || null;
+                  }
+                  this.cdr.markForCheck();
+                },
+                error: () => {
+                  this.solicitudActivaId = null;
+                  this.tipoLicenciaActiva = null;
+                  this.cdr.markForCheck();
                 }
-                this.cdr.markForCheck();
-              },
-              error: () => {
-                this.solicitudActivaId = null;
-                this.tipoLicenciaActiva = null;
-                this.cdr.markForCheck();
-              }
-            });
+              });
+            }
           } else {
             this.validateDocsForm.disable();
           }
@@ -745,31 +754,49 @@ export class AdminDashboardComponent implements OnInit {
         },
         error: () => {
           this.userHasActiveSolicitud = false;
-          this.validateDocsForm.disable();
+          // Si no hay solicitud activa pero tiene licencia vigente, habilitar formulario
+          if (hasActiveLicense) {
+            this.validateDocsForm.enable();
+          } else {
+            this.validateDocsForm.disable();
+          }
           this.cdr.markForCheck();
         }
       });
     } else {
       this.userHasActiveSolicitud = false;
-      this.validateDocsForm.disable();
+      // Si no hay solicitud activa pero tiene licencia vigente, habilitar formulario
+      if (hasActiveLicense) {
+        this.validateDocsForm.enable();
+      } else {
+        this.validateDocsForm.disable();
+      }
       this.cdr.markForCheck();
     }
   }
 
   saveValidatedDocs(): void {
-    if (this.userHasActiveSolicitud && this.validatingUser) {
+    // Verificar si el usuario tiene licencia vigente
+    const hasActiveLicense = !!this.validatingUser?.licenciaVigente && this.validatingUser.licenciaVigente !== 'sin licencia';
+    
+    // Permitir guardar si tiene solicitud activa O licencia vigente
+    if ((this.userHasActiveSolicitud || hasActiveLicense) && this.validatingUser) {
       const updatedFields = this.validateDocsForm.value;
       const allTrue = updatedFields.examenMedicoAprobado && updatedFields.examenPracticoAprobado && updatedFields.examenTeoricoAprobado && updatedFields.examenPsicotecnicoAprobado;
       let updatedUser: User = {
         ...this.validatingUser,
         ...updatedFields,
       };
-      if (allTrue && this.tipoLicenciaActiva) {
+      
+      // Solo actualizar licenciaVigente si tiene solicitud activa y todos los exámenes están aprobados
+      if (allTrue && this.userHasActiveSolicitud && this.tipoLicenciaActiva) {
         updatedUser.licenciaVigente = this.tipoLicenciaActiva;
       }
+      
       this.userService.updateUser(updatedUser.id!, updatedUser).subscribe({
         next: () => {
-          if (allTrue && this.solicitudActivaId) {
+          // Solo eliminar solicitud si tiene solicitud activa y todos los exámenes están aprobados
+          if (allTrue && this.userHasActiveSolicitud && this.solicitudActivaId) {
             this.solicitudService.deleteSolicitud(this.solicitudActivaId).subscribe({
               next: () => {
                 Swal.fire('¡Éxito!', 'Documentos validados y licencia otorgada. Solicitud eliminada.', 'success');
@@ -783,7 +810,10 @@ export class AdminDashboardComponent implements OnInit {
               }
             });
           } else {
-            Swal.fire('¡Éxito!', 'Documentos validados correctamente', 'success');
+            const message = hasActiveLicense ? 
+              'Documentos validados correctamente para usuario con licencia vigente' : 
+              'Documentos validados correctamente';
+            Swal.fire('¡Éxito!', message, 'success');
             this.loadUsers();
             this.cancelValidateDocs();
           }
