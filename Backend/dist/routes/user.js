@@ -11,4 +11,6 @@ router.delete("/api/user/delete/:id", user_1.deleteUser);
 router.post("/api/user/recuperar-password", user_1.recuperarPassword);
 router.post("/api/user/verificar-codigo", user_1.verificarCodigo);
 router.post("/api/user/cambiar-password", user_1.cambiarPassword);
+router.post("/api/user/:id/agregar-licencia", user_1.agregarLicencia);
+router.delete("/api/user/:id/quitar-licencia", user_1.quitarLicencia);
 exports.default = router;

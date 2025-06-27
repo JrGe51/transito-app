@@ -60,6 +60,7 @@
                 <th scope="col">Teléfono</th>
                 <th scope="col">F. Nacimiento</th>
                 <th scope="col">Dirección</th>
+                <th scope="col">Licencias</th>
                 <th scope="col">Acciones</th>
               </tr>
             </thead>
@@ -73,6 +74,21 @@
                 <td>{{ user.telefono }}</td>
                 <td>{{ user.fechanacimiento | date:'dd/MM/yyyy' }}</td>
                 <td>{{ user.direccion }}</td>
+                <td>
+                  <div *ngIf="tieneLicencias(user); else sinLicencia">
+                    <div *ngFor="let licencia of user.licenciaVigente" class="d-flex align-items-center mb-1">
+                      <span class="badge bg-success me-2">{{ licencia }}</span>
+                      <button class="btn btn-outline-danger btn-sm" 
+                              (click)="quitarLicencia(user, licencia)"
+                              title="Quitar licencia {{ licencia }}">
+                        <i class="bi bi-x-circle"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <ng-template #sinLicencia>
+                    <span class="text-muted">Sin licencias</span>
+                  </ng-template>
+                </td>
                 <td>
                   <button class="btn btn-warning btn-sm me-2" (click)="editUser(user)">Editar</button>
                   <button class="btn btn-info btn-sm me-2" (click)="openValidateDocs(user)">Validar documentos</button>
@@ -165,11 +181,11 @@
         </div>
         <div class="card-body">
           <form [formGroup]="validateDocsForm" (ngSubmit)="saveValidatedDocs()">
-            <div *ngIf="userHasActiveSolicitud === false && (!validatingUser.licenciaVigente || validatingUser.licenciaVigente === 'sin licencia')" class="alert alert-warning mb-3">
+            <div *ngIf="userHasActiveSolicitud === false && !tieneLicencias(validatingUser)" class="alert alert-warning mb-3">
               El usuario no tiene documentos a validar (sin solicitud activa ni licencia vigente).
             </div>
-            <div *ngIf="userHasActiveSolicitud === false && validatingUser.licenciaVigente && validatingUser.licenciaVigente !== 'sin licencia'" class="alert alert-info mb-3">
-              Usuario con licencia vigente: {{ validatingUser.licenciaVigente }}. Puede validar documentos.
+            <div *ngIf="userHasActiveSolicitud === false && tieneLicencias(validatingUser)" class="alert alert-info mb-3">
+              Usuario con licencias vigentes: {{ validatingUser.licenciaVigente?.join(', ') || '' }}. Puede validar documentos.
             </div>
             <div class="row g-3">
               <div class="col-md-6">
@@ -198,7 +214,7 @@
               </div>
             </div>
             <div class="mt-4 text-end">
-              <button type="submit" class="btn btn-success me-2" [disabled]="!(userHasActiveSolicitud || (validatingUser.licenciaVigente && validatingUser.licenciaVigente !== 'sin licencia'))">Guardar</button>
+              <button type="submit" class="btn btn-success me-2" [disabled]="!(userHasActiveSolicitud || tieneLicencias(validatingUser))">Guardar</button>
               <button type="button" class="btn btn-secondary" (click)="cancelValidateDocs()">Cancelar</button>
             </div>
           </form>

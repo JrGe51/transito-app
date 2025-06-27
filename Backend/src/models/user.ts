@@ -15,7 +15,7 @@ export const User = sequelize.define(
         direccion: {type: DataTypes.STRING, allowNull: false},
         codigoRecuperacion: {type: DataTypes.STRING, allowNull: true},
         codigoExpiracion: {type: DataTypes.DATE, allowNull: true},
-        licenciaVigente: {type: DataTypes.STRING(15), allowNull: true},
+        licenciaVigente: {type: DataTypes.JSON, allowNull: true, defaultValue: []},
         examenMedicoAprobado: {type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false},
         examenPracticoAprobado: {type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false},
         examenTeoricoAprobado: {type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false},

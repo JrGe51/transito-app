@@ -18,7 +18,7 @@ exports.User = connection_1.default.define('User', {
     direccion: { type: sequelize_1.DataTypes.STRING, allowNull: false },
     codigoRecuperacion: { type: sequelize_1.DataTypes.STRING, allowNull: true },
     codigoExpiracion: { type: sequelize_1.DataTypes.DATE, allowNull: true },
-    licenciaVigente: { type: sequelize_1.DataTypes.STRING(15), allowNull: true },
+    licenciaVigente: { type: sequelize_1.DataTypes.JSON, allowNull: true, defaultValue: [] },
     examenMedicoAprobado: { type: sequelize_1.DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     examenPracticoAprobado: { type: sequelize_1.DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     examenTeoricoAprobado: { type: sequelize_1.DataTypes.BOOLEAN, allowNull: false, defaultValue: false },

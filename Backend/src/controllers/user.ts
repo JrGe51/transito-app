@@ -196,24 +196,126 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
         if (examenPracticoAprobado !== undefined) updateData.examenPracticoAprobado = examenPracticoAprobado;
         if (examenTeoricoAprobado !== undefined) updateData.examenTeoricoAprobado = examenTeoricoAprobado;
         if (examenPsicotecnicoAprobado !== undefined) updateData.examenPsicotecnicoAprobado = examenPsicotecnicoAprobado;
-        if (licenciaVigente !== undefined) updateData.licenciaVigente = licenciaVigente;
+        
+        // Manejar licenciaVigente como array
+        if (licenciaVigente !== undefined) {
+            // Si es un string, convertirlo a array
+            if (typeof licenciaVigente === 'string') {
+                updateData.licenciaVigente = licenciaVigente === 'sin licencia' ? [] : [licenciaVigente];
+            } else if (Array.isArray(licenciaVigente)) {
+                updateData.licenciaVigente = licenciaVigente;
+            }
+        }
 
         await user.update(updateData);
 
         res.json({
-            msg: 'Usuario actualizado correctamente',
-            user
+            msg: `Usuario ${user.name} ${user.lastname} actualizado correctamente`,
+            user: {
+                id: user.id,
+                name: user.name,
+                lastname: user.lastname,
+                email: user.email,
+                rut: user.rut,
+                telefono: user.telefono,
+                fechanacimiento: user.fechanacimiento,
+                direccion: user.direccion,
+                licenciaVigente: user.licenciaVigente
+            }
         });
-        return
     } catch (error) {
-        console.error('Error al actualizar el usuario:', error);
+        console.error('Error al actualizar usuario:', error);
         res.status(500).json({
-            msg: 'Error interno del servidor al actualizar el usuario.',
-            error
+            msg: 'Error interno del servidor al actualizar el usuario'
         });
-        return
     }
-};
+}
+
+// Función para agregar una licencia al usuario
+export const agregarLicencia = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { id } = req.params;
+    const { licencia } = req.body;
+
+    try {
+        const user = await User.findByPk(id) as UserModel;
+
+        if (!user) {
+            res.status(404).json({
+                msg: `No se encontró un usuario con el ID ${id}`
+            });
+            return;
+        }
+
+        // Obtener licencias actuales
+        const licenciasActuales = user.licenciaVigente || [];
+        
+        // Verificar si la licencia ya existe
+        if (licenciasActuales.includes(licencia)) {
+            res.status(400).json({
+                msg: `El usuario ya tiene la licencia ${licencia}`
+            });
+            return;
+        }
+
+        // Agregar la nueva licencia
+        const nuevasLicencias = [...licenciasActuales, licencia];
+        
+        await user.update({ licenciaVigente: nuevasLicencias });
+
+        res.json({
+            msg: `Licencia ${licencia} agregada correctamente al usuario ${user.name} ${user.lastname}`,
+            licencias: nuevasLicencias
+        });
+    } catch (error) {
+        console.error('Error al agregar licencia:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al agregar la licencia'
+        });
+    }
+}
+
+// Función para quitar una licencia del usuario
+export const quitarLicencia = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { id } = req.params;
+    const { licencia } = req.body;
+
+    try {
+        const user = await User.findByPk(id) as UserModel;
+
+        if (!user) {
+            res.status(404).json({
+                msg: `No se encontró un usuario con el ID ${id}`
+            });
+            return;
+        }
+
+        // Obtener licencias actuales
+        const licenciasActuales = user.licenciaVigente || [];
+        
+        // Verificar si la licencia existe
+        if (!licenciasActuales.includes(licencia)) {
+            res.status(400).json({
+                msg: `El usuario no tiene la licencia ${licencia}`
+            });
+            return;
+        }
+
+        // Quitar la licencia
+        const nuevasLicencias = licenciasActuales.filter(l => l !== licencia);
+        
+        await user.update({ licenciaVigente: nuevasLicencias });
+
+        res.json({
+            msg: `Licencia ${licencia} removida correctamente del usuario ${user.name} ${user.lastname}`,
+            licencias: nuevasLicencias
+        });
+    } catch (error) {
+        console.error('Error al quitar licencia:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al quitar la licencia'
+        });
+    }
+}
 
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

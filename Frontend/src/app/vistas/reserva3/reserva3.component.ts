@@ -404,7 +404,7 @@ export class Reserva3Component implements OnInit {
   validarLicenciaVigente(): boolean {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
-    if (!user.licenciaVigente || user.licenciaVigente === 'sin licencia') {
+    if (!user.licenciaVigente || !Array.isArray(user.licenciaVigente) || user.licenciaVigente.length === 0) {
       Swal.fire({
         icon: 'error',
         title: 'No puedes realizar este trámite',
