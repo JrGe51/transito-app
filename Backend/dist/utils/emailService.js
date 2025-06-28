@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendRecoveryEmail = exports.emailTemplates = exports.sendEmail = void 0;
+exports.sendRecoveryEmail = exports.emailTemplates = exports.sendEmail = exports.getRequiredDocuments = exports.formatDate = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -42,6 +42,67 @@ transporter.verify(function (error, success) {
         console.log('Servidor de correo listo para enviar mensajes');
     }
 });
+// Función para formatear fecha de YYYY-MM-DD a DD/MM/YYYY
+const formatDate = (dateString) => {
+    if (!dateString)
+        return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+        // Si no es una fecha válida, intentar parsear como string YYYY-MM-DD
+        const parts = dateString.split('-');
+        if (parts.length === 3) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        return dateString; // Retornar original si no se puede parsear
+    }
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+};
+exports.formatDate = formatDate;
+// Función para obtener documentos requeridos según el tipo de trámite
+const getRequiredDocuments = (tipoTramite, tipoLicencia) => {
+    const documentos = [];
+    // Documentos comunes para todos los trámites
+    documentos.push('Cédula de identidad vigente');
+    documentos.push('Certificado de antecedentes');
+    // Documentos específicos según el tipo de trámite
+    switch (tipoTramite) {
+        case 'Primera Licencia':
+            documentos.push('Certificado de estudios');
+            documentos.push('Fotocopias de la cédula de identidad');
+            break;
+        case 'Renovación':
+            documentos.push('Licencia de Conducir actual');
+            documentos.push('Fotocopias de la cédula de identidad y la licencia de conducir actual');
+            break;
+        case 'Cambio de Clase':
+            documentos.push('Licencia de Conducir actual');
+            documentos.push('Fotocopias de la cédula de identidad y la licencia de conducir actual');
+            break;
+        default:
+            // Para otros tipos de trámite, incluir documentos básicos
+            documentos.push('Fotocopias de la cédula de identidad');
+            break;
+    }
+    // Documentos adicionales según la clase de licencia
+    if (tipoLicencia.includes('A1') || tipoLicencia.includes('A2') || tipoLicencia.includes('A3') ||
+        tipoLicencia.includes('A4') || tipoLicencia.includes('A5')) {
+        documentos.push('Certificado de curso en escuela profesional para conductores');
+        documentos.push('Acreditar posesión de licencia Clase B durante al menos 2 años');
+    }
+    if (tipoLicencia.includes('D')) {
+        documentos.push('Certificado de curso en escuela para maquinaria pesada');
+    }
+    if (tipoLicencia.includes('F')) {
+        documentos.push('Certificado de la institución donde presta servicios');
+    }
+    // Documento adicional para personas de otras comunas
+    documentos.push('Si viene de otra comuna: Certificado de Residencia');
+    return documentos;
+};
+exports.getRequiredDocuments = getRequiredDocuments;
 const sendEmail = (_a) => __awaiter(void 0, [_a], void 0, function* ({ to, subject, html, text }) {
     try {
         console.log('Configurando envío de correo a:', to);

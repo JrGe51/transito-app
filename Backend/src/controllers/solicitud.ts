@@ -3,7 +3,7 @@ import { Solicitud } from "../models/solicitud";
 import { Horario } from "../models/horario";
 import { Licencia } from "../models/licencia";
 import { User } from "../models/user";
-import { sendEmail } from "../utils/emailService";
+import { sendEmail, formatDate, getRequiredDocuments } from "../utils/emailService";
 
 interface UserAttributes {
     id: number;
@@ -108,6 +108,10 @@ export const registerSolicitud = async (req: Request, res: Response, next: NextF
 
         console.log('Intentando enviar correo a:', usuario.email);
         
+        // Obtener documentos requeridos según el tipo de trámite y licencia
+        const documentosRequeridos = getRequiredDocuments(tipoTramite, name);
+        const documentosList = documentosRequeridos.map(doc => `<li>${doc}</li>`).join('');
+
         // Enviar correo de confirmación
         const emailContent = `
             <h1>¡Reserva Confirmada!</h1>
@@ -115,14 +119,35 @@ export const registerSolicitud = async (req: Request, res: Response, next: NextF
             <p>Su reserva ha sido confirmada exitosamente con los siguientes detalles:</p>
             <ul>
                 <li><strong>Tipo de Licencia:</strong> ${name}</li>
-                <li><strong>Fecha:</strong> ${fecha}</li>
-                <li><strong>Hora:</strong> ${hora}</li>
+                <li><strong>Fecha de Cita:</strong> ${formatDate(fecha)}</li>
+                <li><strong>Hora de Cita:</strong> ${hora}</li>
                 <li><strong>Tipo de Trámite:</strong> ${tipoTramite}</li>
+                <li><strong>Número de Solicitud:</strong> #${nuevaSolicitud.id}</li>
             </ul>
 
-            <p>Por favor, asegúrese de traer todos los documentos necesarios el día de su cita.</p>
-            <p>Si necesita realizar algún cambio o cancelar su reserva, por favor contáctenos al **+569 73146125**.</p>
-            <p>Saludos cordiales,<br>Equipo de Tránsito</p>
+            <h3>Documentos Requeridos para su Cita:</h3>
+            <ul>
+                ${documentosList}
+            </ul>
+
+            <div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #2196f3;">
+                <p style="margin: 0; color: #1565c0; font-weight: bold;">📋 Información Importante sobre Documentos:</p>
+                <p style="margin: 5px 0 0 0; color: #1565c0;">
+                    Si ya subió documentos a través del formulario de reserva, <strong>NO es necesario</strong> llevarlos físicamente el día de su cita. 
+                    Nuestro personal ya tiene acceso a los documentos digitales que envió.
+                </p>
+            </div>
+
+            <h3>Información Importante:</h3>
+            <ul>
+                <li>Llegue 15 minutos antes de su hora de cita</li>
+                <li>Si NO subió documentos digitalmente, traiga todos los documentos originales y sus fotocopias</li>
+                <li>Los documentos deben estar vigentes y en buen estado</li>
+                <li>Si algún documento no está disponible, contacte con anticipación</li>
+            </ul>
+
+            <p>Si necesita realizar algún cambio o cancelar su reserva, por favor contáctenos al <strong>+569 73146125</strong>.</p>
+            <p>Saludos cordiales,<br><strong>Equipo de Tránsito</strong></p>
         `;
 
         try {
@@ -302,11 +327,9 @@ export const deleteSolicitud = async (req: Request, res: Response): Promise<void
             return;
         }
 
-
         if (solicitud.horario) {
             await solicitud.horario.update({ cupodisponible: true });
         }
-
 
         const emailContent = `
             <h1>Cancelación de Solicitud</h1>
@@ -314,15 +337,23 @@ export const deleteSolicitud = async (req: Request, res: Response): Promise<void
             <p>Su solicitud ha sido cancelada exitosamente con los siguientes detalles:</p>
             <ul>
                 <li><strong>Tipo de Licencia:</strong> ${solicitud.tipoLicencia?.name}</li>
-                <li><strong>Fecha de Cita:</strong> ${solicitud.horario?.fecha}</li>
+                <li><strong>Fecha de Cita:</strong> ${solicitud.horario?.fecha ? formatDate(solicitud.horario.fecha) : 'No disponible'}</li>
                 <li><strong>Hora de Cita:</strong> ${solicitud.horario?.hora}</li>
                 <li><strong>Tipo de Trámite:</strong> ${solicitud.tipoTramite}</li>
+                <li><strong>Número de Solicitud:</strong> #${solicitud.id}</li>
             </ul>
-            <p>Si necesita realizar una nueva solicitud, puede hacerlo a través de nuestra plataforma.</p>
-            <p>Para cualquier consulta, no dude en contactarnos al **+569 73146125**.</p>
-            <p>Saludos cordiales,<br>Equipo de Tránsito</p>
-        `;
 
+            <h3>Información Importante:</h3>
+            <ul>
+                <li>Su cupo ha sido liberado y está disponible para otros usuarios</li>
+                <li>Puede realizar una nueva solicitud cuando lo desee</li>
+                <li>Si canceló por error, puede contactarnos para verificar disponibilidad</li>
+            </ul>
+
+            <p>Si necesita realizar una nueva solicitud, puede hacerlo a través de nuestra plataforma.</p>
+            <p>Para cualquier consulta, no dude en contactarnos al <strong>+569 73146125</strong>.</p>
+            <p>Saludos cordiales,<br><strong>Equipo de Tránsito</strong></p>
+        `;
 
         try {
             await sendEmail({
@@ -333,7 +364,6 @@ export const deleteSolicitud = async (req: Request, res: Response): Promise<void
         } catch (emailError) {
             console.error('Error al enviar el correo de cancelación:', emailError);
         }
-
 
         await solicitud.destroy();
 
