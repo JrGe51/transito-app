@@ -12,6 +12,8 @@ import { SolicitudService } from '../../servicios/solicitud.service';
 import { Solicitud } from '../../interfaces/solicitud';
 import { Admin } from '../../interfaces/admin';
 import { RutService } from '../../servicios/rut.service';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -44,6 +46,7 @@ export class AdminDashboardComponent implements OnInit {
   solicitudes: Solicitud[] = [];
   filteredSolicitudes: Solicitud[] = [];
   solicitudSearchRut: string = '';
+  solicitudSearchDate: string = '';
   adminData: Admin | undefined;
   showCrearLicencia = false;
   
@@ -87,6 +90,8 @@ export class AdminDashboardComponent implements OnInit {
   userHasActiveSolicitud: boolean | null = null;
   solicitudActivaId: number | null = null;
   tipoLicenciaActiva: string | null = null;
+
+  filterSolicitudSearchRut: string = '';
 
   constructor(
     private horarioService: HorarioService,
@@ -409,6 +414,9 @@ export class AdminDashboardComponent implements OnInit {
       this.users = [];
       this.filteredUsers = [];
     }
+    if (this.showUsersManagement && this.users.length === 0) {
+      this.loadUsers();
+    }
   }
 
   loadUsers(): void {
@@ -523,7 +531,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   formatSearchRut(event: any): void {
-    let rut = event.target.value.replace(/[^0-9kK]/g, '');
+    let rut = event.target.value.replace(/[^0-9kK.-]/g, ''); // Permitir solo números, k, K, . y -
     if (rut.length > 1) {
       rut = rut.slice(0, -1) + '-' + rut.slice(-1);
     }
@@ -561,8 +569,15 @@ export class AdminDashboardComponent implements OnInit {
   loadSolicitudes(): void {
     this.solicitudService.getAllSolicitudes().subscribe({
       next: (data) => {
-        this.solicitudes = data.solicitudes;
-        this.filteredSolicitudes = this.solicitudes;
+        // Ordenar por fecha y luego por hora de la cita
+        const sortedData = data.solicitudes.sort((a, b) => {
+          const dateTimeA = `${a.horario?.fecha || ''}T${a.horario?.hora || ''}`;
+          const dateTimeB = `${b.horario?.fecha || ''}T${b.horario?.hora || ''}`;
+          return dateTimeA.localeCompare(dateTimeB);
+        });
+
+        this.solicitudes = sortedData;
+        this.filteredSolicitudes = sortedData;
         this.cdr.markForCheck();
       },
       error: (err: any) => {
@@ -574,29 +589,102 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  filterSolicitudesByRut(): void {
-    if (!this.solicitudSearchRut) {
-      this.filteredSolicitudes = this.solicitudes;
+  applySolicitudFilters(): void {
+    let tempSolicitudes = [...this.solicitudes];
+
+    // Filtrar por RUT
+    if (this.solicitudSearchRut) {
+      const cleanedSearchRut = this.solicitudSearchRut.replace(/\./g, '').replace(/-/g, '');
+      tempSolicitudes = tempSolicitudes.filter(solicitud => {
+        const cleanedSolicitudRut = solicitud.usuario?.rut?.replace(/\./g, '').replace(/-/g, '');
+        return cleanedSolicitudRut?.includes(cleanedSearchRut);
+      });
+    }
+
+    // Filtrar por Fecha de Cita
+    if (this.solicitudSearchDate) {
+      tempSolicitudes = tempSolicitudes.filter(solicitud => {
+        if (!solicitud.horario?.fecha) return false;
+        // La fecha de la cita viene en el objeto horario y puede ser un string o Date.
+        // Se normaliza a un string YYYY-MM-DD para una comparación segura.
+        const citaDateStr = new Date(solicitud.horario.fecha).toISOString().split('T')[0];
+        return citaDateStr === this.solicitudSearchDate;
+      });
+    }
+
+    this.filteredSolicitudes = tempSolicitudes;
+  }
+
+  clearSolicitudFilters(): void {
+    this.solicitudSearchRut = '';
+    this.solicitudSearchDate = '';
+    this.applySolicitudFilters();
+  }
+
+  exportToExcel(): void {
+    if (this.filteredSolicitudes.length === 0) {
+      this.toast.info('No hay solicitudes para exportar en la vista actual.', 'Información');
       return;
     }
-    this.filteredSolicitudes = this.solicitudes.filter(solicitud => 
-      solicitud.usuario?.rut?.toLowerCase().includes(this.solicitudSearchRut.toLowerCase())
-    );
+
+    const dataToExport = this.filteredSolicitudes.map(s => ({
+      'ID': s.id,
+      'Fecha Solicitud': s.fechaSolicitud ? new Date(s.fechaSolicitud).toLocaleDateString('es-CL', { timeZone: 'UTC' }) : 'N/A',
+      'Tipo Trámite': s.tipoTramite,
+      'Nombre Usuario': `${s.usuario?.name || ''} ${s.usuario?.lastname || ''}`,
+      'RUT Usuario': s.usuario?.rut,
+      'Email Usuario': s.usuario?.email,
+      'Teléfono': s.usuario?.telefono,
+      'Tipo Licencia': s.tipoLicencia?.name,
+      'Fecha Cita': s.horario?.fecha ? new Date(s.horario.fecha).toLocaleDateString('es-CL', { timeZone: 'UTC' }) : 'N/A',
+      'Hora Cita': s.horario?.hora ? s.horario.hora.substring(0, 5) : 'N/A'
+    }));
+
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const data: Blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+    
+    // Lógica para el nombre del archivo dinámico
+    const currentDate = new Date().toISOString().split('T')[0];
+    let fileName = 'reporte';
+
+    const isRutFiltered = this.solicitudSearchRut.trim() !== '';
+    const isDateFiltered = this.solicitudSearchDate.trim() !== '';
+    
+    let dateForFileName = currentDate; // Usar fecha actual por defecto
+
+    if (isRutFiltered && isDateFiltered) {
+      fileName += `_solicitudes_por_RUT_y_Fecha`;
+      dateForFileName = this.solicitudSearchDate; // Usar fecha del filtro
+    } else if (isRutFiltered) {
+      fileName += `_solicitudes_por_RUT`;
+    } else if (isDateFiltered) {
+      fileName += `_solicitudes_por_Fecha`;
+      dateForFileName = this.solicitudSearchDate; // Usar fecha del filtro
+    } else {
+      fileName += '_general_solicitudes';
+    }
+
+    fileName += `_${dateForFileName}.xlsx`;
+
+    FileSaver.saveAs(data, fileName);
   }
 
   formatSolicitudSearchRut(event: any): void {
-    let rut = event.target.value.replace(/[^0-9kK]/g, '');
-    if (rut.length > 1) {
-      rut = rut.slice(0, -1) + '-' + rut.slice(-1);
+    const input = event.target;
+    let value = input.value.replace(/[^0-9kK]/g, '');
+
+    if (value.length > 1) {
+      value = value.slice(0, -1) + '-' + value.slice(-1);
     }
-    if (rut.length > 4) {
-      rut = rut.slice(0, -5) + '.' + rut.slice(-5);
+    if (value.length > 4) {
+      value = value.slice(0, -5) + '.' + value.slice(-5);
     }
-    if (rut.length > 8) {
-      rut = rut.slice(0, -9) + '.' + rut.slice(-9);
+    if (value.length > 8) {
+      value = value.slice(0, -9) + '.' + value.slice(-9);
     }
-    this.solicitudSearchRut = rut;
-    this.filterSolicitudesByRut();
+    this.solicitudSearchRut = value;
   }
 
   deleteSolicitud(id: number): void {

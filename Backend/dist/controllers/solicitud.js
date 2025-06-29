@@ -94,6 +94,9 @@ const registerSolicitud = (req, res, next) => __awaiter(void 0, void 0, void 0, 
         // Actualizar el cupo disponible a false
         yield horario.update({ cupodisponible: false });
         console.log('Intentando enviar correo a:', usuario.email);
+        // Obtener documentos requeridos según el tipo de trámite y licencia
+        const documentosRequeridos = (0, emailService_1.getRequiredDocuments)(tipoTramite, name);
+        const documentosList = documentosRequeridos.map(doc => `<li>${doc}</li>`).join('');
         // Enviar correo de confirmación
         const emailContent = `
             <h1>¡Reserva Confirmada!</h1>
@@ -101,14 +104,35 @@ const registerSolicitud = (req, res, next) => __awaiter(void 0, void 0, void 0, 
             <p>Su reserva ha sido confirmada exitosamente con los siguientes detalles:</p>
             <ul>
                 <li><strong>Tipo de Licencia:</strong> ${name}</li>
-                <li><strong>Fecha:</strong> ${fecha}</li>
-                <li><strong>Hora:</strong> ${hora}</li>
+                <li><strong>Fecha de Cita:</strong> ${(0, emailService_1.formatDate)(fecha)}</li>
+                <li><strong>Hora de Cita:</strong> ${hora}</li>
                 <li><strong>Tipo de Trámite:</strong> ${tipoTramite}</li>
+                <li><strong>Número de Solicitud:</strong> #${nuevaSolicitud.id}</li>
             </ul>
 
-            <p>Por favor, asegúrese de traer todos los documentos necesarios el día de su cita.</p>
-            <p>Si necesita realizar algún cambio o cancelar su reserva, por favor contáctenos al **+569 73146125**.</p>
-            <p>Saludos cordiales,<br>Equipo de Tránsito</p>
+            <h3>Documentos Requeridos para su Cita:</h3>
+            <ul>
+                ${documentosList}
+            </ul>
+
+            <div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #2196f3;">
+                <p style="margin: 0; color: #1565c0; font-weight: bold;">📋 Información Importante sobre Documentos:</p>
+                <p style="margin: 5px 0 0 0; color: #1565c0;">
+                    Si ya subió documentos a través del formulario de reserva, <strong>NO es necesario</strong> llevarlos físicamente el día de su cita. 
+                    Nuestro personal ya tiene acceso a los documentos digitales que envió.
+                </p>
+            </div>
+
+            <h3>Información Importante:</h3>
+            <ul>
+                <li>Llegue 15 minutos antes de su hora de cita</li>
+                <li>Si NO subió documentos digitalmente, traiga todos los documentos originales y sus fotocopias</li>
+                <li>Los documentos deben estar vigentes y en buen estado</li>
+                <li>Si algún documento no está disponible, contacte con anticipación</li>
+            </ul>
+
+            <p>Si necesita realizar algún cambio o cancelar su reserva, por favor contáctenos al <strong>+569 73146125</strong>.</p>
+            <p>Saludos cordiales,<br><strong>Equipo de Tránsito</strong></p>
         `;
         try {
             console.log('Iniciando envío de correo...');
@@ -285,13 +309,22 @@ const deleteSolicitud = (req, res) => __awaiter(void 0, void 0, void 0, function
             <p>Su solicitud ha sido cancelada exitosamente con los siguientes detalles:</p>
             <ul>
                 <li><strong>Tipo de Licencia:</strong> ${(_c = solicitud.tipoLicencia) === null || _c === void 0 ? void 0 : _c.name}</li>
-                <li><strong>Fecha de Cita:</strong> ${(_d = solicitud.horario) === null || _d === void 0 ? void 0 : _d.fecha}</li>
+                <li><strong>Fecha de Cita:</strong> ${((_d = solicitud.horario) === null || _d === void 0 ? void 0 : _d.fecha) ? (0, emailService_1.formatDate)(solicitud.horario.fecha) : 'No disponible'}</li>
                 <li><strong>Hora de Cita:</strong> ${(_e = solicitud.horario) === null || _e === void 0 ? void 0 : _e.hora}</li>
                 <li><strong>Tipo de Trámite:</strong> ${solicitud.tipoTramite}</li>
+                <li><strong>Número de Solicitud:</strong> #${solicitud.id}</li>
             </ul>
+
+            <h3>Información Importante:</h3>
+            <ul>
+                <li>Su cupo ha sido liberado y está disponible para otros usuarios</li>
+                <li>Puede realizar una nueva solicitud cuando lo desee</li>
+                <li>Si canceló por error, puede contactarnos para verificar disponibilidad</li>
+            </ul>
+
             <p>Si necesita realizar una nueva solicitud, puede hacerlo a través de nuestra plataforma.</p>
-            <p>Para cualquier consulta, no dude en contactarnos al **+569 73146125**.</p>
-            <p>Saludos cordiales,<br>Equipo de Tránsito</p>
+            <p>Para cualquier consulta, no dude en contactarnos al <strong>+569 73146125</strong>.</p>
+            <p>Saludos cordiales,<br><strong>Equipo de Tránsito</strong></p>
         `;
         try {
             yield (0, emailService_1.sendEmail)({

@@ -8,6 +8,7 @@ import { UserService } from '../../servicios/user.service';
 import { SolicitudService } from '../../servicios/solicitud.service';
 import { Solicitud } from '../../interfaces/solicitud';
 import Swal from 'sweetalert2';
+import { LoadingService } from '../../servicios/loading.service';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -33,6 +34,7 @@ export class UserDashboardComponent implements OnInit {
     private fb: FormBuilder,
     private userService: UserService,
     private solicitudService: SolicitudService,
+    private loadingService: LoadingService,
     private cdr: ChangeDetectorRef
   ) {
     this.editUserForm = this.fb.group({
@@ -183,6 +185,13 @@ export class UserDashboardComponent implements OnInit {
       cancelButtonText: 'No'
     }).then((result) => {
       if (result.isConfirmed) {
+        Swal.fire({
+          title: 'Cancelando solicitud...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
         this.solicitudService.deleteSolicitud(id).subscribe({
           next: () => {
             Swal.fire(
@@ -205,11 +214,20 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
+<<<<<<< HEAD
   // Función helper para mostrar licencias en el template
   mostrarLicencias(licencias: string[] | undefined): string {
     if (licencias && Array.isArray(licencias) && licencias.length > 0) {
       return licencias.join(', ');
     }
     return 'sin licencia';
+=======
+  // Método para probar el spinner
+  testLoading(): void {
+    this.loadingService.show();
+    setTimeout(() => {
+      this.loadingService.hide();
+    }, 3000);
+>>>>>>> 6c93037a0bb6a103f144c9c053c6bd1c14dae776
   }
 } 
