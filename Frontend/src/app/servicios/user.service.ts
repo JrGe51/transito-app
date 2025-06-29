@@ -103,4 +103,14 @@ export class UserService {
   hasActiveSolicitud(userId: number): Observable<{ hasActive: boolean }> {
     return this.http.get<{ hasActive: boolean }>(`${this.AppUrl}api/solicitud/byUserId/${userId}`);
   }
+
+  agregarLicencia(userId: number, licencia: string): Observable<any> {
+    return this.http.post(`${this.AppUrl}${this.APIUrl}/${userId}/agregar-licencia`, { licencia });
+  }
+
+  quitarLicencia(userId: number, licencia: string): Observable<any> {
+    return this.http.delete(`${this.AppUrl}${this.APIUrl}/${userId}/quitar-licencia`, { 
+      body: { licencia } 
+    });
+  }
 }

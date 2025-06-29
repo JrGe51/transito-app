@@ -29,7 +29,7 @@
                     <p><strong>RUT:</strong> {{ userData.rut }}</p>
                     <p><strong>Teléfono:</strong> {{ userData.telefono }}</p>
                     <p><strong>Dirección:</strong> {{ userData.direccion }}</p>
-                    <p><strong>Licencia Vigente:</strong> {{ userData.licenciaVigente ? userData.licenciaVigente : 'sin licencia' }}</p>
+                    <p><strong>Licencia Vigente:</strong> {{ mostrarLicencias(userData.licenciaVigente) }}</p>
                     <button class="btn btn-outline-primary mt-3" (click)="onEdit()"><i class="bi bi-pencil"></i> Editar</button>
                   </div>
                   <div *ngIf="userData && editMode" class="edit-form-container">
@@ -64,7 +64,7 @@
                       </div>
                       <div class="mb-3">
                         <label for="licenciaVigente" class="form-label">Licencia Vigente:</label>
-                        <input type="text" class="form-control" id="licenciaVigente" [value]="userData.licenciaVigente ? userData.licenciaVigente : 'sin licencia'" disabled readonly>
+                        <input type="text" class="form-control" id="licenciaVigente" [value]="mostrarLicencias(userData.licenciaVigente)" disabled readonly>
                       </div>
                       <button type="submit" class="btn btn-success me-2" [disabled]="!editUserForm.valid">Guardar</button>
                       <button type="button" class="btn btn-secondary" (click)="onCancelEdit()">Cancelar</button>

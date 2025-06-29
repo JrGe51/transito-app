@@ -803,29 +803,38 @@ export class AdminDashboardComponent implements OnInit {
       examenPsicotecnicoAprobado: !!user.examenPsicotecnicoAprobado,
     });
     this.cdr.markForCheck();
+    
+    // Verificar si el usuario tiene licencia vigente
+    const hasActiveLicense = !!(user.licenciaVigente && Array.isArray(user.licenciaVigente) && user.licenciaVigente.length > 0);
+    
     if (user.id) {
       this.userService.hasActiveSolicitud(user.id).subscribe({
         next: (res) => {
           this.userHasActiveSolicitud = res.hasActive;
-          if (res.hasActive) {
+          
+          // Habilitar formulario si tiene solicitud activa O licencia vigente
+          if (res.hasActive || hasActiveLicense) {
             this.validateDocsForm.enable();
-            // Obtener la solicitud activa para el usuario
-            this.solicitudService.getAllSolicitudes().subscribe({
-              next: (data) => {
-                // Buscar la solicitud activa del usuario
-                const solicitud = data.solicitudes.find((s: any) => s.id_usuario === user.id);
-                if (solicitud) {
-                  this.solicitudActivaId = typeof solicitud.id === 'number' ? solicitud.id : null;
-                  this.tipoLicenciaActiva = solicitud.tipoLicencia?.name || null;
+            
+            if (res.hasActive) {
+              // Obtener la solicitud activa para el usuario
+              this.solicitudService.getAllSolicitudes().subscribe({
+                next: (data) => {
+                  // Buscar la solicitud activa del usuario
+                  const solicitud = data.solicitudes.find((s: any) => s.id_usuario === user.id);
+                  if (solicitud) {
+                    this.solicitudActivaId = typeof solicitud.id === 'number' ? solicitud.id : null;
+                    this.tipoLicenciaActiva = solicitud.tipoLicencia?.name || null;
+                  }
+                  this.cdr.markForCheck();
+                },
+                error: () => {
+                  this.solicitudActivaId = null;
+                  this.tipoLicenciaActiva = null;
+                  this.cdr.markForCheck();
                 }
-                this.cdr.markForCheck();
-              },
-              error: () => {
-                this.solicitudActivaId = null;
-                this.tipoLicenciaActiva = null;
-                this.cdr.markForCheck();
-              }
-            });
+              });
+            }
           } else {
             this.validateDocsForm.disable();
           }
@@ -833,31 +842,50 @@ export class AdminDashboardComponent implements OnInit {
         },
         error: () => {
           this.userHasActiveSolicitud = false;
-          this.validateDocsForm.disable();
+          // Si no hay solicitud activa pero tiene licencia vigente, habilitar formulario
+          if (hasActiveLicense) {
+            this.validateDocsForm.enable();
+          } else {
+            this.validateDocsForm.disable();
+          }
           this.cdr.markForCheck();
         }
       });
     } else {
       this.userHasActiveSolicitud = false;
-      this.validateDocsForm.disable();
+      // Si no hay solicitud activa pero tiene licencia vigente, habilitar formulario
+      if (hasActiveLicense) {
+        this.validateDocsForm.enable();
+      } else {
+        this.validateDocsForm.disable();
+      }
       this.cdr.markForCheck();
     }
   }
 
   saveValidatedDocs(): void {
-    if (this.userHasActiveSolicitud && this.validatingUser) {
+    // Verificar si el usuario tiene licencia vigente
+    const hasActiveLicense = !!(this.validatingUser?.licenciaVigente && Array.isArray(this.validatingUser.licenciaVigente) && this.validatingUser.licenciaVigente.length > 0);
+    
+    // Permitir guardar si tiene solicitud activa O licencia vigente
+    if ((this.userHasActiveSolicitud || hasActiveLicense) && this.validatingUser) {
       const updatedFields = this.validateDocsForm.value;
       const allTrue = updatedFields.examenMedicoAprobado && updatedFields.examenPracticoAprobado && updatedFields.examenTeoricoAprobado && updatedFields.examenPsicotecnicoAprobado;
       let updatedUser: User = {
         ...this.validatingUser,
         ...updatedFields,
       };
-      if (allTrue && this.tipoLicenciaActiva) {
-        updatedUser.licenciaVigente = this.tipoLicenciaActiva;
+      
+      // Solo actualizar licenciaVigente si tiene solicitud activa y todos los exámenes están aprobados
+      if (allTrue && this.userHasActiveSolicitud && this.tipoLicenciaActiva) {
+        const licenciasActuales = this.validatingUser.licenciaVigente || [];
+        updatedUser.licenciaVigente = [...licenciasActuales, this.tipoLicenciaActiva];
       }
+      
       this.userService.updateUser(updatedUser.id!, updatedUser).subscribe({
         next: () => {
-          if (allTrue && this.solicitudActivaId) {
+          // Solo eliminar solicitud si tiene solicitud activa y todos los exámenes están aprobados
+          if (allTrue && this.userHasActiveSolicitud && this.solicitudActivaId) {
             this.solicitudService.deleteSolicitud(this.solicitudActivaId).subscribe({
               next: () => {
                 Swal.fire('¡Éxito!', 'Documentos validados y licencia otorgada. Solicitud eliminada.', 'success');
@@ -871,7 +899,10 @@ export class AdminDashboardComponent implements OnInit {
               }
             });
           } else {
-            Swal.fire('¡Éxito!', 'Documentos validados correctamente', 'success');
+            const message = hasActiveLicense ? 
+              'Documentos validados correctamente para usuario con licencia vigente' : 
+              'Documentos validados correctamente';
+            Swal.fire('¡Éxito!', message, 'success');
             this.loadUsers();
             this.cancelValidateDocs();
           }
@@ -891,5 +922,70 @@ export class AdminDashboardComponent implements OnInit {
     this.tipoLicenciaActiva = null;
     this.validateDocsForm.reset();
     this.cdr.markForCheck();
+  }
+
+  // Función para verificar si el usuario tiene licencia vigente (para el template)
+  tieneLicenciaVigente(): boolean {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return !!(user.licenciaVigente && Array.isArray(user.licenciaVigente) && user.licenciaVigente.length > 0);
+  }
+
+  // Función helper para verificar si es array (para el template)
+  esArray(valor: any): boolean {
+    return Array.isArray(valor);
+  }
+
+  // Función helper para verificar si tiene licencias (para el template)
+  tieneLicencias(user: User): boolean {
+    return !!(user.licenciaVigente && Array.isArray(user.licenciaVigente) && user.licenciaVigente.length > 0);
+  }
+
+  // Función para quitar una licencia específica
+  quitarLicencia(user: User, licencia: string): void {
+    if (!user.id) {
+      this.toast.error('Error: ID de usuario no válido', 'Error');
+      return;
+    }
+
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `¿Deseas quitar la licencia "${licencia}" al usuario ${user.name} ${user.lastname}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, quitar licencia',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.userService.quitarLicencia(user.id!, licencia).subscribe({
+          next: (response) => {
+            Swal.fire(
+              '¡Licencia removida!',
+              `La licencia "${licencia}" ha sido removida del usuario ${user.name} ${user.lastname}.`,
+              'success'
+            );
+            // Recargar la lista de usuarios
+            this.loadUsers();
+          },
+          error: (error) => {
+            console.error('Error al quitar licencia:', error);
+            Swal.fire(
+              'Error',
+              'No se pudo quitar la licencia. Inténtalo de nuevo.',
+              'error'
+            );
+          }
+        });
+      }
+    });
+  }
+
+  // Función para mostrar las licencias de un usuario
+  mostrarLicenciasUsuario(user: User): string {
+    if (user.licenciaVigente && Array.isArray(user.licenciaVigente) && user.licenciaVigente.length > 0) {
+      return user.licenciaVigente.join(', ');
+    }
+    return 'sin licencia';
   }
 } 

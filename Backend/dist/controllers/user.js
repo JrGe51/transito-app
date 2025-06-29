@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cambiarPassword = exports.verificarCodigo = exports.recuperarPassword = exports.deleteUser = exports.getAllUsers = exports.updateUser = exports.login = exports.register = void 0;
+exports.cambiarPassword = exports.verificarCodigo = exports.recuperarPassword = exports.deleteUser = exports.getAllUsers = exports.quitarLicencia = exports.agregarLicencia = exports.updateUser = exports.login = exports.register = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const user_1 = require("../models/user");
 const admin_1 = require("../models/admin");
@@ -194,25 +194,114 @@ const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
             updateData.examenTeoricoAprobado = examenTeoricoAprobado;
         if (examenPsicotecnicoAprobado !== undefined)
             updateData.examenPsicotecnicoAprobado = examenPsicotecnicoAprobado;
-        if (licenciaVigente !== undefined)
-            updateData.licenciaVigente = licenciaVigente;
+        // Manejar licenciaVigente como array
+        if (licenciaVigente !== undefined) {
+            // Si es un string, convertirlo a array
+            if (typeof licenciaVigente === 'string') {
+                updateData.licenciaVigente = licenciaVigente === 'sin licencia' ? [] : [licenciaVigente];
+            }
+            else if (Array.isArray(licenciaVigente)) {
+                updateData.licenciaVigente = licenciaVigente;
+            }
+        }
         yield user.update(updateData);
         res.json({
-            msg: 'Usuario actualizado correctamente',
-            user
+            msg: `Usuario ${user.name} ${user.lastname} actualizado correctamente`,
+            user: {
+                id: user.id,
+                name: user.name,
+                lastname: user.lastname,
+                email: user.email,
+                rut: user.rut,
+                telefono: user.telefono,
+                fechanacimiento: user.fechanacimiento,
+                direccion: user.direccion,
+                licenciaVigente: user.licenciaVigente
+            }
         });
-        return;
     }
     catch (error) {
-        console.error('Error al actualizar el usuario:', error);
+        console.error('Error al actualizar usuario:', error);
         res.status(500).json({
-            msg: 'Error interno del servidor al actualizar el usuario.',
-            error
+            msg: 'Error interno del servidor al actualizar el usuario'
         });
-        return;
     }
 });
 exports.updateUser = updateUser;
+// Función para agregar una licencia al usuario
+const agregarLicencia = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { licencia } = req.body;
+    try {
+        const user = yield user_1.User.findByPk(id);
+        if (!user) {
+            res.status(404).json({
+                msg: `No se encontró un usuario con el ID ${id}`
+            });
+            return;
+        }
+        // Obtener licencias actuales
+        const licenciasActuales = user.licenciaVigente || [];
+        // Verificar si la licencia ya existe
+        if (licenciasActuales.includes(licencia)) {
+            res.status(400).json({
+                msg: `El usuario ya tiene la licencia ${licencia}`
+            });
+            return;
+        }
+        // Agregar la nueva licencia
+        const nuevasLicencias = [...licenciasActuales, licencia];
+        yield user.update({ licenciaVigente: nuevasLicencias });
+        res.json({
+            msg: `Licencia ${licencia} agregada correctamente al usuario ${user.name} ${user.lastname}`,
+            licencias: nuevasLicencias
+        });
+    }
+    catch (error) {
+        console.error('Error al agregar licencia:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al agregar la licencia'
+        });
+    }
+});
+exports.agregarLicencia = agregarLicencia;
+// Función para quitar una licencia del usuario
+const quitarLicencia = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { licencia } = req.body;
+    try {
+        const user = yield user_1.User.findByPk(id);
+        if (!user) {
+            res.status(404).json({
+                msg: `No se encontró un usuario con el ID ${id}`
+            });
+            return;
+        }
+        // Obtener licencias actuales
+        const licenciasActuales = user.licenciaVigente || [];
+        // Verificar si la licencia existe
+        if (!licenciasActuales.includes(licencia)) {
+            res.status(400).json({
+                msg: `El usuario no tiene la licencia ${licencia}`
+            });
+            return;
+        }
+        // Quitar la licencia
+        const nuevasLicencias = licenciasActuales.filter(l => l !== licencia);
+        yield user.update({ licenciaVigente: nuevasLicencias });
+        res.json({
+            msg: `Licencia ${licencia} removida correctamente del usuario ${user.name} ${user.lastname}`,
+            licencias: nuevasLicencias
+        });
+    }
+    catch (error) {
+        console.error('Error al quitar licencia:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al quitar la licencia'
+        });
+    }
+});
+exports.quitarLicencia = quitarLicencia;
 const getAllUsers = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         console.log('[getAllUsers] Intentando obtener todos los usuarios...');

@@ -400,7 +400,30 @@ export class Reserva3Component implements OnInit {
     });
   }
 
+  // Función para validar que el usuario tenga licencia vigente
+  validarLicenciaVigente(): boolean {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (!user.licenciaVigente || !Array.isArray(user.licenciaVigente) || user.licenciaVigente.length === 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'No puedes realizar este trámite',
+        text: 'Para realizar un cambio de clase, debes tener una licencia vigente. Actualmente no tienes licencia activa.',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Entendido'
+      });
+      return false;
+    }
+    
+    return true;
+  }
+
   onSubmit() {
+    // Validar que el usuario tenga licencia vigente para cambio de clase
+    if (!this.validarLicenciaVigente()) {
+      return;
+    }
+
     if (!this.tipoLicenciaSeleccionado) {
       this.toast.error('Por favor, selecciona un tipo de licencia', 'Error');
       return;
@@ -414,10 +437,18 @@ export class Reserva3Component implements OnInit {
       return;
     }
 
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.id) {
+      this.toast.error('Debes iniciar sesión para realizar una reserva', 'Error');
+      this.router.navigate(['/login']);
+      return;
+    }
+
     const solicitud = {
-      name: this.tipoLicenciaSeleccionado,
+      userId: user.id,
       fecha: this.formatDate(this.fechaSeleccionada),
       hora: this.horaSeleccionada,
+      name: this.tipoLicenciaSeleccionado,
       tipoTramite: this.tipoTramite,
       documentos: this.documentos || []
     };

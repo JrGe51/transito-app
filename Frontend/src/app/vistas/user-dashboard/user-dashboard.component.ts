@@ -214,6 +214,12 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
+  // Función helper para mostrar licencias en el template
+  mostrarLicencias(licencias: string[] | undefined): string {
+    if (licencias && Array.isArray(licencias) && licencias.length > 0) {
+      return licencias.join(', ');
+    }
+    return 'sin licencia';
   // Método para probar el spinner
   testLoading(): void {
     this.loadingService.show();

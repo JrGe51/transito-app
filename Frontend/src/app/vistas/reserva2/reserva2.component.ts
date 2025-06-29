@@ -71,14 +71,32 @@ export class Reserva2Component implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       this.tipoTramite = params['tipoTramite'] || '';
-      if (this.tipoTramite !== 'Renovación') {
+      
+      if (this.tipoTramite === 'Renovación') {
+        // Para renovación, obtener la licencia vigente del usuario
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.licenciaVigente && user.licenciaVigente !== 'sin licencia') {
+          // Solo si tiene licencia vigente, seleccionarla automáticamente
+          this.tipoLicenciaSeleccionado = user.licenciaVigente;
+          // Cargar fechas disponibles para la licencia específica del usuario
+          this.cargarFechasDisponibles();
+        }
+        // Si no tiene licencia vigente, no seleccionar nada automáticamente
+        // El usuario deberá seleccionar manualmente (aunque no podrá continuar por la validación)
+      } else if (this.tipoTramite !== 'Renovación') {
         this.tipoLicenciaSeleccionado = this.tipoTramite;
       }
     });
   }
 
   cargarFechasDisponibles() {
-    this.horarioService.getFechasDisponibles(this.tipoTramite).subscribe({
+    // Para renovación, usar la licencia específica del usuario
+    let tipoParaFechas = this.tipoTramite;
+    if (this.tipoTramite === 'Renovación' && this.tipoLicenciaSeleccionado) {
+      tipoParaFechas = this.tipoLicenciaSeleccionado;
+    }
+
+    this.horarioService.getFechasDisponibles(tipoParaFechas).subscribe({
       next: (fechas) => {
         this.fechasDisponibles$.next(fechas);
         this.cdr.detectChanges();
@@ -434,7 +452,36 @@ export class Reserva2Component implements OnInit {
     });
   }
 
+  // Función para validar que el usuario tenga licencia vigente
+  validarLicenciaVigente(): boolean {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (!user.licenciaVigente || !Array.isArray(user.licenciaVigente) || user.licenciaVigente.length === 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'No puedes realizar este trámite',
+        text: 'Para realizar una renovación, debes tener una licencia vigente. Actualmente no tienes licencia activa.',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Entendido'
+      });
+      return false;
+    }
+    
+    return true;
+  }
+
+  // Función para verificar si el usuario tiene licencia vigente (para el template)
+  tieneLicenciaVigente(): boolean {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return !!(user.licenciaVigente && Array.isArray(user.licenciaVigente) && user.licenciaVigente.length > 0);
+  }
+
   onSubmit() {
+    // Validar que el usuario tenga licencia vigente para renovación
+    if (!this.validarLicenciaVigente()) {
+      return;
+    }
+
     if (!this.tipoLicenciaSeleccionado && this.tipoTramite !== 'Renovación') {
       this.toast.error('Por favor, selecciona un tipo de licencia', 'Error');
       return;

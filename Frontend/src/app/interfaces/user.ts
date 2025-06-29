@@ -10,7 +10,7 @@ export interface User {
     direccion?: string;
     codigoRecuperacion?: string;
     codigoExpiracion?: Date;
-    licenciaVigente?: string;
+    licenciaVigente?: string[];
     examenMedicoAprobado?: boolean;
     examenPracticoAprobado?: boolean;
     examenTeoricoAprobado?: boolean;
