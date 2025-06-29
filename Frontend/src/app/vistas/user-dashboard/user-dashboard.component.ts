@@ -220,6 +220,7 @@ export class UserDashboardComponent implements OnInit {
       return licencias.join(', ');
     }
     return 'sin licencia';
+  }
   // Método para probar el spinner
   testLoading(): void {
     this.loadingService.show();
