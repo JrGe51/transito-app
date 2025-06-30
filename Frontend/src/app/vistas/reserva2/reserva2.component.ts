@@ -56,6 +56,7 @@ export class Reserva2Component implements OnInit {
   showCalendar: boolean = true;
   documentos: any[] = [];
   tipoTramite: string = '';
+  licenciasUsuario: string[] = [];
 
   constructor(
     private horarioService: HorarioService,
@@ -71,18 +72,18 @@ export class Reserva2Component implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       this.tipoTramite = params['tipoTramite'] || '';
-      
       if (this.tipoTramite === 'Renovación') {
-        // Para renovación, obtener la licencia vigente del usuario
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        if (user.licenciaVigente && user.licenciaVigente !== 'sin licencia') {
-          // Solo si tiene licencia vigente, seleccionarla automáticamente
-          this.tipoLicenciaSeleccionado = user.licenciaVigente;
-          // Cargar fechas disponibles para la licencia específica del usuario
-          this.cargarFechasDisponibles();
+        const licencias = Array.isArray(user.licenciaVigente) ? user.licenciaVigente : (user.licenciaVigente ? [user.licenciaVigente] : []);
+        if (licencias.length === 1) {
+          setTimeout(() => {
+            this.tipoLicenciaSeleccionado = licencias[0];
+            this.cargarFechasDisponibles();
+          });
+        } else if (licencias.length > 1) {
+          this.tipoLicenciaSeleccionado = null;
+          this.licenciasUsuario = licencias;
         }
-        // Si no tiene licencia vigente, no seleccionar nada automáticamente
-        // El usuario deberá seleccionar manualmente (aunque no podrá continuar por la validación)
       } else if (this.tipoTramite !== 'Renovación') {
         this.tipoLicenciaSeleccionado = this.tipoTramite;
       }
@@ -599,5 +600,10 @@ export class Reserva2Component implements OnInit {
 
   goBack(): void {
     this.location.back();
+  }
+
+  seleccionarLicenciaParaRenovar(licencia: string) {
+    this.tipoLicenciaSeleccionado = licencia;
+    this.cargarFechasDisponibles();
   }
 }

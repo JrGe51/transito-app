@@ -28,7 +28,20 @@
         <div id="formContent">
             <h1 class="fadeIn first">Renovación</h1>
 
-            <div class="mb-3 d-flex flex-column align-items-center" *ngIf="!tipoLicenciaSeleccionado && tipoTramite === 'Renovación'">
+            <!-- Mostrar botones solo si hay más de una licencia vigente -->
+            <div class="mb-3 d-flex flex-column align-items-center" *ngIf="licenciasUsuario.length > 1 && !tipoLicenciaSeleccionado && tipoTramite === 'Renovación'">
+                <button
+                  *ngFor="let licencia of licenciasUsuario"
+                  type="button"
+                  class="btn btn-primary m-2 d-block w-100"
+                  style="max-width: 300px;"
+                  (click)="seleccionarLicenciaParaRenovar(licencia)">
+                  {{ licencia }}
+                </button>
+            </div>
+
+            <!-- Botones para primera vez o cuando no hay licencias -->
+            <div class="mb-3 d-flex flex-column align-items-center" *ngIf="licenciasUsuario.length <= 1 && !tipoLicenciaSeleccionado && tipoTramite === 'Renovación'">
                 <button
                   *ngFor="let tipo of tiposLicencia"
                   type="button"
