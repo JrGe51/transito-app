@@ -14,6 +14,7 @@ import { Admin } from '../../interfaces/admin';
 import { RutService } from '../../servicios/rut.service';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
+import { AdminService } from '../../servicios/admin.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -93,6 +94,10 @@ export class AdminDashboardComponent implements OnInit {
 
   filterSolicitudSearchRut: string = '';
 
+  loadingCorreo = false;
+  bulkEmail = { asunto: '', mensaje: '' };
+  mostrarCorreoMasivo = false;
+
   constructor(
     private horarioService: HorarioService,
     private licenciaService: LicenciaService,
@@ -102,7 +107,8 @@ export class AdminDashboardComponent implements OnInit {
     private toast: ToastrService,
     private fb: FormBuilder,
     private solicitudService: SolicitudService,
-    private rutService: RutService
+    private rutService: RutService,
+    private adminService: AdminService
   ) {
     this.minDate = this.getTomorrowDate();
 
@@ -987,5 +993,31 @@ export class AdminDashboardComponent implements OnInit {
       return user.licenciaVigente.join(', ');
     }
     return 'sin licencia';
+  }
+
+  toggleCorreoMasivo() {
+    this.mostrarCorreoMasivo = !this.mostrarCorreoMasivo;
+    if (!this.mostrarCorreoMasivo) {
+      this.bulkEmail = { asunto: '', mensaje: '' }; // Limpiar siempre al cerrar
+    }
+  }
+
+  enviarCorreoMasivo() {
+    this.loadingCorreo = true;
+    this.adminService.enviarCorreoMasivo(this.bulkEmail.asunto, this.bulkEmail.mensaje).subscribe({
+      next: (res) => {
+        this.loadingCorreo = false;
+        Swal.fire('¡Éxito!', 'Correo enviado exitosamente a todos los usuarios.', 'success');
+        if (this.mostrarCorreoMasivo) {
+          this.toggleCorreoMasivo();
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        this.loadingCorreo = false;
+        const msg = err?.error?.error || 'Error al enviar el correo. Intenta nuevamente.';
+        Swal.fire('Error', msg, 'error');
+      }
+    });
   }
 } 

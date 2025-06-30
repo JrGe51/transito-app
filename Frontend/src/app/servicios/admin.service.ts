@@ -30,4 +30,8 @@ export class AdminService {
   loginAdmin(admin: Admin): Observable<string> {
     return this.http.post<string>(`${this.AppUrl}${this.APIUrl}/login`, admin);
   }
+
+  enviarCorreoMasivo(asunto: string, mensaje: string) {
+    return this.http.post(`${this.AppUrl}${this.APIUrl}/send-bulk-email`, { asunto, mensaje });
+  }
 } 

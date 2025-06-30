@@ -30,8 +30,13 @@
 
 <div class="admin-dashboard-bg">
   <div class="dashboard-container">
-    <h1>Panel de Administrador</h1>
-    <p>Bienvenido al panel de administración.</p>
+    <div class="main-title-row">
+      <h1 class="main-title text-center">Panel de Administrador</h1>
+      <button class="btn btn-warning correo-masivo-btn" (click)="toggleCorreoMasivo()" *ngIf="!mostrarCorreoMasivo">
+        <i class="fas fa-envelope"></i> Correo Masivo
+      </button>
+    </div>
+    <p class="text-center">Bienvenido al panel de administración.</p>
 
     <div class="admin-buttons-wrapper">
       <button class="btn btn-primary admin-button" (click)="toggleUsersManagement()">Usuarios</button>
@@ -411,6 +416,29 @@
         <div *ngIf="filteredSolicitudes.length === 0">
           <p class="no-schedules-message">No se encontraron solicitudes que coincidan con los filtros.</p>
         </div>
+      </div>
+    </div>
+
+    <div *ngIf="mostrarCorreoMasivo" class="bulk-email-section card mt-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Enviar correo masivo a todos los usuarios</h4>
+        <button class="btn btn-outline-danger btn-sm" (click)="toggleCorreoMasivo()">
+          <i class="fas fa-times"></i> Cerrar
+        </button>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="enviarCorreoMasivo()" #bulkEmailForm="ngForm">
+          <div class="form-group">
+            <label for="asunto">Asunto</label>
+            <input type="text" id="asunto" class="form-control" [(ngModel)]="bulkEmail.asunto" name="asunto" required>
+          </div>
+          <div class="form-group">
+            <label for="mensaje">Mensaje</label>
+            <textarea id="mensaje" class="form-control" [(ngModel)]="bulkEmail.mensaje" name="mensaje" rows="5" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" [disabled]="loadingCorreo">Enviar correo</button>
+          <span *ngIf="loadingCorreo" class="ml-2"></span>
+        </form>
       </div>
     </div>
   </div>

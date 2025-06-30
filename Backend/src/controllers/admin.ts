@@ -3,6 +3,9 @@ import bcrypt from 'bcrypt'
 import { Admin } from "../models/admin"
 import jwt from "jsonwebtoken"
 import { generarEmailUnico } from "../utils/adminUtils" 
+import { User } from "../models/user"
+import { sendEmail } from "../utils/emailService"
+import { Op } from "sequelize"
 
 const MASTER_EMAIL = "admin@loespejo.com"
 const MASTER_PASSWORD = "Admin@2024#Secure"
@@ -113,4 +116,43 @@ export const loginAdmin = async (req: Request, res: Response) => {
             isAdmin: true
         }
     })
-} 
+}
+
+export const sendBulkEmail = async (req: Request, res: Response) => {
+    try {
+        const { asunto, mensaje } = req.body;
+        if (!asunto || !mensaje) {
+            return res.status(400).json({ error: 'Asunto y mensaje son requeridos.' });
+        }
+
+        // Solo permitir admins (ajusta según tu lógica de autenticación)
+        // Aquí se asume que el admin está autenticado y autorizado
+
+        // Obtener todos los correos de usuarios
+        const users = await User.findAll({ attributes: ['email'], where: { email: { [Op.ne]: null } } });
+        const emails = users.map((u: any) => u.email);
+
+        // Enviar correo masivo (BCC)
+        const html = `
+          <h1 style="color:#d32f2f; font-size:2em; margin-bottom:20px;">Información del Departamento de Tránsito</h1>
+          <p>${mensaje}</p>
+          <hr>
+          <p style="margin-top:30px;">
+            Para cualquier consulta, no dude en contactarnos al <b>+569 73146125</b>.<br>
+            Saludos cordiales,<br>
+            Equipo de Tránsito
+          </p>
+        `;
+        await sendEmail({
+            to: '', // destinatario principal vacío
+            bcc: emails,
+            subject: asunto,
+            html
+        });
+
+        return res.json({ success: true });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Error enviando correos.' });
+    }
+}; 
