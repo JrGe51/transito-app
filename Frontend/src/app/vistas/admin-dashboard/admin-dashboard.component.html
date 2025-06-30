@@ -96,7 +96,6 @@
                 </td>
                 <td>
                   <button class="btn btn-warning btn-sm me-2" (click)="editUser(user)">Editar</button>
-                  <button class="btn btn-info btn-sm me-2" (click)="openValidateDocs(user)">Validar documentos</button>
                   <button class="btn btn-danger btn-sm" (click)="deleteUser(user.id!)">Eliminar</button>
                 </td>
               </tr>
@@ -180,51 +179,6 @@
         </div>
       </div>
 
-      <div class="validate-docs-form-container card shadow-sm mt-4 bg-light-docs" *ngIf="validatingUser">
-        <div class="card-header bg-info text-white">
-          <h5>Validar Documentos</h5>
-        </div>
-        <div class="card-body">
-          <form [formGroup]="validateDocsForm" (ngSubmit)="saveValidatedDocs()">
-            <div *ngIf="userHasActiveSolicitud === false && !tieneLicencias(validatingUser)" class="alert alert-warning mb-3">
-              El usuario no tiene documentos a validar (sin solicitud activa ni licencia vigente).
-            </div>
-            <div *ngIf="userHasActiveSolicitud === false && tieneLicencias(validatingUser)" class="alert alert-info mb-3">
-              Usuario con licencias vigentes: {{ validatingUser.licenciaVigente?.join(', ') || '' }}. Puede validar documentos.
-            </div>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <div class="form-check">
-                  <input type="checkbox" id="examenMedicoAprobado" class="form-check-input" formControlName="examenMedicoAprobado">
-                  <label for="examenMedicoAprobado" class="form-check-label">Examen Médico Aprobado</label>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-check">
-                  <input type="checkbox" id="examenPracticoAprobado" class="form-check-input" formControlName="examenPracticoAprobado">
-                  <label for="examenPracticoAprobado" class="form-check-label">Examen Práctico Aprobado</label>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-check">
-                  <input type="checkbox" id="examenTeoricoAprobado" class="form-check-input" formControlName="examenTeoricoAprobado">
-                  <label for="examenTeoricoAprobado" class="form-check-label">Examen Teórico Aprobado</label>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-check">
-                  <input type="checkbox" id="examenPsicotecnicoAprobado" class="form-check-input" formControlName="examenPsicotecnicoAprobado">
-                  <label for="examenPsicotecnicoAprobado" class="form-check-label">Examen Psicotécnico Aprobado</label>
-                </div>
-              </div>
-            </div>
-            <div class="mt-4 text-end">
-              <button type="submit" class="btn btn-success me-2" [disabled]="!(userHasActiveSolicitud || tieneLicencias(validatingUser))">Guardar</button>
-              <button type="button" class="btn btn-secondary" (click)="cancelValidateDocs()">Cancelar</button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
 
     <!-- Gestión de Licencias -->
@@ -405,9 +359,8 @@
                 </button>
               </td>
               <td>
-                <button class="btn btn-danger btn-sm" (click)="deleteSolicitud(solicitud.id!)">
-                  Eliminar
-                </button>
+                <button class="btn btn-info btn-sm me-2" (click)="openValidateDocs(solicitud)">Validar documentos</button>
+                <button class="btn btn-danger btn-sm" (click)="deleteSolicitud(solicitud.id!)">Eliminar</button>
               </td>
             </tr>
           </tbody>
@@ -415,6 +368,53 @@
         
         <div *ngIf="filteredSolicitudes.length === 0">
           <p class="no-schedules-message">No se encontraron solicitudes que coincidan con los filtros.</p>
+        </div>
+      </div>
+
+      <!-- Formulario de Validación de Documentos -->
+      <div class="validate-docs-form-container card shadow-sm mt-4 bg-light-docs" *ngIf="validatingUser">
+        <div class="card-header bg-info text-white">
+          <h5>Validar Documentos - {{ validatingUser.name }} {{ validatingUser.lastname }}</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="validateDocsForm" (ngSubmit)="saveValidatedDocs()">
+            <div *ngIf="userHasActiveSolicitud === false && !tieneLicencias(validatingUser)" class="alert alert-warning mb-3">
+              El usuario no tiene documentos a validar (sin solicitud activa ni licencia vigente).
+            </div>
+            <div *ngIf="userHasActiveSolicitud === false && tieneLicencias(validatingUser)" class="alert alert-info mb-3">
+              Usuario con licencias vigentes: {{ validatingUser.licenciaVigente?.join(', ') || '' }}. Puede validar documentos.
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input type="checkbox" id="examenMedicoAprobado" class="form-check-input" formControlName="examenMedicoAprobado">
+                  <label for="examenMedicoAprobado" class="form-check-label">Examen Médico Aprobado</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input type="checkbox" id="examenPracticoAprobado" class="form-check-input" formControlName="examenPracticoAprobado">
+                  <label for="examenPracticoAprobado" class="form-check-label">Examen Práctico Aprobado</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input type="checkbox" id="examenTeoricoAprobado" class="form-check-input" formControlName="examenTeoricoAprobado">
+                  <label for="examenTeoricoAprobado" class="form-check-label">Examen Teórico Aprobado</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input type="checkbox" id="examenPsicotecnicoAprobado" class="form-check-input" formControlName="examenPsicotecnicoAprobado">
+                  <label for="examenPsicotecnicoAprobado" class="form-check-label">Examen Psicotécnico Aprobado</label>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 text-end">
+              <button type="submit" class="btn btn-success me-2" [disabled]="!(userHasActiveSolicitud || tieneLicencias(validatingUser))">Guardar</button>
+              <button type="button" class="btn btn-secondary" (click)="cancelValidateDocs()">Cancelar</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

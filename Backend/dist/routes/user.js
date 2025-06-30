@@ -7,6 +7,7 @@ router.post("/api/user/register", user_1.register);
 router.post("/api/user/login", user_1.login);
 router.put("/api/user/updateUser/:id", user_1.updateUser);
 router.get("/api/user/all", user_1.getAllUsers);
+router.get("/api/user/:id", user_1.getUserById);
 router.delete("/api/user/delete/:id", user_1.deleteUser);
 router.post("/api/user/recuperar-password", user_1.recuperarPassword);
 router.post("/api/user/verificar-codigo", user_1.verificarCodigo);

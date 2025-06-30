@@ -169,18 +169,20 @@ export class AdminDashboardComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  toggleHorariosManagement() {
+  toggleHorariosManagement(): void {
     this.showHorariosManagement = !this.showHorariosManagement;
     if (this.showHorariosManagement) {
       this.loadHorarios();
       this.showLicenciasManagement = false;
-      this.showCreateLicenciaForm = false;
       this.showUsersManagement = false;
       this.showSolicitudesManagement = false;
+      this.validatingUser = null;
     } else {
       this.horarios = [];
       this.showCreateForm = false;
       this.shouldShowTable = false;
+      // Resetear el formulario de validación al salir de la sección
+      this.cancelValidateDocs();
       this.cdr.markForCheck();
     }
   }
@@ -301,18 +303,20 @@ export class AdminDashboardComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  toggleLicenciasManagement() {
+  toggleLicenciasManagement(): void {
     this.showLicenciasManagement = !this.showLicenciasManagement;
     if (this.showLicenciasManagement) {
       this.loadLicencias();
-      this.showHorariosManagement = false;
-      this.showCreateForm = false;
       this.showUsersManagement = false;
+      this.showHorariosManagement = false;
       this.showSolicitudesManagement = false;
+      this.validatingUser = null;
     } else {
       this.licencias = [];
       this.showCreateLicenciaForm = false;
       this.shouldShowLicenciasTable = false;
+      // Resetear el formulario de validación al salir de la sección
+      this.cancelValidateDocs();
       this.cdr.markForCheck();
     }
   }
@@ -413,16 +417,18 @@ export class AdminDashboardComponent implements OnInit {
     this.showUsersManagement = !this.showUsersManagement;
     if (this.showUsersManagement) {
       this.loadUsers();
-      this.showHorariosManagement = false;
       this.showLicenciasManagement = false;
+      this.showHorariosManagement = false;
       this.showSolicitudesManagement = false;
+      this.validatingUser = null;
     } else {
-      this.users = [];
-      this.filteredUsers = [];
+      // Resetear el formulario de validación al salir de la sección
+      this.cancelValidateDocs();
     }
     if (this.showUsersManagement && this.users.length === 0) {
       this.loadUsers();
     }
+    this.cdr.markForCheck();
   }
 
   loadUsers(): void {
@@ -561,15 +567,15 @@ export class AdminDashboardComponent implements OnInit {
     this.showSolicitudesManagement = !this.showSolicitudesManagement;
     if (this.showSolicitudesManagement) {
       this.loadSolicitudes();
-      this.showHorariosManagement = false;
-      this.showLicenciasManagement = false;
       this.showUsersManagement = false;
-      this.showCreateForm = false;
-      this.showCreateLicenciaForm = false;
+      this.showLicenciasManagement = false;
+      this.showHorariosManagement = false;
+      this.validatingUser = null;
     } else {
-      this.solicitudes = [];
-      this.filteredSolicitudes = [];
+      // Resetear el formulario de validación al salir de la sección
+      this.cancelValidateDocs();
     }
+    this.cdr.markForCheck();
   }
 
   loadSolicitudes(): void {
@@ -797,76 +803,36 @@ export class AdminDashboardComponent implements OnInit {
     return null;
   }
 
-  openValidateDocs(user: User): void {
-    this.validatingUser = { ...user };
-    this.userHasActiveSolicitud = null;
-    this.solicitudActivaId = null;
-    this.tipoLicenciaActiva = null;
-    this.validateDocsForm.patchValue({
-      examenMedicoAprobado: !!user.examenMedicoAprobado,
-      examenPracticoAprobado: !!user.examenPracticoAprobado,
-      examenTeoricoAprobado: !!user.examenTeoricoAprobado,
-      examenPsicotecnicoAprobado: !!user.examenPsicotecnicoAprobado,
-    });
-    this.cdr.markForCheck();
-    
-    // Verificar si el usuario tiene licencia vigente
-    const hasActiveLicense = !!(user.licenciaVigente && Array.isArray(user.licenciaVigente) && user.licenciaVigente.length > 0);
-    
-    if (user.id) {
-      this.userService.hasActiveSolicitud(user.id).subscribe({
-        next: (res) => {
-          this.userHasActiveSolicitud = res.hasActive;
-          
-          // Habilitar formulario si tiene solicitud activa O licencia vigente
-          if (res.hasActive || hasActiveLicense) {
-            this.validateDocsForm.enable();
-            
-            if (res.hasActive) {
-              // Obtener la solicitud activa para el usuario
-              this.solicitudService.getAllSolicitudes().subscribe({
-                next: (data) => {
-                  // Buscar la solicitud activa del usuario
-                  const solicitud = data.solicitudes.find((s: any) => s.id_usuario === user.id);
-                  if (solicitud) {
-                    this.solicitudActivaId = typeof solicitud.id === 'number' ? solicitud.id : null;
-                    this.tipoLicenciaActiva = solicitud.tipoLicencia?.name || null;
-                  }
-                  this.cdr.markForCheck();
-                },
-                error: () => {
-                  this.solicitudActivaId = null;
-                  this.tipoLicenciaActiva = null;
-                  this.cdr.markForCheck();
-                }
-              });
-            }
-          } else {
-            this.validateDocsForm.disable();
-          }
-          this.cdr.markForCheck();
-        },
-        error: () => {
-          this.userHasActiveSolicitud = false;
-          // Si no hay solicitud activa pero tiene licencia vigente, habilitar formulario
-          if (hasActiveLicense) {
-            this.validateDocsForm.enable();
-          } else {
-            this.validateDocsForm.disable();
-          }
-          this.cdr.markForCheck();
-        }
-      });
-    } else {
-      this.userHasActiveSolicitud = false;
-      // Si no hay solicitud activa pero tiene licencia vigente, habilitar formulario
-      if (hasActiveLicense) {
-        this.validateDocsForm.enable();
-      } else {
-        this.validateDocsForm.disable();
-      }
-      this.cdr.markForCheck();
+  openValidateDocs(solicitud: Solicitud): void {
+    // Verificar si tenemos el ID del usuario en la solicitud
+    if (!solicitud.id_usuario) {
+      Swal.fire('Error', 'No se pudo identificar al usuario de esta solicitud.', 'error');
+      return;
     }
+
+    // Obtener los datos completos del usuario usando el nuevo método
+    this.userService.getUserById(solicitud.id_usuario).subscribe({
+      next: (user) => {
+        this.validatingUser = user;
+        this.tipoLicenciaActiva = solicitud.tipoLicencia?.name || null;
+        this.solicitudActivaId = typeof solicitud.id === 'number' ? solicitud.id : null;
+        this.userHasActiveSolicitud = true;
+        
+        // Inicializar el formulario con los valores actuales del usuario
+        this.validateDocsForm.reset({
+          examenMedicoAprobado: user.examenMedicoAprobado || false,
+          examenPracticoAprobado: user.examenPracticoAprobado || false,
+          examenTeoricoAprobado: user.examenTeoricoAprobado || false,
+          examenPsicotecnicoAprobado: user.examenPsicotecnicoAprobado || false,
+        });
+        
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error al obtener datos del usuario:', error);
+        Swal.fire('Error', 'No se pudieron obtener los datos del usuario.', 'error');
+      }
+    });
   }
 
   saveValidatedDocs(): void {

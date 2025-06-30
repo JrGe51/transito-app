@@ -84,6 +84,11 @@ export class UserService {
     return this.http.get<User[]>(`${this.AppUrl}${this.APIUrl}/all`);
   }
 
+  getUserById(id: number): Observable<User> {
+    return this.http.get<{ user: User }>(`${this.AppUrl}${this.APIUrl}/${id}`)
+      .pipe(map(response => response.user));
+  }
+
   deleteUser(id: number): Observable<any> {
     return this.http.delete(`${this.AppUrl}${this.APIUrl}/delete/${id}`);
   }

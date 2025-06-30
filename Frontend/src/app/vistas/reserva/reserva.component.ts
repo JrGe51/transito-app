@@ -594,5 +594,14 @@ export class ReservaComponent implements OnInit {
     this.location.back();
   }
 
-
+  tieneLicencia(tipo: string): boolean {
+    if (!this.userData || !this.userData.licenciaVigente) return false;
+    if (Array.isArray(this.userData.licenciaVigente)) {
+      return this.userData.licenciaVigente.includes(tipo);
+    }
+    if (typeof this.userData.licenciaVigente === 'string') {
+      return this.userData.licenciaVigente === tipo;
+    }
+    return false;
+  }
 }

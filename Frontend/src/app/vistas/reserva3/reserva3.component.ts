@@ -554,4 +554,18 @@ export class Reserva3Component implements OnInit {
   goBack(): void {
     this.location.back();
   }
+
+  tieneLicencia(tipo: string): boolean {
+    const userString = localStorage.getItem('user');
+    if (!userString) return false;
+    const user = JSON.parse(userString);
+    if (!user.licenciaVigente) return false;
+    if (Array.isArray(user.licenciaVigente)) {
+      return user.licenciaVigente.includes(tipo);
+    }
+    if (typeof user.licenciaVigente === 'string') {
+      return user.licenciaVigente === tipo;
+    }
+    return false;
+  }
 }
