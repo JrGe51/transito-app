@@ -93,6 +93,15 @@ export class AdminDashboardComponent implements OnInit {
 
   filterSolicitudSearchRut: string = '';
 
+  // Propiedades para el modal de reagendamiento
+  isRescheduleModalOpen = false;
+  selectedSolicitud: Solicitud | null = null;
+  availableHorarios: any[] = [];
+  filteredAvailableHorarios: any[] = [];
+  newHorarioId: number | null = null;
+  rescheduleFilterDate: string = '';
+  rescheduleFilterLicencia: string = '';
+
   constructor(
     private horarioService: HorarioService,
     private licenciaService: LicenciaService,
@@ -517,37 +526,20 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   formatRut(event: any): void {
-    let rut = event.target.value.replace(/[^0-9kK]/g, '');
-    if (rut.length > 1) {
-      rut = rut.slice(0, -1) + '-' + rut.slice(-1);
-    }
-    if (rut.length > 4) {
-      rut = rut.slice(0, -5) + '.' + rut.slice(-5);
-    }
-    if (rut.length > 8) {
-      rut = rut.slice(0, -9) + '.' + rut.slice(-9);
-    }
-    this.editUserForm.get('rut')?.setValue(rut, { emitEvent: false });
+    const rut = event.target.value.replace(/[^0-9kK]/g, '');
+    this.editUserForm.get('rut')?.setValue(this.rutService.formatRut(rut), { emitEvent: false });
   }
 
   formatSearchRut(event: any): void {
-    let rut = event.target.value.replace(/[^0-9kK.-]/g, ''); // Permitir solo números, k, K, . y -
-    if (rut.length > 1) {
-      rut = rut.slice(0, -1) + '-' + rut.slice(-1);
-    }
-    if (rut.length > 4) {
-      rut = rut.slice(0, -5) + '.' + rut.slice(-5);
-    }
-    if (rut.length > 8) {
-      rut = rut.slice(0, -9) + '.' + rut.slice(-9);
-    }
+    let rut = event.target.value.replace(/[^0-9kK]/g, '');
+    rut = this.rutService.formatRut(rut);
     this.userSearchRut = rut;
+    this.filterUsersByRut();
+    this.cdr.markForCheck();
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    this.toast.info('Sesión cerrada', 'Hasta pronto!');
+    this.userService.logout();
     this.router.navigate(['/login']);
   }
 
@@ -564,6 +556,10 @@ export class AdminDashboardComponent implements OnInit {
       this.solicitudes = [];
       this.filteredSolicitudes = [];
     }
+    if (this.solicitudSearchRut) {
+      this.solicitudSearchRut = this.rutService.formatRut(this.solicitudSearchRut);
+    }
+    this.applySolicitudFilters();
   }
 
   loadSolicitudes(): void {
@@ -672,19 +668,9 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   formatSolicitudSearchRut(event: any): void {
-    const input = event.target;
-    let value = input.value.replace(/[^0-9kK]/g, '');
-
-    if (value.length > 1) {
-      value = value.slice(0, -1) + '-' + value.slice(-1);
-    }
-    if (value.length > 4) {
-      value = value.slice(0, -5) + '.' + value.slice(-5);
-    }
-    if (value.length > 8) {
-      value = value.slice(0, -9) + '.' + value.slice(-9);
-    }
-    this.solicitudSearchRut = value;
+    let rut = event.target.value.replace(/[^0-9kK]/g, '');
+    this.solicitudSearchRut = this.rutService.formatRut(rut);
+    this.applySolicitudFilters();
   }
 
   deleteSolicitud(id: number): void {
@@ -987,5 +973,70 @@ export class AdminDashboardComponent implements OnInit {
       return user.licenciaVigente.join(', ');
     }
     return 'sin licencia';
+  }
+
+  openRescheduleModal(solicitud: Solicitud): void {
+    this.selectedSolicitud = solicitud;
+    this.isRescheduleModalOpen = true;
+    this.horarioService.getAllHorarios().subscribe((data: any) => {
+      // Filtrar solo horarios con cupo disponible y en el futuro
+      this.availableHorarios = data.filter((h: any) => h.cupodisponible && new Date(h.fecha) >= new Date());
+      this.applyRescheduleFilters(); // Aplicar filtros al abrir
+      this.cdr.markForCheck();
+    });
+  }
+
+  closeRescheduleModal(): void {
+    this.isRescheduleModalOpen = false;
+    this.selectedSolicitud = null;
+    this.availableHorarios = [];
+    this.newHorarioId = null;
+    this.clearRescheduleFilters(); // Limpiar filtros al cerrar
+    this.cdr.markForCheck();
+  }
+
+  applyRescheduleFilters(): void {
+    let filtered = [...this.availableHorarios];
+    if (this.rescheduleFilterDate) {
+      filtered = filtered.filter(h => h.fecha === this.rescheduleFilterDate);
+    }
+    if (this.rescheduleFilterLicencia) {
+      filtered = filtered.filter(h => h.licenciaName === this.rescheduleFilterLicencia);
+    }
+    this.filteredAvailableHorarios = filtered;
+    this.cdr.markForCheck();
+  }
+
+  clearRescheduleFilters(): void {
+    this.rescheduleFilterDate = '';
+    this.rescheduleFilterLicencia = '';
+    this.applyRescheduleFilters();
+  }
+
+  confirmReschedule(): void {
+    if (this.newHorarioId && this.selectedSolicitud?.id) {
+      Swal.fire({
+        title: 'Reagendando...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      
+      this.solicitudService.rescheduleSolicitud(this.selectedSolicitud.id, this.newHorarioId).subscribe({
+        next: () => {
+          this.loadSolicitudes();
+          Swal.fire('¡Éxito!', 'La cita ha sido reagendada correctamente.', 'success').then(() => {
+            this.closeRescheduleModal();
+          });
+        },
+        error: (err: any) => {
+          console.error('Error al reagendar la cita:', err);
+          Swal.fire('Error', 'No se pudo reagendar la cita.', 'error');
+        }
+      });
+    } else {
+      this.toast.error('Debe seleccionar un nuevo horario.', 'Error');
+    }
   }
 } 
