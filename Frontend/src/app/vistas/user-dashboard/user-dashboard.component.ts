@@ -68,6 +68,21 @@ export class UserDashboardComponent implements OnInit {
   }
 
   irAReservaRenovacion(): void {
+    const userString = localStorage.getItem('user');
+    const user = userString ? JSON.parse(userString) : {};
+    if (
+      !user.licenciaVigente ||
+      user.licenciaVigente === 'sin licencia' ||
+      (Array.isArray(user.licenciaVigente) && user.licenciaVigente.length === 0)
+    ) {
+      Swal.fire({
+        icon: 'error',
+        title: 'No puedes renovar',
+        text: 'No cuentas con una licencia vigente para realizar el trámite de renovación.',
+        confirmButtonColor: '#3085d6'
+      });
+      return;
+    }
     this.router.navigate(['/reserva2'], { queryParams: { tipoTramite: 'Renovación' } });
   }
 
