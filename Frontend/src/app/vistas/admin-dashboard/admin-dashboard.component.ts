@@ -864,13 +864,16 @@ export class AdminDashboardComponent implements OnInit {
           fechaEmision,
           fechaCaducidad
         };
-        if (this.tipoTramiteActiva === 'Cambio de Clase' && this.solicitudActiva?.claseAnterior && this.solicitudActiva?.claseNueva) {
-          // Reemplaza la licencia cuyo tipo sea igual a claseAnterior por la nueva claseNueva
-          updatedUser.licenciaVigente = licenciasActuales.map(l =>
-            l.tipo === this.solicitudActiva!.claseAnterior
-              ? { tipo: this.solicitudActiva!.claseNueva!, fechaEmision, fechaCaducidad }
-              : l
-          );
+        if (this.tipoTramiteActiva === 'Cambio de Clase' && this.solicitudActiva?.claseNueva) {
+          // Agrega la nueva licencia sin eliminar la anterior
+          updatedUser.licenciaVigente = [
+            ...licenciasActuales,
+            {
+              tipo: this.solicitudActiva.claseNueva,
+              fechaEmision,
+              fechaCaducidad
+            }
+          ];
         } else if (this.tipoTramiteActiva === 'Renovación') {
           // Reemplaza la licencia del mismo tipo
           updatedUser.licenciaVigente = licenciasActuales.map(l => l.tipo === nuevaLicencia.tipo ? nuevaLicencia : l);

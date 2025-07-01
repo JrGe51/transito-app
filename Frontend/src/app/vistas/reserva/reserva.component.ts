@@ -84,8 +84,10 @@ export class ReservaComponent implements OnInit {
   cargarTiposLicencia(): void {
     this.horarioService.getLicencias().subscribe({
       next: (licencias: any[]) => {
-        // Incluir todas las licencias, incluidas las clases A
-        this.tiposLicencia = licencias.map(licencia => licencia.name);
+        // Filtrar las licencias para excluir las clases A1 a A5
+        this.tiposLicencia = licencias
+          .map(licencia => licencia.name)
+          .filter(licencia => !['Clase A1', 'Clase A2', 'Clase A3', 'Clase A4', 'Clase A5'].includes(licencia));
         this.cdr.detectChanges();
       },
       error: (error) => {
