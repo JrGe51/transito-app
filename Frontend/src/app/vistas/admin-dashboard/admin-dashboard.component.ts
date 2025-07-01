@@ -97,6 +97,7 @@ export class AdminDashboardComponent implements OnInit {
   userHasActiveSolicitud: boolean | null = null;
   solicitudActivaId: number | null = null;
   tipoLicenciaActiva: string | null = null;
+  tipoTramiteActiva: string | null = null;
 
   filterSolicitudSearchRut: string = '';
 
@@ -823,6 +824,7 @@ export class AdminDashboardComponent implements OnInit {
         this.tipoLicenciaActiva = solicitud.tipoLicencia?.name || null;
         this.solicitudActivaId = typeof solicitud.id === 'number' ? solicitud.id : null;
         this.userHasActiveSolicitud = true;
+        this.tipoTramiteActiva = solicitud.tipoTramite || null;
         
         // Inicializar el formulario con los valores actuales del usuario
         this.validateDocsForm.reset({
@@ -860,7 +862,6 @@ export class AdminDashboardComponent implements OnInit {
         const hoy = new Date();
         const fechaEmision = hoy.toISOString().split('T')[0];
         let fechaCaducidad = '';
-        // Lógica de expiración: 6 años para B/C/D/F, 4 años para A
         if (this.tipoLicenciaActiva && this.tipoLicenciaActiva.startsWith('Clase A')) {
           const caduca = new Date(hoy);
           caduca.setFullYear(caduca.getFullYear() + 4);
@@ -875,7 +876,13 @@ export class AdminDashboardComponent implements OnInit {
           fechaEmision,
           fechaCaducidad
         };
-        updatedUser.licenciaVigente = [...licenciasActuales, nuevaLicencia];
+        if (this.tipoTramiteActiva === 'Renovación' || this.tipoTramiteActiva === 'Cambio de Clase') {
+          // Reemplaza la licencia del mismo tipo
+          updatedUser.licenciaVigente = licenciasActuales.map(l => l.tipo === nuevaLicencia.tipo ? nuevaLicencia : l);
+        } else {
+          // Agrega normalmente
+          updatedUser.licenciaVigente = [...licenciasActuales, nuevaLicencia];
+        }
       }
       
       this.userService.updateUser(updatedUser.id!, updatedUser).subscribe({
@@ -916,6 +923,7 @@ export class AdminDashboardComponent implements OnInit {
     this.userHasActiveSolicitud = null;
     this.solicitudActivaId = null;
     this.tipoLicenciaActiva = null;
+    this.tipoTramiteActiva = null;
     this.validateDocsForm.reset();
     this.cdr.markForCheck();
   }
