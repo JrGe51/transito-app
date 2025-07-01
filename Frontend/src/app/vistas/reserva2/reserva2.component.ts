@@ -602,8 +602,12 @@ export class Reserva2Component implements OnInit {
     this.location.back();
   }
 
-  seleccionarLicenciaParaRenovar(licencia: string) {
-    this.tipoLicenciaSeleccionado = licencia;
+  seleccionarLicenciaParaRenovar(licencia: any) {
+    this.tipoLicenciaSeleccionado = this.getNombreLicencia(licencia);
     this.cargarFechasDisponibles();
+  }
+
+  getNombreLicencia(licencia: any): string {
+    return licencia && typeof licencia === 'object' && 'tipo' in licencia ? licencia.tipo : licencia;
   }
 }

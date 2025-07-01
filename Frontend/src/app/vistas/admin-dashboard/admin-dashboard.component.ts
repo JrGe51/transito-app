@@ -15,6 +15,12 @@ import { RutService } from '../../servicios/rut.service';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { AdminService } from '../../servicios/admin.service';
+import { LicenciaVigente } from '../../interfaces/user';
+
+// Helper fuera de la clase
+function isLicenciaVigente(l: any): l is LicenciaVigente {
+  return l && typeof l === 'object' && 'tipo' in l && 'fechaEmision' in l && 'fechaCaducidad' in l;
+}
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -851,7 +857,25 @@ export class AdminDashboardComponent implements OnInit {
       // Solo actualizar licenciaVigente si tiene solicitud activa y todos los exámenes están aprobados
       if (allTrue && this.userHasActiveSolicitud && this.tipoLicenciaActiva) {
         const licenciasActuales = this.validatingUser.licenciaVigente || [];
-        updatedUser.licenciaVigente = [...licenciasActuales, this.tipoLicenciaActiva];
+        const hoy = new Date();
+        const fechaEmision = hoy.toISOString().split('T')[0];
+        let fechaCaducidad = '';
+        // Lógica de expiración: 6 años para B/C/D/F, 4 años para A
+        if (this.tipoLicenciaActiva && this.tipoLicenciaActiva.startsWith('Clase A')) {
+          const caduca = new Date(hoy);
+          caduca.setFullYear(caduca.getFullYear() + 4);
+          fechaCaducidad = caduca.toISOString().split('T')[0];
+        } else {
+          const caduca = new Date(hoy);
+          caduca.setFullYear(caduca.getFullYear() + 6);
+          fechaCaducidad = caduca.toISOString().split('T')[0];
+        }
+        const nuevaLicencia: LicenciaVigente = {
+          tipo: this.tipoLicenciaActiva!,
+          fechaEmision,
+          fechaCaducidad
+        };
+        updatedUser.licenciaVigente = [...licenciasActuales, nuevaLicencia];
       }
       
       this.userService.updateUser(updatedUser.id!, updatedUser).subscribe({
@@ -913,7 +937,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   // Función para quitar una licencia específica
-  quitarLicencia(user: User, licencia: string): void {
+  quitarLicencia(user: User, licencia: LicenciaVigente): void {
     if (!user.id) {
       this.toast.error('Error: ID de usuario no válido', 'Error');
       return;
@@ -921,7 +945,7 @@ export class AdminDashboardComponent implements OnInit {
 
     Swal.fire({
       title: '¿Estás seguro?',
-      text: `¿Deseas quitar la licencia "${licencia}" al usuario ${user.name} ${user.lastname}?`,
+      text: `¿Deseas quitar la licencia "${licencia.tipo}" al usuario ${user.name} ${user.lastname}?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -930,14 +954,19 @@ export class AdminDashboardComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.userService.quitarLicencia(user.id!, licencia).subscribe({
+        user.licenciaVigente = user.licenciaVigente?.filter(l => {
+          if (!isLicenciaVigente(l)) return true; // deja pasar strings u otros
+          return l.tipo !== licencia.tipo ||
+                 l.fechaEmision !== licencia.fechaEmision ||
+                 l.fechaCaducidad !== licencia.fechaCaducidad;
+        });
+        this.userService.updateUser(user.id!, user).subscribe({
           next: (response) => {
             Swal.fire(
               '¡Licencia removida!',
-              `La licencia "${licencia}" ha sido removida del usuario ${user.name} ${user.lastname}.`,
+              `La licencia "${licencia.tipo}" ha sido removida del usuario ${user.name} ${user.lastname}.`,
               'success'
             );
-            // Recargar la lista de usuarios
             this.loadUsers();
           },
           error: (error) => {

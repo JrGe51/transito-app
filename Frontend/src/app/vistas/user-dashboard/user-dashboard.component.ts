@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { User } from '../../interfaces/user';
+import { User, LicenciaVigente } from '../../interfaces/user';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from '../../servicios/user.service';
 import { SolicitudService } from '../../servicios/solicitud.service';
@@ -229,18 +229,22 @@ export class UserDashboardComponent implements OnInit {
     });
   }
 
-  // Función helper para mostrar licencias en el template
-  mostrarLicencias(licencias: string[] | undefined): string {
-    if (licencias && Array.isArray(licencias) && licencias.length > 0) {
-      return licencias.join(', ');
-    }
-    return 'sin licencia';
-  }
   // Método para probar el spinner
   testLoading(): void {
     this.loadingService.show();
     setTimeout(() => {
       this.loadingService.hide();
     }, 3000);
+  }
+
+  getLicenciasComoString(): string {
+    if (this.userData?.licenciaVigente && this.userData.licenciaVigente.length > 0) {
+      return this.userData.licenciaVigente.map(l => l.tipo).join(', ');
+    }
+    return 'Sin licencias';
+  }
+
+  get licenciasVigentes(): LicenciaVigente[] {
+    return this.userData?.licenciaVigente ?? [];
   }
 } 

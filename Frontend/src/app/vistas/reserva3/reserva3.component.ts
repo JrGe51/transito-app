@@ -561,7 +561,7 @@ export class Reserva3Component implements OnInit {
     const user = JSON.parse(userString);
     if (!user.licenciaVigente) return false;
     if (Array.isArray(user.licenciaVigente)) {
-      return user.licenciaVigente.includes(tipo);
+      return user.licenciaVigente.some((l: any) => l && l.tipo === tipo);
     }
     if (typeof user.licenciaVigente === 'string') {
       return user.licenciaVigente === tipo;

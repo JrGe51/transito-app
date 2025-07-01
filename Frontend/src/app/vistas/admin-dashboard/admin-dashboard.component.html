@@ -82,7 +82,7 @@
                 <td>
                   <div *ngIf="tieneLicencias(user); else sinLicencia">
                     <div *ngFor="let licencia of user.licenciaVigente" class="d-flex align-items-center mb-1">
-                      <span class="badge bg-success me-2">{{ licencia }}</span>
+                      <span class="badge bg-success me-2">{{ licencia.tipo }}</span>
                       <button class="btn btn-outline-danger btn-sm" 
                               (click)="quitarLicencia(user, licencia)"
                               title="Quitar licencia {{ licencia }}">
