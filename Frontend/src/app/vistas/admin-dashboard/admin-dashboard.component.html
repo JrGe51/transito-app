@@ -360,7 +360,12 @@
               </td>
               <td>
                 <button class="btn btn-info btn-sm me-2" (click)="openValidateDocs(solicitud)">Validar documentos</button>
-                <button class="btn btn-danger btn-sm" (click)="deleteSolicitud(solicitud.id!)">Eliminar</button>
+                <button class="btn btn-warning btn-sm me-2" (click)="openRescheduleModal(solicitud)">
+                  Reagendar
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="deleteSolicitud(solicitud.id!)">
+                  Eliminar
+                </button>
               </td>
             </tr>
           </tbody>
@@ -440,6 +445,56 @@
           <span *ngIf="loadingCorreo" class="ml-2"></span>
         </form>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Reagendar Cita -->
+<div class="modal-overlay" *ngIf="isRescheduleModalOpen">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">Reagendar Cita</h5>
+      <button type="button" class="btn-close" (click)="closeRescheduleModal()"></button>
+    </div>
+    <div class="modal-body" *ngIf="selectedSolicitud">
+      <p><strong>Usuario:</strong> {{ selectedSolicitud.usuario?.name }} {{ selectedSolicitud.usuario?.lastname }}</p>
+      <p><strong>Cita Actual:</strong> {{ selectedSolicitud.horario?.fecha | date:'dd/MM/yyyy' }} a las {{ selectedSolicitud.horario?.hora }}</p>
+      <hr>
+      
+      <!-- Filtros para reagendamiento -->
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <label for="rescheduleFilterDate" class="form-label">Filtrar por Fecha:</label>
+          <input type="date" id="rescheduleFilterDate" class="form-control" [(ngModel)]="rescheduleFilterDate" (change)="applyRescheduleFilters()">
+        </div>
+        <div class="col-md-4">
+          <label for="rescheduleFilterLicencia" class="form-label">Filtrar por Licencia:</label>
+          <select id="rescheduleFilterLicencia" class="form-select" [(ngModel)]="rescheduleFilterLicencia" (change)="applyRescheduleFilters()">
+            <option value="">Todas</option>
+            <option *ngFor="let licencia of tiposLicencia" [value]="licencia">{{ licencia }}</option>
+          </select>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <button class="btn btn-secondary w-100" (click)="clearRescheduleFilters()">Limpiar Filtros</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="newHorario">Seleccione un nuevo horario:</label>
+        <select class="form-control" [(ngModel)]="newHorarioId" id="newHorario">
+          <option [ngValue]="null" disabled>-- Elija una nueva fecha y hora --</option>
+          <option *ngFor="let horario of filteredAvailableHorarios" [value]="horario.id">
+            {{ horario.fecha | date:'dd/MM/yyyy' }} - {{ horario.hora }} ({{ horario.licenciaName }})
+          </option>
+        </select>
+        <div *ngIf="filteredAvailableHorarios.length === 0" class="alert alert-warning mt-2">
+          No hay horarios disponibles que coincidan con los filtros.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeRescheduleModal()">Cancelar</button>
+      <button type="button" class="btn btn-primary" (click)="confirmReschedule()" [disabled]="!newHorarioId">Confirmar Reagendamiento</button>
     </div>
   </div>
 </div>

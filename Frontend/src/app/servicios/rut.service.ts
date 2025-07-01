@@ -51,6 +51,19 @@ export class RutService {
     return dvIngresado === dvCalculado;
   }
 
+  // Función para formatear el RUT mientras se escribe
+  formatRut(rut: string): string {
+    const rutLimpio = rut.replace(/[^0-9kK]/g, '').toUpperCase();
+    if (!rutLimpio) return '';
+
+    let rutFormateado = rutLimpio.slice(0, -1);
+    const dv = rutLimpio.slice(-1);
+
+    rutFormateado = rutFormateado.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+    return `${rutFormateado}-${dv}`;
+  }
+
   // Función para verificar si el RUT es válido
   esMayorDeEdad(rut: string): { esValido: boolean; mensaje: string } {
     if (!this.validarRut(rut)) {

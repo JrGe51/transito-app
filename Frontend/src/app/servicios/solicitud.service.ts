@@ -43,4 +43,10 @@ export class SolicitudService {
 
     return this.http.get<{ solicitud: Solicitud }>(`${this.AppUrl}${this.APIUrl}/${id}`, { headers: headers });
   }
+
+  rescheduleSolicitud(solicitudId: number, newHorarioId: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put(`${this.AppUrl}${this.APIUrl}/reschedule/${solicitudId}`, { horarioId: newHorarioId }, { headers });
+  }
 } 
