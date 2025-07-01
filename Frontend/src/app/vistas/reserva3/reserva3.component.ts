@@ -214,6 +214,25 @@ export class Reserva3Component implements OnInit {
   }
 
   seleccionarTipoLicencia(tipo: string) {
+    if (!this.puedeSolicitarLicencia(tipo)) {
+      let mensaje = '';
+      if (["Clase A1", "Clase A2", "Clase A3", "Clase A4", "Clase A5"].includes(tipo)) {
+        mensaje = 'Para solicitar una licencia ' + tipo + ' debes tener una licencia Clase B vigente.';
+      }
+      if (tipo === "Clase A3") {
+        mensaje = 'Para solicitar una licencia Clase A3 debes tener una Clase B y al menos una de: Clase A1, A2, A4 o A5.';
+      }
+      if (tipo === "Clase A5") {
+        mensaje = 'Para solicitar una licencia Clase A5 debes tener una Clase B o una Clase A2 o A4.';
+      }
+      Swal.fire({
+        icon: 'warning',
+        title: 'Requisito no cumplido',
+        text: mensaje,
+        confirmButtonColor: '#3085d6'
+      });
+      return;
+    }
     // Validar edad para cualquier tipo de licencia
     if (!this.validarEdadParaLicencia(tipo)) {
       return;
@@ -585,6 +604,36 @@ export class Reserva3Component implements OnInit {
 
   getNombreLicencia(licencia: any): string {
     return licencia && typeof licencia === 'object' && 'tipo' in licencia ? licencia.tipo : licencia;
+  }
+
+  puedeSolicitarLicencia(tipo: string): boolean {
+    const tiposUsuario = this.licenciasUsuario.map(l => l.tipo);
+
+    // Restricciones para clases A
+    if (["Clase A1", "Clase A2", "Clase A3", "Clase A4", "Clase A5"].includes(tipo)) {
+      // Todas las clases A requieren Clase B
+      if (!tiposUsuario.includes("Clase B")) {
+        return false;
+      }
+    }
+
+    // Restricción específica para Clase A3
+    if (tipo === "Clase A3") {
+      const tieneAlgunaA = ["Clase A1", "Clase A2", "Clase A4", "Clase A5"].some(a => tiposUsuario.includes(a));
+      if (!(tiposUsuario.includes("Clase B") && tieneAlgunaA)) {
+        return false;
+      }
+    }
+
+    // Restricción específica para Clase A5
+    if (tipo === "Clase A5") {
+      if (!(tiposUsuario.includes("Clase B") || tiposUsuario.includes("Clase A2") || tiposUsuario.includes("Clase A4"))) {
+        return false;
+      }
+    }
+
+    // Por defecto, permitir
+    return true;
   }
 
 }
