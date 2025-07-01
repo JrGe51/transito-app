@@ -14,6 +14,13 @@ import { Admin } from '../../interfaces/admin';
 import { RutService } from '../../servicios/rut.service';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
+import { AdminService } from '../../servicios/admin.service';
+import { LicenciaVigente } from '../../interfaces/user';
+
+// Helper fuera de la clase
+function isLicenciaVigente(l: any): l is LicenciaVigente {
+  return l && typeof l === 'object' && 'tipo' in l && 'fechaEmision' in l && 'fechaCaducidad' in l;
+}
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -90,9 +97,15 @@ export class AdminDashboardComponent implements OnInit {
   userHasActiveSolicitud: boolean | null = null;
   solicitudActivaId: number | null = null;
   tipoLicenciaActiva: string | null = null;
+  tipoTramiteActiva: string | null = null;
 
   filterSolicitudSearchRut: string = '';
 
+  loadingCorreo = false;
+  bulkEmail = { asunto: '', mensaje: '' };
+  mostrarCorreoMasivo = false;
+
+  solicitudActiva: Solicitud | null = null;
   // Propiedades para el modal de reagendamiento
   isRescheduleModalOpen = false;
   selectedSolicitud: Solicitud | null = null;
@@ -111,7 +124,8 @@ export class AdminDashboardComponent implements OnInit {
     private toast: ToastrService,
     private fb: FormBuilder,
     private solicitudService: SolicitudService,
-    private rutService: RutService
+    private rutService: RutService,
+    private adminService: AdminService
   ) {
     this.minDate = this.getTomorrowDate();
 
@@ -172,18 +186,20 @@ export class AdminDashboardComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  toggleHorariosManagement() {
+  toggleHorariosManagement(): void {
     this.showHorariosManagement = !this.showHorariosManagement;
     if (this.showHorariosManagement) {
       this.loadHorarios();
       this.showLicenciasManagement = false;
-      this.showCreateLicenciaForm = false;
       this.showUsersManagement = false;
       this.showSolicitudesManagement = false;
+      this.validatingUser = null;
     } else {
       this.horarios = [];
       this.showCreateForm = false;
       this.shouldShowTable = false;
+      // Resetear el formulario de validación al salir de la sección
+      this.cancelValidateDocs();
       this.cdr.markForCheck();
     }
   }
@@ -304,18 +320,20 @@ export class AdminDashboardComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  toggleLicenciasManagement() {
+  toggleLicenciasManagement(): void {
     this.showLicenciasManagement = !this.showLicenciasManagement;
     if (this.showLicenciasManagement) {
       this.loadLicencias();
-      this.showHorariosManagement = false;
-      this.showCreateForm = false;
       this.showUsersManagement = false;
+      this.showHorariosManagement = false;
       this.showSolicitudesManagement = false;
+      this.validatingUser = null;
     } else {
       this.licencias = [];
       this.showCreateLicenciaForm = false;
       this.shouldShowLicenciasTable = false;
+      // Resetear el formulario de validación al salir de la sección
+      this.cancelValidateDocs();
       this.cdr.markForCheck();
     }
   }
@@ -416,16 +434,18 @@ export class AdminDashboardComponent implements OnInit {
     this.showUsersManagement = !this.showUsersManagement;
     if (this.showUsersManagement) {
       this.loadUsers();
-      this.showHorariosManagement = false;
       this.showLicenciasManagement = false;
+      this.showHorariosManagement = false;
       this.showSolicitudesManagement = false;
+      this.validatingUser = null;
     } else {
-      this.users = [];
-      this.filteredUsers = [];
+      // Resetear el formulario de validación al salir de la sección
+      this.cancelValidateDocs();
     }
     if (this.showUsersManagement && this.users.length === 0) {
       this.loadUsers();
     }
+    this.cdr.markForCheck();
   }
 
   loadUsers(): void {
@@ -547,15 +567,15 @@ export class AdminDashboardComponent implements OnInit {
     this.showSolicitudesManagement = !this.showSolicitudesManagement;
     if (this.showSolicitudesManagement) {
       this.loadSolicitudes();
-      this.showHorariosManagement = false;
-      this.showLicenciasManagement = false;
       this.showUsersManagement = false;
-      this.showCreateForm = false;
-      this.showCreateLicenciaForm = false;
+      this.showLicenciasManagement = false;
+      this.showHorariosManagement = false;
+      this.validatingUser = null;
     } else {
-      this.solicitudes = [];
-      this.filteredSolicitudes = [];
+      // Resetear el formulario de validación al salir de la sección
+      this.cancelValidateDocs();
     }
+    this.cdr.markForCheck();
     if (this.solicitudSearchRut) {
       this.solicitudSearchRut = this.rutService.formatRut(this.solicitudSearchRut);
     }
@@ -777,76 +797,38 @@ export class AdminDashboardComponent implements OnInit {
     return null;
   }
 
-  openValidateDocs(user: User): void {
-    this.validatingUser = { ...user };
-    this.userHasActiveSolicitud = null;
-    this.solicitudActivaId = null;
-    this.tipoLicenciaActiva = null;
-    this.validateDocsForm.patchValue({
-      examenMedicoAprobado: !!user.examenMedicoAprobado,
-      examenPracticoAprobado: !!user.examenPracticoAprobado,
-      examenTeoricoAprobado: !!user.examenTeoricoAprobado,
-      examenPsicotecnicoAprobado: !!user.examenPsicotecnicoAprobado,
-    });
-    this.cdr.markForCheck();
-    
-    // Verificar si el usuario tiene licencia vigente
-    const hasActiveLicense = !!(user.licenciaVigente && Array.isArray(user.licenciaVigente) && user.licenciaVigente.length > 0);
-    
-    if (user.id) {
-      this.userService.hasActiveSolicitud(user.id).subscribe({
-        next: (res) => {
-          this.userHasActiveSolicitud = res.hasActive;
-          
-          // Habilitar formulario si tiene solicitud activa O licencia vigente
-          if (res.hasActive || hasActiveLicense) {
-            this.validateDocsForm.enable();
-            
-            if (res.hasActive) {
-              // Obtener la solicitud activa para el usuario
-              this.solicitudService.getAllSolicitudes().subscribe({
-                next: (data) => {
-                  // Buscar la solicitud activa del usuario
-                  const solicitud = data.solicitudes.find((s: any) => s.id_usuario === user.id);
-                  if (solicitud) {
-                    this.solicitudActivaId = typeof solicitud.id === 'number' ? solicitud.id : null;
-                    this.tipoLicenciaActiva = solicitud.tipoLicencia?.name || null;
-                  }
-                  this.cdr.markForCheck();
-                },
-                error: () => {
-                  this.solicitudActivaId = null;
-                  this.tipoLicenciaActiva = null;
-                  this.cdr.markForCheck();
-                }
-              });
-            }
-          } else {
-            this.validateDocsForm.disable();
-          }
-          this.cdr.markForCheck();
-        },
-        error: () => {
-          this.userHasActiveSolicitud = false;
-          // Si no hay solicitud activa pero tiene licencia vigente, habilitar formulario
-          if (hasActiveLicense) {
-            this.validateDocsForm.enable();
-          } else {
-            this.validateDocsForm.disable();
-          }
-          this.cdr.markForCheck();
-        }
-      });
-    } else {
-      this.userHasActiveSolicitud = false;
-      // Si no hay solicitud activa pero tiene licencia vigente, habilitar formulario
-      if (hasActiveLicense) {
-        this.validateDocsForm.enable();
-      } else {
-        this.validateDocsForm.disable();
-      }
-      this.cdr.markForCheck();
+  openValidateDocs(solicitud: Solicitud): void {
+    // Verificar si tenemos el ID del usuario en la solicitud
+    if (!solicitud.id_usuario) {
+      Swal.fire('Error', 'No se pudo identificar al usuario de esta solicitud.', 'error');
+      return;
     }
+
+    // Obtener los datos completos del usuario usando el nuevo método
+    this.userService.getUserById(solicitud.id_usuario).subscribe({
+      next: (user) => {
+        this.validatingUser = user;
+        this.tipoLicenciaActiva = solicitud.tipoLicencia?.name || null;
+        this.solicitudActivaId = typeof solicitud.id === 'number' ? solicitud.id : null;
+        this.userHasActiveSolicitud = true;
+        this.tipoTramiteActiva = solicitud.tipoTramite || null;
+        this.solicitudActiva = solicitud;
+        
+        // Inicializar el formulario con los valores actuales del usuario
+        this.validateDocsForm.reset({
+          examenMedicoAprobado: user.examenMedicoAprobado || false,
+          examenPracticoAprobado: user.examenPracticoAprobado || false,
+          examenTeoricoAprobado: user.examenTeoricoAprobado || false,
+          examenPsicotecnicoAprobado: user.examenPsicotecnicoAprobado || false,
+        });
+        
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error al obtener datos del usuario:', error);
+        Swal.fire('Error', 'No se pudieron obtener los datos del usuario.', 'error');
+      }
+    });
   }
 
   saveValidatedDocs(): void {
@@ -865,7 +847,37 @@ export class AdminDashboardComponent implements OnInit {
       // Solo actualizar licenciaVigente si tiene solicitud activa y todos los exámenes están aprobados
       if (allTrue && this.userHasActiveSolicitud && this.tipoLicenciaActiva) {
         const licenciasActuales = this.validatingUser.licenciaVigente || [];
-        updatedUser.licenciaVigente = [...licenciasActuales, this.tipoLicenciaActiva];
+        const hoy = new Date();
+        const fechaEmision = hoy.toISOString().split('T')[0];
+        let fechaCaducidad = '';
+        if (this.tipoLicenciaActiva && this.tipoLicenciaActiva.startsWith('Clase A')) {
+          const caduca = new Date(hoy);
+          caduca.setFullYear(caduca.getFullYear() + 4);
+          fechaCaducidad = caduca.toISOString().split('T')[0];
+        } else {
+          const caduca = new Date(hoy);
+          caduca.setFullYear(caduca.getFullYear() + 6);
+          fechaCaducidad = caduca.toISOString().split('T')[0];
+        }
+        const nuevaLicencia: LicenciaVigente = {
+          tipo: this.tipoLicenciaActiva!,
+          fechaEmision,
+          fechaCaducidad
+        };
+        if (this.tipoTramiteActiva === 'Cambio de Clase' && this.solicitudActiva?.claseAnterior && this.solicitudActiva?.claseNueva) {
+          // Reemplaza la licencia cuyo tipo sea igual a claseAnterior por la nueva claseNueva
+          updatedUser.licenciaVigente = licenciasActuales.map(l =>
+            l.tipo === this.solicitudActiva!.claseAnterior
+              ? { tipo: this.solicitudActiva!.claseNueva!, fechaEmision, fechaCaducidad }
+              : l
+          );
+        } else if (this.tipoTramiteActiva === 'Renovación') {
+          // Reemplaza la licencia del mismo tipo
+          updatedUser.licenciaVigente = licenciasActuales.map(l => l.tipo === nuevaLicencia.tipo ? nuevaLicencia : l);
+        } else {
+          // Agrega normalmente
+          updatedUser.licenciaVigente = [...licenciasActuales, nuevaLicencia];
+        }
       }
       
       this.userService.updateUser(updatedUser.id!, updatedUser).subscribe({
@@ -906,6 +918,7 @@ export class AdminDashboardComponent implements OnInit {
     this.userHasActiveSolicitud = null;
     this.solicitudActivaId = null;
     this.tipoLicenciaActiva = null;
+    this.tipoTramiteActiva = null;
     this.validateDocsForm.reset();
     this.cdr.markForCheck();
   }
@@ -927,7 +940,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   // Función para quitar una licencia específica
-  quitarLicencia(user: User, licencia: string): void {
+  quitarLicencia(user: User, licencia: LicenciaVigente): void {
     if (!user.id) {
       this.toast.error('Error: ID de usuario no válido', 'Error');
       return;
@@ -935,7 +948,7 @@ export class AdminDashboardComponent implements OnInit {
 
     Swal.fire({
       title: '¿Estás seguro?',
-      text: `¿Deseas quitar la licencia "${licencia}" al usuario ${user.name} ${user.lastname}?`,
+      text: `¿Deseas quitar la licencia "${licencia.tipo}" al usuario ${user.name} ${user.lastname}?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -944,14 +957,19 @@ export class AdminDashboardComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.userService.quitarLicencia(user.id!, licencia).subscribe({
+        user.licenciaVigente = user.licenciaVigente?.filter(l => {
+          if (!isLicenciaVigente(l)) return true; // deja pasar strings u otros
+          return l.tipo !== licencia.tipo ||
+                 l.fechaEmision !== licencia.fechaEmision ||
+                 l.fechaCaducidad !== licencia.fechaCaducidad;
+        });
+        this.userService.updateUser(user.id!, user).subscribe({
           next: (response) => {
             Swal.fire(
               '¡Licencia removida!',
-              `La licencia "${licencia}" ha sido removida del usuario ${user.name} ${user.lastname}.`,
+              `La licencia "${licencia.tipo}" ha sido removida del usuario ${user.name} ${user.lastname}.`,
               'success'
             );
-            // Recargar la lista de usuarios
             this.loadUsers();
           },
           error: (error) => {
@@ -975,6 +993,31 @@ export class AdminDashboardComponent implements OnInit {
     return 'sin licencia';
   }
 
+  toggleCorreoMasivo() {
+    this.mostrarCorreoMasivo = !this.mostrarCorreoMasivo;
+    if (!this.mostrarCorreoMasivo) {
+      this.bulkEmail = { asunto: '', mensaje: '' }; // Limpiar siempre al cerrar
+    }
+  }
+
+  enviarCorreoMasivo() {
+    this.loadingCorreo = true;
+    this.adminService.enviarCorreoMasivo(this.bulkEmail.asunto, this.bulkEmail.mensaje).subscribe({
+      next: (res) => {
+        this.loadingCorreo = false;
+        Swal.fire('¡Éxito!', 'Correo enviado exitosamente a todos los usuarios.', 'success');
+        if (this.mostrarCorreoMasivo) {
+          this.toggleCorreoMasivo();
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        this.loadingCorreo = false;
+        const msg = err?.error?.error || 'Error al enviar el correo. Intenta nuevamente.';
+        Swal.fire('Error', msg, 'error');
+      }
+    });
+  }
   openRescheduleModal(solicitud: Solicitud): void {
     this.selectedSolicitud = solicitud;
     this.isRescheduleModalOpen = true;

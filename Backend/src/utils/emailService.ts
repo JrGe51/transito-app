@@ -36,6 +36,7 @@ interface EmailOptions {
     subject: string;
     html: string;
     text?: string;
+    bcc?: string[];
 }
 
 // Función para formatear fecha de YYYY-MM-DD a DD/MM/YYYY
@@ -111,18 +112,21 @@ export const getRequiredDocuments = (tipoTramite: string, tipoLicencia: string):
     return documentos;
 };
 
-export const sendEmail = async ({ to, subject, html, text }: EmailOptions) => {
+export const sendEmail = async ({ to, subject, html, text, bcc }: EmailOptions) => {
     try {
         console.log('Configurando envío de correo a:', to);
         console.log('Usando cuenta:', process.env.EMAIL_USER);
         
-        const mailOptions = {
+        const mailOptions: any = {
             from: `"Departamento de Tránsito" <${process.env.EMAIL_USER}>`,
             to,
             subject,
             html,
             text: text || ''
         };
+        if (bcc && bcc.length > 0) {
+            mailOptions.bcc = bcc;
+        }
 
         const info = await transporter.sendMail(mailOptions);
         console.log('Correo enviado:', info.response);

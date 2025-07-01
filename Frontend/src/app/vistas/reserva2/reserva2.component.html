@@ -28,7 +28,20 @@
         <div id="formContent">
             <h1 class="fadeIn first">Renovación</h1>
 
-            <div class="mb-3 d-flex flex-column align-items-center" *ngIf="!tipoLicenciaSeleccionado && tipoTramite === 'Renovación'">
+            <!-- Mostrar botones solo si hay más de una licencia vigente -->
+            <div class="mb-3 d-flex flex-column align-items-center" *ngIf="licenciasUsuario.length > 1 && !tipoLicenciaSeleccionado && tipoTramite === 'Renovación'">
+                <button
+                  *ngFor="let licencia of licenciasUsuario"
+                  type="button"
+                  class="btn btn-primary m-2 d-block w-100"
+                  style="max-width: 300px;"
+                  (click)="seleccionarLicenciaParaRenovar(licencia)">
+                  {{ getNombreLicencia(licencia) }}
+                </button>
+            </div>
+
+            <!-- Botones para primera vez o cuando no hay licencias -->
+            <div class="mb-3 d-flex flex-column align-items-center" *ngIf="licenciasUsuario.length <= 1 && !tipoLicenciaSeleccionado && tipoTramite === 'Renovación'">
                 <button
                   *ngFor="let tipo of tiposLicencia"
                   type="button"
@@ -42,14 +55,14 @@
             <div class="mb-3 text-center" *ngIf="tipoLicenciaSeleccionado || tipoTramite !== 'Renovación'">
               <div class="alert alert-info mb-4">
                 <strong>Tipo de trámite seleccionado:</strong> {{ tipoTramite }}
-                <span *ngIf="tipoLicenciaSeleccionado"> - {{ tipoLicenciaSeleccionado }}</span>
+                <span *ngIf="tipoLicenciaSeleccionado"> - {{ getNombreLicencia(tipoLicenciaSeleccionado) }}</span>
                 <button *ngIf="tipoLicenciaSeleccionado && tipoTramite !== 'Renovación'" type="button" class="btn btn-sm btn-outline-primary ms-3" (click)="tipoLicenciaSeleccionado = null">
                   Cambiar
                 </button>
               </div>
               <div *ngIf="tipoTramite === 'Renovación' && tipoLicenciaSeleccionado && tieneLicenciaVigente()" class="alert alert-success mb-4">
                 <i class="bi bi-info-circle"></i>
-                <strong>Renovación de licencia:</strong> Estás renovando tu licencia {{ tipoLicenciaSeleccionado }}. 
+                <strong>Renovación de licencia:</strong> Estás renovando tu licencia {{ getNombreLicencia(tipoLicenciaSeleccionado) }}. 
                 Solo se mostrarán horarios disponibles para este tipo de licencia.
               </div>
               <form class="reservation-form" (ngSubmit)="mostrarFormularioReserva()">

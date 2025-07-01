@@ -56,6 +56,9 @@ export class Reserva3Component implements OnInit {
   showCalendar: boolean = true;
   documentos: any[] = [];
   tipoTramite: string = '';
+  licenciaActualSeleccionada: any = null;
+  nuevaClaseSeleccionada: string | null = null;
+  licenciasUsuario: any[] = [];
 
   constructor(
     private horarioService: HorarioService,
@@ -70,7 +73,9 @@ export class Reserva3Component implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.tipoTramite = params['tipoTramite'] || '';
     });
-    // No cargamos fechas aquí, esperamos a que se seleccione un tipo de licencia
+    // Cargar licencias del usuario
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.licenciasUsuario = Array.isArray(user.licenciaVigente) ? user.licenciaVigente : (user.licenciaVigente ? [user.licenciaVigente] : []);
   }
 
   onFechaChange(date: Date | null) {
@@ -220,17 +225,9 @@ export class Reserva3Component implements OnInit {
         const licenciaExiste = licencias.some(
           lic => lic.name.toLowerCase() === tipo.toLowerCase()
         );
-
         if (!licenciaExiste) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Licencia no disponible',
-            text: 'De momento no se está impartiendo este tipo de licencia',
-            confirmButtonColor: '#3085d6'
-          });
           return;
         }
-
         // Si la licencia existe, continuar con el proceso
         this.tipoLicenciaSeleccionado = tipo;
         this.licenciaSeleccionada = true;
@@ -245,35 +242,31 @@ export class Reserva3Component implements OnInit {
         this.cdr.detectChanges(); 
 
         this.horarioService.getFechasDisponibles(tipo).subscribe({
-          next: (fechas) => {
-            if (fechas && fechas.length > 0) {
-              this.fechasDisponibles$.next(fechas);
-              this.cdr.detectChanges();
-
-              // MOSTRAR CALENDARIO después de un pequeño retraso para asegurar que se recree
+          next: (fechas: string[]) => {
+            this.fechasDisponibles$.next(fechas);
+            this.cdr.detectChanges();
+            // Mostrar el calendario inmediatamente
+            this.showCalendar = true;
+            this.cdr.detectChanges();
+            if (fechas.length > 0) {
+              // Asignar automáticamente la primera fecha disponible
+              const primerFecha = fechas[0];
+              this.fechaSeleccionada = new Date(primerFecha);
+              // Actualizar funciones de clase y filtro
+              this.dateClass = (d: Date) => {
+                const dateString = this.formatDate(d);
+                return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
+              };
+              this.filtrarFechasDisponibles = (date: Date | null): boolean => {
+                if (!date) return false;
+                const dateString = this.formatDate(date);
+                return this.fechasDisponibles$.value.includes(dateString);
+              };
+              // Forzar la fecha activa del calendario si existe
               setTimeout(() => {
-                this.showCalendar = true;
-                this.cdr.detectChanges();
-
                 if (this.calendar) {
-                  // Reasignar las funciones dateClass y filtrarFechasDisponibles para forzar reevaluación
-                  this.dateClass = (d: Date) => {
-                    const dateString = this.formatDate(d);
-                    return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
-                  };
-                  this.filtrarFechasDisponibles = (date: Date | null): boolean => {
-                    if (!date) return false;
-                    const dateString = this.formatDate(date);
-                    return this.fechasDisponibles$.value.includes(dateString);
-                  };
-
-                  // Intentar establecer la fecha activa para forzar la reevaluación
-                  if (fechas.length > 0) {
-                    this.calendar.activeDate = new Date(fechas[0]);
-                  } else {
-                    this.calendar.activeDate = new Date(); // Si no hay fechas, mostrar el mes actual
-                  }
-                  this.calendar.updateTodaysDate(); // Fuerza la reevaluación de los filtros
+                  this.calendar.activeDate = new Date(primerFecha);
+                  this.calendar.updateTodaysDate();
                   this.cdr.detectChanges();
                 }
               }, 0);
@@ -281,11 +274,11 @@ export class Reserva3Component implements OnInit {
               Swal.fire({
                 icon: 'info',
                 title: 'Sin cupos disponibles',
-                text: `No hay fechas disponibles para reservar la licencia ${tipo}. Por favor, intenta más tarde.`,
+                text: `No hay fechas disponibles para reservar la licencia ${this.nuevaClaseSeleccionada}. Por favor, intenta más tarde.`,
                 confirmButtonColor: '#3085d6'
               });
+              this.nuevaClaseSeleccionada = null;
               this.tipoLicenciaSeleccionado = null;
-              this.licenciaSeleccionada = false;
             }
           },
           error: (error) => {
@@ -450,7 +443,9 @@ export class Reserva3Component implements OnInit {
       hora: this.horaSeleccionada,
       name: this.tipoLicenciaSeleccionado,
       tipoTramite: this.tipoTramite,
-      documentos: this.documentos || []
+      documentos: this.documentos || [],
+      claseAnterior: this.licenciaActualSeleccionada?.tipo,
+      claseNueva: this.nuevaClaseSeleccionada
     };
 
     console.log('Enviando solicitud:', solicitud);
@@ -553,5 +548,119 @@ export class Reserva3Component implements OnInit {
 
   goBack(): void {
     this.location.back();
+  }
+
+  tieneLicencia(tipo: string): boolean {
+    const userString = localStorage.getItem('user');
+    if (!userString) return false;
+    const user = JSON.parse(userString);
+    if (!user.licenciaVigente) return false;
+    if (Array.isArray(user.licenciaVigente)) {
+      return user.licenciaVigente.some((l: any) => l && l.tipo === tipo);
+    }
+    if (typeof user.licenciaVigente === 'string') {
+      return user.licenciaVigente === tipo;
+    }
+    return false;
+  }
+
+  getNombreLicencia(licencia: any): string {
+    return licencia && typeof licencia === 'object' && 'tipo' in licencia ? licencia.tipo : licencia;
+  }
+
+  seleccionarLicenciaActual(licencia: any) {
+    this.licenciaActualSeleccionada = licencia;
+  }
+
+  seleccionarNuevaClase(tipo: string) {
+    this.nuevaClaseSeleccionada = tipo;
+    this.tipoLicenciaSeleccionado = tipo;
+    this.cargarFechasDisponibles();
+  }
+
+  volverSeleccionLicencia() {
+    this.licenciaActualSeleccionada = null;
+    this.nuevaClaseSeleccionada = null;
+    this.tipoLicenciaSeleccionado = null;
+  }
+
+  cargarFechasDisponibles() {
+    if (!this.nuevaClaseSeleccionada) return;
+    // Verificar si la licencia existe en la base de datos
+    this.horarioService.getLicencias().subscribe({
+      next: (licencias: any[]) => {
+        const licenciaExiste = licencias.some(
+          lic => lic.name.toLowerCase() === this.nuevaClaseSeleccionada!.toLowerCase()
+        );
+        if (!licenciaExiste) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Licencia no disponible',
+            text: 'De momento no se está impartiendo este tipo de licencia',
+            confirmButtonColor: '#3085d6'
+          });
+          this.nuevaClaseSeleccionada = null;
+          this.tipoLicenciaSeleccionado = null;
+          return;
+        }
+        // Si la licencia existe, continuar con la carga de fechas
+        this.horarioService.getFechasDisponibles(this.nuevaClaseSeleccionada!).subscribe({
+          next: (fechas: string[]) => {
+            this.fechasDisponibles$.next(fechas);
+            this.cdr.detectChanges();
+            // Mostrar el calendario inmediatamente
+            this.showCalendar = true;
+            this.cdr.detectChanges();
+            if (fechas.length > 0) {
+              // Asignar automáticamente la primera fecha disponible
+              const primerFecha = fechas[0];
+              this.fechaSeleccionada = new Date(primerFecha);
+              // Actualizar funciones de clase y filtro
+              this.dateClass = (d: Date) => {
+                const dateString = this.formatDate(d);
+                return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
+              };
+              this.filtrarFechasDisponibles = (date: Date | null): boolean => {
+                if (!date) return false;
+                const dateString = this.formatDate(date);
+                return this.fechasDisponibles$.value.includes(dateString);
+              };
+              // Forzar la fecha activa del calendario si existe
+              setTimeout(() => {
+                if (this.calendar) {
+                  this.calendar.activeDate = new Date(primerFecha);
+                  this.calendar.updateTodaysDate();
+                  this.cdr.detectChanges();
+                }
+              }, 0);
+            } else {
+              Swal.fire({
+                icon: 'info',
+                title: 'Sin cupos disponibles',
+                text: `No hay fechas disponibles para reservar la licencia ${this.nuevaClaseSeleccionada}. Por favor, intenta más tarde.`,
+                confirmButtonColor: '#3085d6'
+              });
+              this.nuevaClaseSeleccionada = null;
+              this.tipoLicenciaSeleccionado = null;
+            }
+          },
+          error: (error) => {
+            console.error('Error al cargar fechas disponibles:', error);
+            this.toast.error('Error al cargar fechas disponibles', 'Error');
+            this.fechasDisponibles$.next([]);
+            this.showCalendar = true;
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error al verificar licencia:', error);
+        this.toast.error('Error al verificar la licencia', 'Error');
+      }
+    });
+  }
+
+  puedeElegirNuevaClase(tipo: string): boolean {
+    return !this.licenciasUsuario.some(l => this.getNombreLicencia(l) === tipo);
   }
 }

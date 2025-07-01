@@ -103,7 +103,7 @@ const getRequiredDocuments = (tipoTramite, tipoLicencia) => {
     return documentos;
 };
 exports.getRequiredDocuments = getRequiredDocuments;
-const sendEmail = (_a) => __awaiter(void 0, [_a], void 0, function* ({ to, subject, html, text }) {
+const sendEmail = (_a) => __awaiter(void 0, [_a], void 0, function* ({ to, subject, html, text, bcc }) {
     try {
         console.log('Configurando envío de correo a:', to);
         console.log('Usando cuenta:', process.env.EMAIL_USER);
@@ -114,6 +114,9 @@ const sendEmail = (_a) => __awaiter(void 0, [_a], void 0, function* ({ to, subje
             html,
             text: text || ''
         };
+        if (bcc && bcc.length > 0) {
+            mailOptions.bcc = bcc;
+        }
         const info = yield transporter.sendMail(mailOptions);
         console.log('Correo enviado:', info.response);
         return {

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cambiarPassword = exports.verificarCodigo = exports.recuperarPassword = exports.deleteUser = exports.getAllUsers = exports.quitarLicencia = exports.agregarLicencia = exports.updateUser = exports.login = exports.register = void 0;
+exports.cambiarPassword = exports.verificarCodigo = exports.recuperarPassword = exports.deleteUser = exports.getUserById = exports.getAllUsers = exports.quitarLicencia = exports.agregarLicencia = exports.updateUser = exports.login = exports.register = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const user_1 = require("../models/user");
 const admin_1 = require("../models/admin");
@@ -324,6 +324,36 @@ const getAllUsers = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.getAllUsers = getAllUsers;
+const getUserById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    console.log(`[getUserById] Intentando obtener usuario con ID: ${id}`);
+    try {
+        const user = yield user_1.User.findByPk(id, {
+            attributes: { exclude: ['password'] }
+        });
+        if (!user) {
+            console.warn(`[getUserById] Usuario con ID ${id} no encontrado.`);
+            res.status(404).json({
+                msg: `No se encontró un usuario con el ID ${id}`
+            });
+            return;
+        }
+        console.log(`[getUserById] Usuario con ID ${id} encontrado exitosamente.`);
+        res.status(200).json({
+            user
+        });
+        return;
+    }
+    catch (error) {
+        console.error('[getUserById] Error al obtener usuario:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al obtener usuario.',
+            error
+        });
+        return;
+    }
+});
+exports.getUserById = getUserById;
 const deleteUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     console.log(`[deleteUser] Intentando eliminar usuario con ID: ${id}`);

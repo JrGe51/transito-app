@@ -339,6 +339,38 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
     }
 };
 
+export const getUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { id } = req.params;
+    console.log(`[getUserById] Intentando obtener usuario con ID: ${id}`);
+    
+    try {
+        const user = await User.findByPk(id, {
+            attributes: { exclude: ['password'] } 
+        });
+
+        if (!user) {
+            console.warn(`[getUserById] Usuario con ID ${id} no encontrado.`);
+            res.status(404).json({
+                msg: `No se encontró un usuario con el ID ${id}`
+            });
+            return;
+        }
+
+        console.log(`[getUserById] Usuario con ID ${id} encontrado exitosamente.`);
+        res.status(200).json({
+            user
+        });
+        return;
+    } catch (error) {
+        console.error('[getUserById] Error al obtener usuario:', error);
+        res.status(500).json({
+            msg: 'Error interno del servidor al obtener usuario.',
+            error
+        });
+        return;
+    }
+};
+
 export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
     console.log(`[deleteUser] Intentando eliminar usuario con ID: ${id}`);

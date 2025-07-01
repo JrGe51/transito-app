@@ -6,4 +6,5 @@ const router = (0, express_1.Router)();
 router.post("/api/admin/check-master", admin_1.checkMasterCredentials);
 router.post("/api/admin/register", admin_1.registerAdmin);
 router.post("/api/admin/login", admin_1.loginAdmin);
+router.post("/api/admin/send-bulk-email", admin_1.sendBulkEmail);
 exports.default = router;

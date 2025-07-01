@@ -22,6 +22,8 @@ Solicitud.init({
     id_tipoLicencia: { type: sequelize_1.DataTypes.INTEGER, references: { model: licencia_1.Licencia, key: 'id' }, allowNull: false },
     id_horario: { type: sequelize_1.DataTypes.INTEGER, references: { model: horario_1.Horario, key: 'id' }, allowNull: false },
     documentos: { type: sequelize_1.DataTypes.JSON, allowNull: true, defaultValue: [] }, // Campo para almacenar documentos como JSON
+    claseAnterior: { type: sequelize_1.DataTypes.STRING, allowNull: true },
+    claseNueva: { type: sequelize_1.DataTypes.STRING, allowNull: true },
 }, {
     sequelize: connection_1.default,
     modelName: 'Solicitud',

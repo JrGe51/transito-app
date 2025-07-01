@@ -12,11 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginAdmin = exports.registerAdmin = exports.checkMasterCredentials = void 0;
+exports.sendBulkEmail = exports.loginAdmin = exports.registerAdmin = exports.checkMasterCredentials = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const admin_1 = require("../models/admin");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const adminUtils_1 = require("../utils/adminUtils");
+const user_1 = require("../models/user");
+const emailService_1 = require("../utils/emailService");
+const sequelize_1 = require("sequelize");
 const MASTER_EMAIL = "admin@loespejo.com";
 const MASTER_PASSWORD = "Admin@2024#Secure";
 const checkMasterCredentials = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -117,3 +120,39 @@ const loginAdmin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     });
 });
 exports.loginAdmin = loginAdmin;
+const sendBulkEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { asunto, mensaje } = req.body;
+        if (!asunto || !mensaje) {
+            return res.status(400).json({ error: 'Asunto y mensaje son requeridos.' });
+        }
+        // Solo permitir admins (ajusta según tu lógica de autenticación)
+        // Aquí se asume que el admin está autenticado y autorizado
+        // Obtener todos los correos de usuarios
+        const users = yield user_1.User.findAll({ attributes: ['email'], where: { email: { [sequelize_1.Op.ne]: null } } });
+        const emails = users.map((u) => u.email);
+        // Enviar correo masivo (BCC)
+        const html = `
+          <h1 style="color:#d32f2f; font-size:2em; margin-bottom:20px;">Información del Departamento de Tránsito</h1>
+          <p>${mensaje}</p>
+          <hr>
+          <p style="margin-top:30px;">
+            Para cualquier consulta, no dude en contactarnos al <b>+569 73146125</b>.<br>
+            Saludos cordiales,<br>
+            Equipo de Tránsito
+          </p>
+        `;
+        yield (0, emailService_1.sendEmail)({
+            to: '', // destinatario principal vacío
+            bcc: emails,
+            subject: asunto,
+            html
+        });
+        return res.json({ success: true });
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Error enviando correos.' });
+    }
+});
+exports.sendBulkEmail = sendBulkEmail;

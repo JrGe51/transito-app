@@ -1,3 +1,9 @@
+export interface LicenciaVigente {
+  tipo: string;
+  fechaEmision: string;
+  fechaCaducidad: string;
+}
+
 export interface User {
     id?: number;
     name?: string;
@@ -10,7 +16,7 @@ export interface User {
     direccion?: string;
     codigoRecuperacion?: string;
     codigoExpiracion?: Date;
-    licenciaVigente?: string[];
+    licenciaVigente?: LicenciaVigente[];
     examenMedicoAprobado?: boolean;
     examenPracticoAprobado?: boolean;
     examenTeoricoAprobado?: boolean;

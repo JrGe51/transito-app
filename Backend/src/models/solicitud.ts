@@ -30,6 +30,8 @@ interface SolicitudAttributes {
     horario?: Horario;
     tipoLicencia?: LicenciaAttributes;
     usuario?: UserAttributes;
+    claseAnterior?: string;
+    claseNueva?: string;
 }
 
 // Define los atributos opcionales para la creación
@@ -47,6 +49,8 @@ export class Solicitud extends Model<SolicitudAttributes, SolicitudCreationAttri
     public horario?: Horario;
     public tipoLicencia?: LicenciaAttributes;
     public usuario?: UserAttributes;
+    public claseAnterior?: string;
+    public claseNueva?: string;
 }
 
 // Inicializa el modelo
@@ -59,6 +63,8 @@ Solicitud.init(
         id_tipoLicencia: { type: DataTypes.INTEGER, references: { model: Licencia, key: 'id' }, allowNull: false },
         id_horario: { type: DataTypes.INTEGER, references: { model: Horario, key: 'id' }, allowNull: false },
         documentos: { type: DataTypes.JSON, allowNull: true, defaultValue: [] }, // Campo para almacenar documentos como JSON
+        claseAnterior: { type: DataTypes.STRING, allowNull: true },
+        claseNueva: { type: DataTypes.STRING, allowNull: true },
     },
     {
         sequelize,

@@ -28,24 +28,39 @@
       <div id="formContent">
         <h1 class="fadeIn first">Cambio de clase</h1>
 
-        <div class="mb-3 d-flex flex-column align-items-center" *ngIf="!tipoLicenciaSeleccionado">
-          <button
-            *ngFor="let tipo of tiposLicencia"
-            type="button"
-            class="btn btn-primary m-2 d-block w-100"
-            style="max-width: 300px;"
-            (click)="seleccionarTipoLicencia(tipo)">
-            {{ tipo }}
+        <!-- Selección de licencia actual -->
+        <div class="mb-3 d-flex flex-column align-items-center" *ngIf="!licenciaActualSeleccionada">
+          <h5>Selecciona la licencia que deseas cambiar:</h5>
+          <button *ngFor="let licencia of licenciasUsuario"
+                  class="btn btn-primary m-2 d-block w-100"
+                  style="max-width: 300px;"
+                  (click)="seleccionarLicenciaActual(licencia)">
+            {{ getNombreLicencia(licencia) }}
           </button>
         </div>
-        
-        <div class="mb-3 text-center" *ngIf="tipoLicenciaSeleccionado">
-          <div class="alert alert-info mb-4">
-            <strong>Tipo de licencia seleccionada:</strong> {{ tipoLicenciaSeleccionado }}
-            <button type="button" class="btn btn-sm btn-outline-primary ms-3" (click)="tipoLicenciaSeleccionado = null">
-              Cambiar
-            </button>
-          </div>
+
+        <!-- Selección de nueva clase -->
+        <div class="mb-3 d-flex flex-column align-items-center" *ngIf="licenciaActualSeleccionada && !nuevaClaseSeleccionada">
+          <h5>Selecciona la nueva clase a la que deseas cambiar:</h5>
+          <button *ngFor="let tipo of tiposLicencia"
+                  class="btn btn-primary m-2 d-block w-100"
+                  style="max-width: 300px;"
+                  [disabled]="!puedeElegirNuevaClase(tipo)"
+                  (click)="seleccionarNuevaClase(tipo)">
+            {{ tipo }}
+          </button>
+          <button class="btn btn-secondary m-2 d-block w-100" style="max-width: 300px;" (click)="volverSeleccionLicencia()">Volver</button>
+        </div>
+
+        <!-- Calendario y formulario -->
+        <div *ngIf="licenciaActualSeleccionada && nuevaClaseSeleccionada">
+          <!-- Aquí va el calendario y el resto del formulario como ya lo tienes -->
+          <ng-container *ngTemplateOutlet="formularioReserva"></ng-container>
+          <button class="btn btn-secondary m-2 d-block w-100" style="max-width: 300px;" (click)="volverSeleccionLicencia()">Volver</button>
+        </div>
+
+        <!-- Template del formulario original -->
+        <ng-template #formularioReserva>
           <form class="reservation-form" (ngSubmit)="onSubmit()">
             <div class="row justify-content-center">
               <div class="col-md-10">
@@ -114,7 +129,7 @@
               </div>
             </div>
           </form>
-        </div>
+        </ng-template>
       </div>
     </div>
   </main>
