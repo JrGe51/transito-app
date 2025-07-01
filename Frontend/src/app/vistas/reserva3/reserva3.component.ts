@@ -56,6 +56,9 @@ export class Reserva3Component implements OnInit {
   showCalendar: boolean = true;
   documentos: any[] = [];
   tipoTramite: string = '';
+  licenciaActualSeleccionada: any = null;
+  nuevaClaseSeleccionada: string | null = null;
+  licenciasUsuario: any[] = [];
 
   constructor(
     private horarioService: HorarioService,
@@ -70,7 +73,9 @@ export class Reserva3Component implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.tipoTramite = params['tipoTramite'] || '';
     });
-    // No cargamos fechas aquí, esperamos a que se seleccione un tipo de licencia
+    // Cargar licencias del usuario
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.licenciasUsuario = Array.isArray(user.licenciaVigente) ? user.licenciaVigente : (user.licenciaVigente ? [user.licenciaVigente] : []);
   }
 
   onFechaChange(date: Date | null) {
@@ -220,17 +225,9 @@ export class Reserva3Component implements OnInit {
         const licenciaExiste = licencias.some(
           lic => lic.name.toLowerCase() === tipo.toLowerCase()
         );
-
         if (!licenciaExiste) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Licencia no disponible',
-            text: 'De momento no se está impartiendo este tipo de licencia',
-            confirmButtonColor: '#3085d6'
-          });
           return;
         }
-
         // Si la licencia existe, continuar con el proceso
         this.tipoLicenciaSeleccionado = tipo;
         this.licenciaSeleccionada = true;
@@ -278,12 +275,6 @@ export class Reserva3Component implements OnInit {
                 }
               }, 0);
             } else {
-              Swal.fire({
-                icon: 'info',
-                title: 'Sin cupos disponibles',
-                text: `No hay fechas disponibles para reservar la licencia ${tipo}. Por favor, intenta más tarde.`,
-                confirmButtonColor: '#3085d6'
-              });
               this.tipoLicenciaSeleccionado = null;
               this.licenciaSeleccionada = false;
             }
@@ -450,7 +441,9 @@ export class Reserva3Component implements OnInit {
       hora: this.horaSeleccionada,
       name: this.tipoLicenciaSeleccionado,
       tipoTramite: this.tipoTramite,
-      documentos: this.documentos || []
+      documentos: this.documentos || [],
+      claseAnterior: this.licenciaActualSeleccionada?.tipo,
+      claseNueva: this.nuevaClaseSeleccionada
     };
 
     console.log('Enviando solicitud:', solicitud);
@@ -567,5 +560,79 @@ export class Reserva3Component implements OnInit {
       return user.licenciaVigente === tipo;
     }
     return false;
+  }
+
+  getNombreLicencia(licencia: any): string {
+    return licencia && typeof licencia === 'object' && 'tipo' in licencia ? licencia.tipo : licencia;
+  }
+
+  seleccionarLicenciaActual(licencia: any) {
+    this.licenciaActualSeleccionada = licencia;
+  }
+
+  seleccionarNuevaClase(tipo: string) {
+    this.nuevaClaseSeleccionada = tipo;
+    this.tipoLicenciaSeleccionado = tipo;
+    this.cargarFechasDisponibles();
+  }
+
+  volverSeleccionLicencia() {
+    this.licenciaActualSeleccionada = null;
+    this.nuevaClaseSeleccionada = null;
+    this.tipoLicenciaSeleccionado = null;
+  }
+
+  cargarFechasDisponibles() {
+    if (!this.nuevaClaseSeleccionada) return;
+    // Verificar si la licencia existe en la base de datos
+    this.horarioService.getLicencias().subscribe({
+      next: (licencias: any[]) => {
+        const licenciaExiste = licencias.some(
+          lic => lic.name.toLowerCase() === this.nuevaClaseSeleccionada!.toLowerCase()
+        );
+        if (!licenciaExiste) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Licencia no disponible',
+            text: 'De momento no se está impartiendo este tipo de licencia',
+            confirmButtonColor: '#3085d6'
+          });
+          this.nuevaClaseSeleccionada = null;
+          this.tipoLicenciaSeleccionado = null;
+          return;
+        }
+        // Si la licencia existe, continuar con la carga de fechas
+        this.horarioService.getFechasDisponibles(this.nuevaClaseSeleccionada!).subscribe({
+          next: (fechas: string[]) => {
+            this.fechasDisponibles$.next(fechas);
+            this.cdr.detectChanges();
+            if (fechas.length === 0) {
+              Swal.fire({
+                icon: 'info',
+                title: 'Sin cupos disponibles',
+                text: `No hay fechas disponibles para reservar la licencia ${this.nuevaClaseSeleccionada}. Por favor, intenta más tarde.`,
+                confirmButtonColor: '#3085d6'
+              });
+              this.nuevaClaseSeleccionada = null;
+              this.tipoLicenciaSeleccionado = null;
+            }
+          },
+          error: (error) => {
+            console.error('Error al cargar fechas disponibles:', error);
+            this.toast.error('Error al cargar fechas disponibles', 'Error');
+            this.fechasDisponibles$.next([]);
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error al verificar licencia:', error);
+        this.toast.error('Error al verificar la licencia', 'Error');
+      }
+    });
+  }
+
+  puedeElegirNuevaClase(tipo: string): boolean {
+    return !this.licenciasUsuario.some(l => this.getNombreLicencia(l) === tipo);
   }
 }

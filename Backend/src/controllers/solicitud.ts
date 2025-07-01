@@ -19,7 +19,7 @@ interface UserAttributes {
 
 export const registerSolicitud = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { name, fecha, hora, tipoTramite, documentos } = req.body;
+        const { name, fecha, hora, tipoTramite, documentos, claseAnterior, claseNueva } = req.body;
 
         const id_usuario = (req as any).userId; // <-- Toma el usuario autenticado
 
@@ -100,7 +100,9 @@ export const registerSolicitud = async (req: Request, res: Response, next: NextF
             tipoTramite,
             id_tipoLicencia: licencia.id,
             id_horario: horario.id,
-            documentos: documentos || [], // Asegurarse de que sea un array, incluso si está vacío
+            documentos: documentos || [],
+            claseAnterior,
+            claseNueva
         });
 
         // Actualizar el cupo disponible a false

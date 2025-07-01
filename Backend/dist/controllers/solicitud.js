@@ -17,7 +17,7 @@ const user_1 = require("../models/user");
 const emailService_1 = require("../utils/emailService");
 const registerSolicitud = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { name, fecha, hora, tipoTramite, documentos } = req.body;
+        const { name, fecha, hora, tipoTramite, documentos, claseAnterior, claseNueva } = req.body;
         const id_usuario = req.userId; // <-- Toma el usuario autenticado
         if (!id_usuario) {
             res.status(401).json({ msg: 'Usuario no autenticado' });
@@ -89,7 +89,9 @@ const registerSolicitud = (req, res, next) => __awaiter(void 0, void 0, void 0, 
             tipoTramite,
             id_tipoLicencia: licencia.id,
             id_horario: horario.id,
-            documentos: documentos || [], // Asegurarse de que sea un array, incluso si está vacío
+            documentos: documentos || [],
+            claseAnterior,
+            claseNueva
         });
         // Actualizar el cupo disponible a false
         yield horario.update({ cupodisponible: false });

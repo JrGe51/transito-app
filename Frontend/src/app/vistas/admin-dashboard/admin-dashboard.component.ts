@@ -105,6 +105,8 @@ export class AdminDashboardComponent implements OnInit {
   bulkEmail = { asunto: '', mensaje: '' };
   mostrarCorreoMasivo = false;
 
+  solicitudActiva: Solicitud | null = null;
+
   constructor(
     private horarioService: HorarioService,
     private licenciaService: LicenciaService,
@@ -825,6 +827,7 @@ export class AdminDashboardComponent implements OnInit {
         this.solicitudActivaId = typeof solicitud.id === 'number' ? solicitud.id : null;
         this.userHasActiveSolicitud = true;
         this.tipoTramiteActiva = solicitud.tipoTramite || null;
+        this.solicitudActiva = solicitud;
         
         // Inicializar el formulario con los valores actuales del usuario
         this.validateDocsForm.reset({
@@ -876,7 +879,14 @@ export class AdminDashboardComponent implements OnInit {
           fechaEmision,
           fechaCaducidad
         };
-        if (this.tipoTramiteActiva === 'Renovación' || this.tipoTramiteActiva === 'Cambio de Clase') {
+        if (this.tipoTramiteActiva === 'Cambio de Clase' && this.solicitudActiva?.claseAnterior && this.solicitudActiva?.claseNueva) {
+          // Reemplaza la licencia cuyo tipo sea igual a claseAnterior por la nueva claseNueva
+          updatedUser.licenciaVigente = licenciasActuales.map(l =>
+            l.tipo === this.solicitudActiva!.claseAnterior
+              ? { tipo: this.solicitudActiva!.claseNueva!, fechaEmision, fechaCaducidad }
+              : l
+          );
+        } else if (this.tipoTramiteActiva === 'Renovación') {
           // Reemplaza la licencia del mismo tipo
           updatedUser.licenciaVigente = licenciasActuales.map(l => l.tipo === nuevaLicencia.tipo ? nuevaLicencia : l);
         } else {

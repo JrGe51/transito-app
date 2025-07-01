@@ -23,4 +23,6 @@ export interface Solicitud {
         rut: string;
         telefono: string;
     };
+    claseAnterior?: string;
+    claseNueva?: string;
 } 
