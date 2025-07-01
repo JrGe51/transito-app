@@ -644,7 +644,6 @@ export class AdminDashboardComponent implements OnInit {
     }
 
     const dataToExport = this.filteredSolicitudes.map(s => ({
-      'ID': s.id,
       'Fecha Solicitud': s.fechaSolicitud ? new Date(s.fechaSolicitud).toLocaleDateString('es-CL', { timeZone: 'UTC' }) : 'N/A',
       'Tipo Trámite': s.tipoTramite,
       'Nombre Usuario': `${s.usuario?.name || ''} ${s.usuario?.lastname || ''}`,
