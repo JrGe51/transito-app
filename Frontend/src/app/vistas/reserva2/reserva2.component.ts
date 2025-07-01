@@ -77,7 +77,7 @@ export class Reserva2Component implements OnInit {
         const licencias = Array.isArray(user.licenciaVigente) ? user.licenciaVigente : (user.licenciaVigente ? [user.licenciaVigente] : []);
         if (licencias.length === 1) {
           setTimeout(() => {
-            this.tipoLicenciaSeleccionado = licencias[0];
+            this.tipoLicenciaSeleccionado = this.getNombreLicencia(licencias[0]);
             this.cargarFechasDisponibles();
           });
         } else if (licencias.length > 1) {

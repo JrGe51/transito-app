@@ -55,14 +55,14 @@
             <div class="mb-3 text-center" *ngIf="tipoLicenciaSeleccionado || tipoTramite !== 'Renovación'">
               <div class="alert alert-info mb-4">
                 <strong>Tipo de trámite seleccionado:</strong> {{ tipoTramite }}
-                <span *ngIf="tipoLicenciaSeleccionado"> - {{ tipoLicenciaSeleccionado }}</span>
+                <span *ngIf="tipoLicenciaSeleccionado"> - {{ getNombreLicencia(tipoLicenciaSeleccionado) }}</span>
                 <button *ngIf="tipoLicenciaSeleccionado && tipoTramite !== 'Renovación'" type="button" class="btn btn-sm btn-outline-primary ms-3" (click)="tipoLicenciaSeleccionado = null">
                   Cambiar
                 </button>
               </div>
               <div *ngIf="tipoTramite === 'Renovación' && tipoLicenciaSeleccionado && tieneLicenciaVigente()" class="alert alert-success mb-4">
                 <i class="bi bi-info-circle"></i>
-                <strong>Renovación de licencia:</strong> Estás renovando tu licencia {{ tipoLicenciaSeleccionado }}. 
+                <strong>Renovación de licencia:</strong> Estás renovando tu licencia {{ getNombreLicencia(tipoLicenciaSeleccionado) }}. 
                 Solo se mostrarán horarios disponibles para este tipo de licencia.
               </div>
               <form class="reservation-form" (ngSubmit)="mostrarFormularioReserva()">

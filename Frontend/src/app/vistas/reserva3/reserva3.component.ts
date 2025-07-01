@@ -242,41 +242,43 @@ export class Reserva3Component implements OnInit {
         this.cdr.detectChanges(); 
 
         this.horarioService.getFechasDisponibles(tipo).subscribe({
-          next: (fechas) => {
-            if (fechas && fechas.length > 0) {
-              this.fechasDisponibles$.next(fechas);
-              this.cdr.detectChanges();
-
-              // MOSTRAR CALENDARIO después de un pequeño retraso para asegurar que se recree
+          next: (fechas: string[]) => {
+            this.fechasDisponibles$.next(fechas);
+            this.cdr.detectChanges();
+            // Mostrar el calendario inmediatamente
+            this.showCalendar = true;
+            this.cdr.detectChanges();
+            if (fechas.length > 0) {
+              // Asignar automáticamente la primera fecha disponible
+              const primerFecha = fechas[0];
+              this.fechaSeleccionada = new Date(primerFecha);
+              // Actualizar funciones de clase y filtro
+              this.dateClass = (d: Date) => {
+                const dateString = this.formatDate(d);
+                return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
+              };
+              this.filtrarFechasDisponibles = (date: Date | null): boolean => {
+                if (!date) return false;
+                const dateString = this.formatDate(date);
+                return this.fechasDisponibles$.value.includes(dateString);
+              };
+              // Forzar la fecha activa del calendario si existe
               setTimeout(() => {
-                this.showCalendar = true;
-                this.cdr.detectChanges();
-
                 if (this.calendar) {
-                  // Reasignar las funciones dateClass y filtrarFechasDisponibles para forzar reevaluación
-                  this.dateClass = (d: Date) => {
-                    const dateString = this.formatDate(d);
-                    return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
-                  };
-                  this.filtrarFechasDisponibles = (date: Date | null): boolean => {
-                    if (!date) return false;
-                    const dateString = this.formatDate(date);
-                    return this.fechasDisponibles$.value.includes(dateString);
-                  };
-
-                  // Intentar establecer la fecha activa para forzar la reevaluación
-                  if (fechas.length > 0) {
-                    this.calendar.activeDate = new Date(fechas[0]);
-                  } else {
-                    this.calendar.activeDate = new Date(); // Si no hay fechas, mostrar el mes actual
-                  }
-                  this.calendar.updateTodaysDate(); // Fuerza la reevaluación de los filtros
+                  this.calendar.activeDate = new Date(primerFecha);
+                  this.calendar.updateTodaysDate();
                   this.cdr.detectChanges();
                 }
               }, 0);
             } else {
+              Swal.fire({
+                icon: 'info',
+                title: 'Sin cupos disponibles',
+                text: `No hay fechas disponibles para reservar la licencia ${this.nuevaClaseSeleccionada}. Por favor, intenta más tarde.`,
+                confirmButtonColor: '#3085d6'
+              });
+              this.nuevaClaseSeleccionada = null;
               this.tipoLicenciaSeleccionado = null;
-              this.licenciaSeleccionada = false;
             }
           },
           error: (error) => {
@@ -606,7 +608,32 @@ export class Reserva3Component implements OnInit {
           next: (fechas: string[]) => {
             this.fechasDisponibles$.next(fechas);
             this.cdr.detectChanges();
-            if (fechas.length === 0) {
+            // Mostrar el calendario inmediatamente
+            this.showCalendar = true;
+            this.cdr.detectChanges();
+            if (fechas.length > 0) {
+              // Asignar automáticamente la primera fecha disponible
+              const primerFecha = fechas[0];
+              this.fechaSeleccionada = new Date(primerFecha);
+              // Actualizar funciones de clase y filtro
+              this.dateClass = (d: Date) => {
+                const dateString = this.formatDate(d);
+                return this.fechasDisponibles$.value.includes(dateString) ? 'fecha-disponible' : '';
+              };
+              this.filtrarFechasDisponibles = (date: Date | null): boolean => {
+                if (!date) return false;
+                const dateString = this.formatDate(date);
+                return this.fechasDisponibles$.value.includes(dateString);
+              };
+              // Forzar la fecha activa del calendario si existe
+              setTimeout(() => {
+                if (this.calendar) {
+                  this.calendar.activeDate = new Date(primerFecha);
+                  this.calendar.updateTodaysDate();
+                  this.cdr.detectChanges();
+                }
+              }, 0);
+            } else {
               Swal.fire({
                 icon: 'info',
                 title: 'Sin cupos disponibles',
@@ -621,6 +648,7 @@ export class Reserva3Component implements OnInit {
             console.error('Error al cargar fechas disponibles:', error);
             this.toast.error('Error al cargar fechas disponibles', 'Error');
             this.fechasDisponibles$.next([]);
+            this.showCalendar = true;
             this.cdr.detectChanges();
           }
         });
