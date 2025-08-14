@@ -1,0 +1,5 @@
+[33md5b6ff0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m Fix: Remove hardcoded Twilio credentials and add environment variables support
+[33m56155dd[m Merge branch 'master' of https://github.com/JrGe51/transito-app
+[33m46f9b8b[m .
+[33m28a799d[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m Commit #22 from JrGe51/JorgeDev
+[33m93ba775[m[33m ([m[1;31morigin/JorgeDev[m[33m)[m detalle en primera licencia
